@@ -1,6 +1,6 @@
 # Sol 2: the rover-derived walkable patch
 
-Time box: 8 hours, with a checkpoint at 5 hours. Start only after Sol 1 is merged.
+Time box: 5 hours, with a checkpoint at 3 hours, and a hard stop at 06:00 Sunday EST whichever comes first. This is a stretch goal: start only after Sol 1 and Sol 3 are merged. The step times below are the upper limits; scale them down to fit, and prefer a small patch that is finished over a large one that is not.
 
 ## Goal
 
@@ -27,7 +27,7 @@ Start with option 1. Move to option 2 only if option 1 has no coverage of the la
    - every product used added to `data/manifest.csv`.
 6. **Inspect (30 min).** Load the export, print bounds, counts and texture sizes, and render standing-height views from both ends of the intended walk. Save them to `docs/img/`.
 
-## Checkpoint at 5 hours
+## Checkpoint at 3 hours
 
 If there is no continuous aligned mesh around the landmark by then, freeze the best verified sub-area, shrink the route to fit it, and spend the remaining time on quality. If there is nothing usable at all, stop, report what blocked you, and tell the lead to ship the orbital scene. Do not continue past the time box.
 

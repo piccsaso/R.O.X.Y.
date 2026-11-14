@@ -1,6 +1,6 @@
 # Sol 1: challenge notes, site choice, and the orbital scene
 
-Time box: 5 hours. This prompt produces the guaranteed submission, so it comes before any rover reconstruction.
+Time box: 4 hours (merged by 22:30 Saturday EST). This prompt produces the guaranteed submission, so it comes before any rover reconstruction.
 
 ## Goal
 
@@ -12,13 +12,13 @@ Deliver `scenes/jezero_orbital/`: a walkable, textured scene of a patch of Jezer
 
 2. **Environment inventory (15 min).** Record Python version, GDAL/rasterio availability, Blender or Open3D if present, GPU, and free disk.
 
-3. **Site choice (1 h).** Follow master step 1, Phase 1, but in compressed form. You are choosing a site that satisfies both this prompt and Sol 2, so the test is:
+3. **Site choice (45 min).** Follow master step 1, Phase 1, but in compressed form. You are choosing a site that satisfies both this prompt and Sol 2, so the test is:
    - HiRISE DTM and orthoimage coverage (USGS Jezero landing-site products);
    - a named Perseverance science target (abrasion patch, sample site or named rock) inside the patch, so there is a real science stop;
    - archived rover geometry nearby (PDS Navcam mesh archive, or the NASA-AMMOS 3DTilesSampleData drive 1004) so that Sol 2 has something to work with. Check the archive for the sols you are considering before ranking. Recent sols may have raw images only.
    Compare at least three candidates in a table in `docs/SITE_SELECTION.md`, choose one, and name the runner-up.
 
-4. **Orbital terrain (2.5 h).** With repeatable scripts in `scripts/`:
+4. **Orbital terrain (2 h).** With repeatable scripts in `scripts/`:
    - Download the HiRISE DTM and orthoimage covering the site. Record each product in `data/manifest.csv` with the fields listed in master step 1, section 2.2.
    - Crop a patch around the science target, roughly 200 to 400 m across. State the DTM post spacing and the orthoimage pixel size you actually found.
    - Build `terrain.glb` (textured with the orthoimage, texture at most 4096 px per side) and `collision.glb` (the same surface, ground node named `ground_ORBITAL`). Use the axis and unit conventions in roadmap section 4. Write down the exact conversion from map coordinates to local metres.

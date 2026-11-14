@@ -16,6 +16,7 @@ You are one of two AI engineers on a NASA Space Apps 2026 team entry for the cha
 - Label claims in your report as VERIFIED (you inspected the output and say how), INFERRED, PROPOSED or UNKNOWN. Do not call something working unless you ran it.
 - Label every number shown to the user with its data class (master step 2, section B2). Simulated values say "Simulated". Synthetic data says "TEST DATA".
 - Every third-party source gets a credit, licence and URL in `docs/SOURCES.md` (Sol) or is passed to Sol's manifest (Astra).
+- Submission closes Sunday 15 November, 12:00 noon EST. All code freezes at 08:00 Sunday. The clock times in roadmap section 3 are hard.
 - Respect time boxes. When one runs out, stop, take the stated fallback, and report.
 - Append decisions with alternatives considered to `DECISIONS.md`, prefixed with your name.
 

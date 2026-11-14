@@ -1,6 +1,6 @@
 # Astra 3: helmet HUD, obstacle scanner, live remap, voice
 
-Time box: 6 hours. Start only when typed routing from Astra 2 works and its tests pass. Build in the order below; each part must work before the next begins, and the last part (voice) is the first to be cut.
+Time box: 5 hours, ending at the 07:00 Sunday EST feature cut. Start only when typed routing from Astra 2 works and its tests pass. Build in the order below; each part must work before the next begins. Parts are cut from the end: the mirror first, then voice. The step times are upper limits.
 
 ## Goal
 
@@ -15,6 +15,7 @@ Fill the regions laid out in Astra 1:
 - route guidance: distance to next waypoint and to destination, estimated time remaining, and a ground-following breadcrumb line that stays readable without hiding the terrain texture;
 - status: slope under the feet, and the provenance of the ground the player stands on (rover-measured, rover stereo, orbital, interpolated), so the astronaut knows how well the ground is known;
 - alerts: one line at a time, with a reason;
+- safe-return gauge: from editable assumptions (suited walking speed, consumables duration, reserve margin), show whether the astronaut can finish the route and walk back to the start, and the latest turn-back point. Raise an alert when the margin is crossed. Label it ASSUMPTION; never present it as a validated mission number;
 - every number carries its data class, shown as a small badge. Assumptions and simulated values are marked.
 
 Keep it sparse. The HUD must be legible in a 30-second video at 1080p.
@@ -26,6 +27,7 @@ Keep it sparse. The HUD must be legible in a 30-second video at 1080p.
 - Show them in the hazard radar region as a top-down sweep centred on the player, and optionally as a brief point sweep on the terrain.
 - Proximity alert when a hazard lies within a configurable distance in the direction of travel, naming what it is ("Drop-off 3 m ahead").
 - Label the display "Simulated scanner on measured terrain".
+- Speak each new alert aloud with the browser's speech synthesis (works offline), with a mute control. Rate-limit it so alerts do not overlap.
 
 ## Part 3: live remap and re-route (1.5 h)
 
@@ -44,6 +46,10 @@ The idea: the route is first planned on what was known before the walk, and corr
 - Push-to-talk button and key. Show the recognised text in the HUD before acting.
 - Use the browser Web Speech API. Check whether the tested browser can recognise on the device. If only cloud recognition works, make it opt-in and say so in the interface. If the microphone is denied or the API is missing, disable the button with a short reason; typing always works.
 - Report: browser and version tested, on-device or cloud, and a tally of successful recognitions for each command.
+
+## Part 5: mission-control mirror (1 h, cut before voice if short)
+
+A second page (`?view=control`) for the support team: the top-down map with the astronaut's live position, the active route, the alert log and the safe-return gauge. Sync it from the walker tab with a BroadcastChannel so it works offline with no server. Read-only.
 
 ## Done when
 

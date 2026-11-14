@@ -25,26 +25,30 @@ Send the prompts in order within each column. The two columns run in parallel.
 
 | Order | 6.1 Sol | GPT Astra |
 |---|---|---|
-| 1 | `sol-1-orbital-scene.md`: challenge notes, site choice, Tier 0 orbital scene (the guaranteed submission) | `astra-1-contract-walker.md`: scene contract, scene-core, test scene, first-person walk, HUD shell |
-| 2 | `sol-2-rover-patch.md`: rover-derived textured patch (the risky part, strictly time-boxed) | `astra-2-layers-planner.md`: layers, hazard-aware route planner, map, acceptance tests |
-| 3 | `sol-3-science-layers.md`: landmarks, rover traverse, second-mission layer, radiation scenario inputs | `astra-3-hud-scanner-voice.md`: obstacle scanner, live remap and re-route, voice |
+| 1 | `sol-1-orbital-scene.md` (4 h): challenge notes, site choice, Tier 0 orbital scene (the guaranteed submission) | `astra-1-contract-walker.md` (3 h): scene contract, scene-core, test scene, first-person walk, HUD shell |
+| 2 | `sol-3-science-layers.md` (3 h): landmarks, arrival photos, rover traverse, thermal layer, radiation scenario inputs | `astra-2-layers-planner.md` (5 h): layers, hazard-aware route planner, map, acceptance tests |
+| 3 | `sol-2-rover-patch.md` (5 h, stretch): rover-derived textured patch, strictly time-boxed | `astra-3-hud-scanner-voice.md` (5 h): HUD, safe-return gauge, obstacle scanner, live re-route, voice, mission-control mirror |
 | 4 | Lead: integration of the real scene, spatial agreement checks, walk test, README, video and project page | |
+
+Sol runs prompt 3 before prompt 2 on purpose. With about 14 working hours, the landmarks and multi-mission layers are worth more to the judges than photoreal ground, and they work on the orbital scene. The rover patch is attempted last and dropped without regret if it is not ready by 06:00.
 
 Paste `00-shared-rules.md` in front of every prompt. Both models also need the two master prompt files (they are in `docs/prompts/`).
 
 ## 3. Schedule
 
-The exact submission close time for your local event is **not confirmed**. Until it is, the plan is expressed in hours before the deadline (T).
+Submission closes **Sunday 15 November 2026, 12:00 noon local time (EST)**. This schedule was written at 18:00 Saturday, leaving 18 hours: 14 for building and 4 protected for submission. The demo is limited to a 30-second video or 7 slides (confirmed by the team).
 
-| Point | What must be true |
+| Local time | What must be true |
 |---|---|
-| Start + 2 h | Astra: contract frozen and `test_scene` walkable. Sol: site chosen, orbital data downloading. |
-| Start + 6 h | Sol-1 merged: orbital scene loads in Astra's app. This alone is a valid submission. |
-| T − 10 h | Real rover scene integrated, or the decision is made to ship the orbital scene. No more waiting on reconstruction after this. |
-| T − 6 h | Feature cut. Anything not merged and working is dropped. |
-| T − 4 h | Code freeze. Only README, video, slides and project page from here. |
+| Sat 20:00 | Astra: `CONTRACT.md` on `main` and `test_scene` walkable. Sol: site chosen, orbital data downloading. |
+| Sat 22:30 | Sol 1 merged: the orbital scene loads in Astra's app. This alone is a valid submission. |
+| Sun 02:00 | Astra 2 merged: typed routing works on the orbital scene. Sol 3 merged: landmarks and layers present. |
+| Sun 06:00 | Integration point. The rover scene is integrated, or the orbital scene ships. No waiting on reconstruction after this. |
+| Sun 07:00 | Feature cut. Anything not merged and working is dropped. |
+| Sun 08:00 | Code freeze. Only README, video, slides and project page from here. |
+| Sun 11:00 | Submit. The last hour is slack for upload problems. |
 
-Cut order if time runs short: voice, radiation scenario, geologic units, rover patch (fall back to orbital scene). The route planner, obstacle scanner and HUD are never cut.
+Cut order if time runs short: mission-control mirror, voice, radiation scenario, geologic units, rover patch (fall back to orbital scene). The route planner, obstacle scanner and HUD are never cut.
 
 ## 4. Interface pins (v0)
 
@@ -67,7 +71,7 @@ These are fixed now so that Sol can produce scenes before Astra finishes the sch
 4. **Voice is built last** and goes through the same command parser as typing, so the demo never depends on a microphone.
 5. **The orbital scene ships first** as insurance. The rover-photoreal patch is an upgrade with a hard cut-off.
 
-### Proposed, not in the prompts (waiting for approval)
+### Approved by the team on 14 November (now in the prompts)
 
 | # | Proposal | Why | Cost |
 |---|---|---|---|
@@ -75,12 +79,6 @@ These are fixed now so that Sol can produce scenes before Astra finishes the sch
 | B | Spoken HUD callouts (browser speech synthesis, works offline): "Obstacle ahead, re-routing left" | Hands-free in both directions; strong in a 30-second video | About 30 min, Astra |
 | C | Mission-control mirror: a second browser tab showing the same map, position and alerts | Demonstrates the "less stress on the support scientists" claim instead of only stating it | About 1.5 h, Astra |
 | D | Arrival photo: on reaching a landmark, show the real Perseverance image of it beside the 3D view | The challenge page suggests point-of-view images; cheap proof of ground truth | About 45 min, Sol data and Astra card |
-| E | Thermal layer (THEMIS, Mars Odyssey) as the third data kind, map only | Gets to the "at least three kinds of data" the challenge suggests: optical, topographic, thermal | About 1 h, Sol (folded into Sol-3 if approved) |
+| E | Thermal layer (THEMIS, Mars Odyssey) as the third data kind, map only | Gets to the "at least three kinds of data" the challenge suggests: optical, topographic, thermal | About 1 h, Sol |
 
-Recommendation: approve A, B and D. C only if Astra finishes prompt 3 before T − 8 h. E only if the THEMIS product is quick to register.
-
-## 6. Open questions for the team
-
-1. What is the exact submission close time for your local event? Every deadline above depends on it.
-2. Does your event enforce the 30-second video or 7-slide limit stated in master step 1? The challenge text you pasted does not mention it.
-3. Which proposals in section 5 do you approve?
+All five are approved. Because the build window is 14 hours, C is built last and is the first thing cut; E is dropped if the THEMIS product takes more than 45 minutes to register.

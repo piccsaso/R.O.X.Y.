@@ -1,6 +1,6 @@
 # Astra 2: data layers, map, and the hazard-aware route planner
 
-Time box: 7 hours. Start only when Astra 1's "done" list is met.
+Time box: 5 hours (merged by 02:00 Sunday EST). The step times below are upper limits; scale them down. Start only when Astra 1's "done" list is met.
 
 ## Goal
 
@@ -25,7 +25,7 @@ Implement all of section C2.7, including: detour around the boulder; the hole, l
 ## Done when
 
 - `npm test` passes all of the above. Put the test output in your report, not a description of it.
-- In a browser on `test_scene`: type a destination, see the route bend around the boulder with its reason, follow the breadcrumbs, arrive at the viewing point and see the landmark's science card.
+- In a browser on `test_scene`: type a destination, see the route bend around the boulder with its reason, follow the breadcrumbs, arrive at the viewing point and see the landmark's science card, with the real Perseverance photo beside the 3D view when the landmark has a `photo` entry (credit and source link shown).
 - If Sol's `scenes/jezero_orbital/` is on `main`, run the grid builder on it and confirm it loads, routes and shows its layers with no code change. Report anything in the real scene that did not fit the contract.
 
 ## Constraints
