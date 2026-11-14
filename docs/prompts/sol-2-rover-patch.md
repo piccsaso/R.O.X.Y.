@@ -1,5 +1,7 @@
 # Sol 2: the rover-derived walkable patch
 
+> **Superseded.** A teammate delivered this as `skinner-ridge/`. Do not send this prompt. It is kept for reference.
+
 Time box: 5 hours, with a checkpoint at 3 hours, and a hard stop at 06:00 Sunday EST whichever comes first. This is a stretch goal: start only after Sol 1 and Sol 3 are merged. The step times below are the upper limits; scale them down to fit, and prefer a small patch that is finished over a large one that is not.
 
 ## Goal

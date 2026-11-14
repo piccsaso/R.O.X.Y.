@@ -1,6 +1,8 @@
-# Sol 1: challenge notes, site choice, and the orbital scene
+# Sol 1: challenge notes and the orbital terrain around Skinner Ridge
 
-Time box: 4 hours (merged by 22:30 Saturday EST). This prompt produces the guaranteed submission, so it comes before any rover reconstruction.
+Time box: 4 hours (merged by 23:00 Saturday EST).
+
+**The site is already chosen and the rover patch already exists.** A teammate pushed `skinner-ridge/`: a 28 × 24.5 m walkable patch of Perseverance's Skinner Ridge workspace at Hawksbill Gap, Jezero, in SITE_FRAME 26. Read its `README.md`, `SITE_SELECTION.md` and `terrain.json` first. Do not edit that directory. Skip step 3 below (site choice); copy the teammate's comparison into your notes by reference instead. Your orbital terrain is the wider world the patch sits in: the app shows it from above as the planning map and lets the player walk out onto it.
 
 ## Goal
 
@@ -20,7 +22,9 @@ Deliver `scenes/jezero_orbital/`: a walkable, textured scene of a patch of Jezer
 
 4. **Orbital terrain (2 h).** With repeatable scripts in `scripts/`:
    - Download the HiRISE DTM and orthoimage covering the site. Record each product in `data/manifest.csv` with the fields listed in master step 1, section 2.2.
-   - Crop a patch around the science target, roughly 200 to 400 m across. State the DTM post spacing and the orthoimage pixel size you actually found.
+   - Crop an area centred on the Skinner Ridge patch. Deliver two levels: a walkable crop about 400 m across at full resolution, and a wider context crop of 2 to 3 km at reduced resolution for the oblique planning view (it should take in the delta front and the rover's approach).
+   - Use the local frame of the rover patch (roadmap section 4): +X west, +Y up, +Z north, origin at the patch's crop corner. Work out where that origin is in map coordinates from the SITE 26 location (rover waypoint data and the PDS labels), then check it: the patch's slab and outcrop edges should line up with the same features in the 25 cm orthoimage. Report the residual offset in metres and the height difference between the patch and the DTM at five points. This registration is the most important number you produce.
+   - Also deliver the elevation as a heightfield in the same layout as `skinner-ridge/ground.bin`, so the app can use it for walking and routing. State the DTM post spacing and the orthoimage pixel size you actually found.
    - Build `terrain.glb` (textured with the orthoimage, texture at most 4096 px per side) and `collision.glb` (the same surface, ground node named `ground_ORBITAL`). Use the axis and unit conventions in roadmap section 4. Write down the exact conversion from map coordinates to local metres.
    - Write `scene.json` with every field in master step 2, section C0.1 that you can fill: origin, `map_transform` with status and estimated error, `playable_bounds`, `spawn` on verified ground, `credits`. Set `is_test_data` to false.
    - Add a wider context image for the map view (CTX or HiRISE mosaic crop) as an overlay in `overlays/`, with bounds in local metres.

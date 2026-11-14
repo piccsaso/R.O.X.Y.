@@ -1,36 +1,74 @@
-# Astra 1: scene contract, test scene, first-person walk, HUD shell
+# Astra 1: Skinner Ridge app, scene contract, expanded map, photoreal rendering
 
-Time box: 3 hours (`CONTRACT.md` on `main` by 20:00 Saturday EST). Everything else in the project builds on this, so finish it before anything in Astra 2.
+Time box: 4 hours (merged by 23:00 Saturday EST). Everything else in the project builds on this, so finish it before anything in Astra 2.
+
+## Starting point: a working demo already exists
+
+A teammate has pushed `skinner-ridge/` to `main`. Read `skinner-ridge/README.md`, `PROJECT_HISTORY.md`, `viewer.mjs`, `ground.mjs`, `landscape.mjs`, `terrain.json` and `route.json` before writing any code, and run it (`npm ci`, `npm start`). What it gives you:
+
+- `terrain.glb`: a 28 × 24.5 m textured patch of Perseverance's Skinner Ridge workspace at Hawksbill Gap, Jezero crater, fused from NASA/JPL-Caltech Navcam mesh products (sols 470 to 501, SITE_FRAME 26). 1,120,000 triangles on a 3.5 cm grid, 37 MB. About 63% of the footprint has stereo support; the rest is inferred height and texture.
+- `ground.bin`: the same surface as a heightfield (Float32 heights, then a Uint8 triangle mask per cell). `ground.mjs` samples it, and its `foot()` check is the collision rule: a 16 cm clearance radius and step limits.
+- `viewer.mjs`: pointer-lock walk at 1.65 m eye height, tiled culling, anisotropic filtering, reset.
+- `landscape.mjs`: fog, a sky dome, and a **decorative, procedurally invented** horizon beyond the patch.
+- `route.json`: spawn, look-back and expansion viewpoints. `terrain-coverage.png`: measured versus inferred support.
+- Axes: +X west, +Y up, +Z north, metres, origin at the crop corner, which is (77.49 m north, 2.51 m east, −14 m down) in SITE_FRAME 26.
+
+Do not rebuild this. Do not edit or delete anything in `skinner-ridge/`; it stays runnable as it is. Build the new app in `app/` by porting the viewer code, and load the assets from where they are (do not commit a second copy of the 37 MB model).
 
 ## Goal
 
-A browser app in which a player walks in first person on a synthetic test scene, with an empty helmet HUD frame drawn over the view, all loading through one shared scene format. The data engineer (Sol) is producing real Mars scenes in the same format in parallel; they must load in your app with no code change.
+One app in which the player walks the real Skinner Ridge patch, sees real orbital terrain stretching to the horizon around it, and can walk out onto that terrain, all rendered to look as close to a photograph of Mars as the data allows, and all loading through one scene format that the planner and HUD will share.
 
-This is master step 2, section C0, plus master step 1, section 3.1. Read both. The roadmap's interface pins (section 4) are already fixed; formalise them, do not change them.
+## Part 1: contract and port (1.5 h)
 
-## Deliverables
+1. **Scene contract.** `schema/scene.schema.json`, `schema/landmarks.schema.json` and a `CONTRACT.md` a teammate can read in five minutes. Follow master step 2, section C0.1, with these project decisions:
+   - The Skinner Ridge axis convention above is the project convention for every scene. Write the exact transform from SITE_FRAME 26 (north, east, down) to local metres after reading `reconstruct.mjs`. This replaces the axis pin in roadmap section 4.
+   - The ground may be a heightfield in the `ground.bin` layout or a `collision.glb`. Either way it is the single source of truth for walking.
+   - Provenance per cell: ROVER_MEASURED (stereo-supported), INTERPOLATED (inferred fill), ORBITAL, UNKNOWN. For Skinner Ridge, take measured versus inferred from `terrain-coverage.png`; verify its size and orientation against the grid before trusting it (the README says the top of the image is the low-Z edge).
+   - A scene may nest a detailed patch inside a wider context terrain. Add optional `photo` to the landmark science entry (path, image ID, sol, camera, credit, source URL).
+2. **`scenes/skinner_ridge/scene.json`** describing the existing assets by relative path, with spawn and viewpoints from `route.json`, `is_test_data: false`, and credits from `terrain.json`.
+3. **App** (`app/`, Vite, TypeScript, Three.js). Port the walker. Scene chosen by URL parameter. Keep the controller a pure module with thresholds in `config/navigation.json` (each with a rationale and the ASSUMPTION label); Astra 2's tests drive a scripted walker through it. A loading bar with real progress, because the model is large.
+4. **scene-core** (`app/src/scene-core/`, no rendering dependencies, Vitest tests): scene loading and validation, ground height, normal and slope sampling, provenance lookup, local to map conversion, and landmark search (aliases, fuzzy match, ranked results, ambiguity flag).
+5. **Planner grid builder** (`tools/build-ground-grid`): resamples the ground to a coarser routing grid. Each routing cell must keep the worst slope and largest step found inside it, so that downsampling never hides a hazard. Choose the cell size (0.25 to 0.5 m) and justify it in `DECISIONS.md`.
 
-1. **Contract.** `schema/scene.schema.json` and `schema/landmarks.schema.json` (JSON Schema), and a `CONTRACT.md` a teammate can read in five minutes. Include the optional `prior_collision.glb` and the node naming rule for `collision.glb` from the roadmap.
+## Part 2: expand the map with real terrain (1 h)
 
-2. **scene-core** (`app/src/scene-core/`, TypeScript, no rendering dependencies). Loads and validates a scene package and provides: ground height and normal sampling, ground-grid access, local to map coordinate conversion, provenance lookup, and landmark search (normalised text, aliases, fuzzy match, ranked results with an ambiguity flag). Unit tests with Vitest.
+The data engineer (Sol) is delivering `scenes/jezero_orbital/`: HiRISE elevation and orthoimage for the area around Skinner Ridge, in the same local frame.
 
-3. **Grid builder** (`tools/build-ground-grid`). Casts rays down through `collision.glb` per cell and writes the ground grid: height, provenance class from the node name, and a valid mask. Misses become UNKNOWN. Start with 0.25 m cells and justify the final size in `DECISIONS.md`. If `prior_collision.glb` exists, build a second grid from it in the same layout. It must run unchanged on any scene directory.
+- When that scene is present, **replace the invented horizon with it.** Seat the rover patch inside the orbital terrain, hide the orbital surface under the patch, and blend a narrow skirt so there is no visible seam or step. Report the height mismatch you found at the join.
+- Let the player walk off the patch onto the orbital terrain. `playable_bounds` becomes the orbital extent (a few hundred metres). The HUD will show that the ground underfoot changed from rover-measured to orbital.
+- For the far distance beyond the orbital crop, a low-detail backdrop is acceptable only if it is real data (a coarser orbital product from Sol) or a plain haze. No invented hills.
+- Until Sol's scene lands, keep the existing decorative horizon behind a flag and label it in the credits line as decorative. Build and test the nesting code against a stand-in heightfield so it is ready.
 
-4. **test_scene** (`scenes/test_scene/`, generated by a script, `is_test_data: true`). Everything listed in master step 2, section C0.3: sloped ground about 60 by 40 m, a boulder on the straight line to a target, a steep band, a hole, a ledge, a short and a long corridor, an exposure field and an exclusion zone, a rock landmark with a viewing point, two landmarks sharing a word, and one outside the patch. Also generate a `prior_collision.glb` that is smoother than the truth and is missing the boulder, so the remap feature in Astra 3 has something to discover. Document which feature serves which test.
+## Part 3: make it look like a photograph (1 h)
 
-5. **Walker** (`app/`, Vite, TypeScript, Three.js). Loads a scene chosen by URL parameter (`?scene=test_scene`). Pointer-lock mouse look, WASD, reset key. Eye height about 1.7 m. Ground following by sampling the collision surface. The player cannot walk through obstacles, into holes, off ledges higher than the maximum step, up slopes beyond the limit, or out of `playable_bounds`. Thresholds come from `config/navigation.json`, each with a one-line rationale and the ASSUMPTION label. Add an optional `photo` object to the landmark science entry in the schema (path, image ID, sol, camera, credit, source URL); Sol fills it. Keep the controller as a pure module, because the planner tests in Astra 2 drive a scripted walker through the same code.
+The patch texture is real rover photography with sunlight already baked in. The job is to present it without damaging it.
 
-6. **HUD shell.** A helmet-visor frame over the 3D view with named, empty regions for: heading tape, route guidance, hazard radar, status gauges, alerts, and recognised voice text. Add a visible "TEST DATA" watermark whenever `is_test_data` is true. Astra 3 fills the regions; fix the layout now so later work does not move things.
+- **Colour pipeline:** sRGB output, a filmic tone curve tuned so the rover photos keep their original colour, no relighting of photo-textured ground. Verify against a source Navcam frame side by side.
+- **Atmosphere:** a Mars sky gradient with a soft sun glow in the direction consistent with the shadows in the photos, and distance haze that tints toward the horizon colour (aerial perspective), so the patch, the orbital terrain and the sky read as one scene.
+- **Orbital ground at eye level:** a 25 cm orthoimage is blurry underfoot. Blend in fine surface detail sampled from rover photo swatches, fading out with distance, plus slope-based shading from the elevation data. This is a display enhancement over real orbital colour; it adds no geometry.
+- **Inferred areas of the patch:** soften the visible transition between measured and inferred texture; do not sharpen invented detail.
+- **Camera feel:** smooth acceleration and stopping, gentle walking bob that can be turned off, field of view near a helmet view, near plane close enough to look down at the ground without clipping.
+- **Finishing:** antialiasing, mipmaps with maximum anisotropy, a light vignette and very light grain. No bloom or colour effects that alter the terrain's colour.
+- **Opening shot:** start on a slow establishing view of the slab from the spawn point with the interface faded back, then hand over control.
+- **Honesty switch:** one key toggles every enhancement off and shows the raw assets. The credits line always states "includes inferred and orbital terrain".
+- **Performance:** hold 60 frames per second at 1080p on a mid-range laptop. Keep tiled culling. Measure and report frame time, load time and memory.
+
+## Part 4: test scene and HUD frame (30 min)
+
+- `scenes/test_scene/` generated by a script, `is_test_data: true`, with a visible "TEST DATA" watermark: everything in master step 2, section C0.3 (boulder, steep band, hole, ledge, two corridors, exposure field, exclusion zone, landmarks with an ambiguous alias pair and one outside the patch), plus a prior surface that lacks the boulder. Plain colours are fine; this scene exists for automated planner tests, not for looks.
+- A helmet-visor frame over the view with named, empty regions for heading, route guidance, hazard radar, status, alerts and recognised voice text. Thin and unobtrusive; it must not cover the terrain.
 
 ## Done when
 
-- `npm install` and `npm run dev` in `app/` start the walker on Windows, and `npm test` passes (VERIFIED with the test output).
-- You walked the test scene in a browser and confirmed each blocking rule (boulder, hole, ledge, steep band, boundary) stops the player. Say which you tested.
-- The schema validates `scenes/test_scene/` and rejects a deliberately broken copy.
-- `CONTRACT.md` is merged to `main` early, within the first two hours, so Sol can check their output against it. Aim for the first 90 minutes.
+- `npm install`, `npm run dev` and `npm test` work in `app/` on Windows (test output in the report), and `skinner-ridge/` still runs unchanged.
+- In a browser you walked from spawn past the slab, looked back, then walked off the patch onto the surrounding terrain with no seam, hole or fall. Save screenshots from spawn, look-back, the patch edge and an elevated view to `docs/img/`, each with enhancements on and off.
+- The schema validates both scenes and rejects a deliberately broken copy.
+- `CONTRACT.md` is on `main` within the first 90 minutes so Sol can match it.
 
 ## Constraints
 
-- One source of truth for the ground: collision, slope and routing all read the ground grid built from `collision.glb`. The visual mesh affects looks only.
-- The app must work offline once loaded. No CDN-loaded dependencies at run time.
-- After this prompt the contract is frozen. Later changes are additive and need a version bump and a note in `DECISIONS.md`.
+- Nothing invented is presented as measured. Enhancements change appearance only, and the walking surface is always the ground data.
+- The app works offline once loaded. No dependencies fetched at run time.
+- After this prompt the contract is frozen; later changes are additive, with a version bump and a note in `DECISIONS.md`.
+- If time runs short, the order to protect is: Part 1, then Part 2, then Part 3. Part 4's test scene can slip into the start of Astra 2.

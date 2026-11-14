@@ -6,6 +6,17 @@ NASA Space Apps 2026, "Interplanetary Survival Guide: Martian Map".
 
 This roadmap merges three inputs: the team's HUD idea, `docs/prompts/master-step1.txt` (terrain reconstruction) and `docs/prompts/master-step2.txt` (layers, planner, voice). Where they conflict, the master prompts' evidence and honesty rules win.
 
+## 0. Update, Saturday 18:45: the rover patch already exists
+
+A teammate pushed `skinner-ridge/`: a working first-person walk on a 28 × 24.5 m patch of Perseverance's Skinner Ridge workspace (Hawksbill Gap, Jezero), built from NASA Navcam mesh products. This changes the plan:
+
+- **The site is fixed:** Skinner Ridge, SITE_FRAME 26. Sol no longer chooses a site.
+- **Sol 2 (rover reconstruction) is done** by the teammate. Sol's remaining work is the orbital terrain around the patch and the data layers.
+- **Astra 1 builds on the existing viewer** instead of writing a walker from scratch, and spends the saved time on the expanded map and photoreal rendering.
+- **Astra 2 adds a planning view** styled after NASA's Curiosity Mount Sharp route map (references in `docs/img/reference/`), with a button per dataset that highlights the terrain.
+- **Axis convention changes** to the one the patch already uses: +X west, +Y up, +Z north. This replaces the first pin in section 4.
+- `skinner-ridge/` belongs to the teammate who built it. Sol and Astra read it and do not edit it.
+
 ## 1. Who does what
 
 | Owner | Role | Owns these paths (nobody else edits them) |
@@ -25,9 +36,9 @@ Send the prompts in order within each column. The two columns run in parallel.
 
 | Order | 6.1 Sol | GPT Astra |
 |---|---|---|
-| 1 | `sol-1-orbital-scene.md` (4 h): challenge notes, site choice, Tier 0 orbital scene (the guaranteed submission) | `astra-1-contract-walker.md` (3 h): scene contract, scene-core, test scene, first-person walk, HUD shell |
-| 2 | `sol-3-science-layers.md` (3 h): landmarks, arrival photos, rover traverse, thermal layer, radiation scenario inputs | `astra-2-layers-planner.md` (5 h): layers, hazard-aware route planner, map, acceptance tests |
-| 3 | `sol-2-rover-patch.md` (5 h, stretch): rover-derived textured patch, strictly time-boxed | `astra-3-hud-scanner-voice.md` (5 h): HUD, safe-return gauge, obstacle scanner, live re-route, voice, mission-control mirror |
+| 1 | `sol-1-orbital-scene.md` (4 h): challenge notes, orbital terrain around Skinner Ridge registered to the patch | `astra-1-contract-walker.md` (4 h): port the Skinner Ridge viewer, scene contract, expanded map, photoreal rendering |
+| 2 | `sol-3-science-layers.md` (3 h): landmarks, arrival photos, rover traverse, geology, thermal and mineral highlight layers, radiation scenario inputs | `astra-2-layers-planner.md` (5 h): oblique planning view, data highlight buttons, route planner, acceptance tests |
+| 3 | Done by a teammate (`skinner-ridge/`). `sol-2-rover-patch.md` is kept for reference only. | `astra-3-hud-scanner-voice.md` (3 h): HUD, safe-return gauge, obstacle scanner, live re-route, voice, mission-control mirror |
 | 4 | Lead: integration of the real scene, spatial agreement checks, walk test, README, video and project page | |
 
 Sol runs prompt 3 before prompt 2 on purpose. With about 14 working hours, the landmarks and multi-mission layers are worth more to the judges than photoreal ground, and they work on the orbital scene. The rover patch is attempted last and dropped without regret if it is not ready by 06:00.
@@ -40,10 +51,11 @@ Submission closes **Sunday 15 November 2026, 12:00 noon local time (EST)**. This
 
 | Local time | What must be true |
 |---|---|
-| Sat 20:00 | Astra: `CONTRACT.md` on `main` and `test_scene` walkable. Sol: site chosen, orbital data downloading. |
-| Sat 22:30 | Sol 1 merged: the orbital scene loads in Astra's app. This alone is a valid submission. |
-| Sun 02:00 | Astra 2 merged: typed routing works on the orbital scene. Sol 3 merged: landmarks and layers present. |
-| Sun 06:00 | Integration point. The rover scene is integrated, or the orbital scene ships. No waiting on reconstruction after this. |
+| Sat 20:30 | Astra: `CONTRACT.md` on `main` and the Skinner Ridge patch walkable in `app/`. Sol: orbital data downloaded and cropped. |
+| Sat 23:00 | Sol 1 and Astra 1 merged: the rover patch sits inside real orbital terrain with no seam. |
+| Sun 02:00 | Sol 3 merged: landmarks and highlight layers present. |
+| Sun 04:00 | Astra 2 merged: planning view, highlight buttons and typed routing work on the real scene. |
+| Sun 06:00 | Integration point. Spatial agreement between patch, orbital terrain, layers and traverse is checked and reported. |
 | Sun 07:00 | Feature cut. Anything not merged and working is dropped. |
 | Sun 08:00 | Code freeze. Only README, video, slides and project page from here. |
 | Sun 11:00 | Submit. The last hour is slack for upload problems. |
@@ -54,11 +66,12 @@ Cut order if time runs short: mission-control mirror, voice, radiation scenario,
 
 These are fixed now so that Sol can produce scenes before Astra finishes the schema. Astra formalises them in `schema/` and `CONTRACT.md` and may add fields but not change these.
 
-- Units are metres. Axes: +X east, +Y up, −Z north, right-handed (glTF). Scene origin is a documented point in the rover SITE frame or a documented lat/lon.
+- Units are metres. Axes: +X west, +Y up, +Z north, right-handed, as used by `skinner-ridge/`. The scene origin is the patch's crop corner: (77.49 m north, 2.51 m east, −14 m down) in SITE_FRAME 26. Every scene uses this frame.
+- The ground may be a heightfield in the `skinner-ridge/ground.bin` layout or a `collision.glb`.
 - A scene is a directory `scenes/<scene_id>/` with `scene.json`, `terrain.glb`, `collision.glb`, `landmarks.json`, `overlays/`, `routes/`, as listed in master step 2, section C0.1.
 - `collision.glb` node names carry meaning: ground nodes are named `ground_<PROVENANCE>` (`ROVER_MEASURED`, `ROVER_STEREO`, `ORBITAL`, `INTERPOLATED`); solid obstacles are named `obstacle_<name>`.
 - Optional `prior_collision.glb`: the ground as known before the walk (orbital resolution). It feeds the remap feature in section 5. For the rover scene it is the orbital terrain cropped to the same footprint.
-- Raster overlays are PNG files with an entry in `scene.json` giving bounds in local metres, units, value range and data class. Vector overlays and routes are GeoJSON with coordinates in local metres `[x, z]`.
+- Raster overlays are PNG files with an entry in `scene.json` giving bounds in local metres, units, value range and data class. A categorical overlay is a class raster plus a legend table (class, name, colour) and optional label anchor points. Vector overlays and routes are GeoJSON with coordinates in local metres `[x, z]`.
 - `ground_grid` is built by Astra's tool from `collision.glb`. Sol does not produce it.
 
 ## 5. Changes to the original idea

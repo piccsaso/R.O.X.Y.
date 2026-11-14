@@ -4,6 +4,10 @@ Time box: 3 hours. Run this straight after Sol 1 and before Sol 2. It only needs
 
 ## Goal
 
+The site is Skinner Ridge at Hawksbill Gap (see `skinner-ridge/`). Perseverance cored its Swift Run and Skyland samples from the Skinner Ridge rock and abraded it; verify the names, sols and instruments from NASA sources before using them. The slab in the existing patch has no verified individual name, so describe it as part of the Skinner Ridge workspace unless you can verify more.
+
+The app has a planning view modelled on NASA's Curiosity Mount Sharp route map (`docs/img/reference/`): pressing a button tints regions of the terrain by dataset, with labels. You supply the data for those buttons.
+
 Give the scenes their meaning: what is here, what is worth visiting, and what other missions say about this ground. Everything is delivered as data files inside `scenes/jezero_orbital/` and `scenes/jezero_rover/`. The app reads them through the scene contract; you write no app code. This is the data half of master step 2, sections C1.1, C1.3 and C1.4.
 
 ## Deliverables, in priority order
@@ -18,7 +22,11 @@ Give the scenes their meaning: what is here, what is worth visiting, and what ot
 
 4. **Radiation scenario inputs** (`overlays/radiation_scenario.json`). There is no measured dose map at Jezero. Provide a baseline surface dose rate from Curiosity RAD in Gale crater with its citation, labelled as a reference proxy from another site, and a multiplier for a solar particle event scenario with its source. The app computes the spatial field from terrain (sky visibility); you supply only the sourced numbers and the wording of the assumptions.
 
-5. **Geologic units** from USGS SIM 3464 (map only, with a note that it was mapped at 1:75,000). Only if time remains.
+5. **Geologic units** from USGS SIM 3464, covering the wide context crop. This is now a priority, not optional, because it is the closest match to the coloured units in the reference image. Deliver a class raster, a legend table (class, unit name as published, colour) and one label anchor point per unit. Note that it was mapped at 1:75,000.
+
+6. **Minerals** from CRISM (Mars Reconnaissance Orbiter), if a published, georeferenced product covers the delta front and can be registered within 45 minutes. Same delivery format. Skip it otherwise and say so.
+
+For every categorical layer, use the unit and feature names exactly as the source publishes them. Do not invent or simplify names.
 
 ## For every source
 
