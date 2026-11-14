@@ -1,6 +1,6 @@
 # Astra 3: helmet HUD, obstacle scanner, live remap, voice
 
-Time box: 5 hours, ending at the 07:00 Sunday EST feature cut. Start only when typed routing from Astra 2 works and its tests pass. Build in the order below; each part must work before the next begins. Parts are cut from the end: the mirror first, then voice. The step times are upper limits.
+Time box: 3 hours, from 04:00 to the 07:00 Sunday EST feature cut. The part times below add up to more than that, so treat them as upper limits and expect to cut parts 4 and 5. Start only when typed routing from Astra 2 works and its tests pass. Build in the order below; each part must work before the next begins. Parts are cut from the end: the mirror first, then voice. The step times are upper limits.
 
 ## Goal
 
