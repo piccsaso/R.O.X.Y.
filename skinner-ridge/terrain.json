@@ -1,0 +1,1199 @@
+{
+  "step": 0.035,
+  "width": 801,
+  "depth": 701,
+  "origin": [
+    77.49,
+    2.51,
+    -14
+  ],
+  "boundsMeters": [
+    28.000000000000004,
+    24.500000000000004
+  ],
+  "faces": 1120000,
+  "surveyedFaces": 708134,
+  "inferredFaces": 411866,
+  "softenedSamples": 96519,
+  "covered": 377075,
+  "overlap": 319769,
+  "crossDrive": 271226,
+  "disagreements": 103048,
+  "coverage": {
+    "measuredPixels": 16648135,
+    "inferredPixels": 10791865,
+    "textureSwatches": 1478
+  },
+  "sources": [
+    {
+      "id": "NLF_0477_0709296508M723RAS_N0261004NCAM00708_0A00LLJ02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709296508M723RAS_N0261004NCAM00708_0A00LLJ02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709296508M723RAS_N0261004NCAM00708_0A00LLJ02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709296508M723RAS_N0261004NCAM00708_0A00LLJ02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709296508M723RAS_N0261004NCAM00708_0A00LLJ02.mtl"
+      },
+      "rejected": 2,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709296508m723ras_n0261004ncam00708_0a00llj::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709296508_723xym_n0261004ncam00708_0a00llj::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        6,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "c1d941f93fcc055b6b6a1891706304f3e2bcf8f7fc2615729e15b7c927e09dfb",
+        "obj.xml": "f216d01c02aebd8302ac6b468734d52c7a749fa273d5b59b46d5c15cb2a9c313",
+        "png": "e2e79a2846d6fd9ddea3247e9d4daffb215c766a478f3268164b95242a3e3d6d"
+      },
+      "fusedSamples": 8042,
+      "atlasTriangles": 15406
+    },
+    {
+      "id": "NLF_0477_0709297328M366RAS_N0261004NCAM03477_0A0195J02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297328M366RAS_N0261004NCAM03477_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297328M366RAS_N0261004NCAM03477_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297328M366RAS_N0261004NCAM03477_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297328M366RAS_N0261004NCAM03477_0A0195J02.mtl"
+      },
+      "rejected": 2665,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297328m366ras_n0261004ncam03477_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297328_366xym_n0261004ncam03477_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        8,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "3e4b22aee2da8d8921b3021494bef477e27971ce4077723ca31e79cee036edf1",
+        "obj.xml": "dbc354bdf48e7c2df4e3c4ef283a035298e3e66ffaadfa34e691ea2f4b3f0b38",
+        "png": "8db4bcdb1547185b658216a6718809dc3c8dca1c335cdca9fbb4c7cd811c3674"
+      },
+      "fusedSamples": 50911,
+      "atlasTriangles": 93644
+    },
+    {
+      "id": "NLF_0477_0709297503M102RAS_N0261004NCAM03477_0A0195J02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297503M102RAS_N0261004NCAM03477_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297503M102RAS_N0261004NCAM03477_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297503M102RAS_N0261004NCAM03477_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297503M102RAS_N0261004NCAM03477_0A0195J02.mtl"
+      },
+      "rejected": 578,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297503m102ras_n0261004ncam03477_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297503_102xym_n0261004ncam03477_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        12,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "d4805c2afdb3009e2517e5d12995169cffb229157c2fdca98c974259b56f0a01",
+        "obj.xml": "a25a39afb0382f746d3cd45430d705afd20e443a89429125f565516527bb1c67",
+        "png": "af1d2d3b0d23c9c301df30316b44f7f3ce3fd859e6a78e0664da17d142ea3a2b"
+      },
+      "fusedSamples": 68067,
+      "atlasTriangles": 130790
+    },
+    {
+      "id": "NLF_0477_0709297668M065RAS_N0261004NCAM03477_0A0195J02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297668M065RAS_N0261004NCAM03477_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297668M065RAS_N0261004NCAM03477_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297668M065RAS_N0261004NCAM03477_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297668M065RAS_N0261004NCAM03477_0A0195J02.mtl"
+      },
+      "rejected": 24,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297668m065ras_n0261004ncam03477_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297668_065xym_n0261004ncam03477_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        14,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "cf2585589dc883f08afaf5b2663e7a66ba054ae92a84410bb895b5711e20a0fd",
+        "obj.xml": "dcc9a001ef1ea43e8fe4854766f91d0c0b91ae66f64d00d7857318f04cc3c553",
+        "png": "f35ff57e5690592f469019a9761bdb948ac5befb6019650fb051ab7a819811de"
+      },
+      "fusedSamples": 37015,
+      "atlasTriangles": 72622
+    },
+    {
+      "id": "NLF_0477_0709297838M897RAS_N0261004NCAM02477_0A0195J02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297838M897RAS_N0261004NCAM02477_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297838M897RAS_N0261004NCAM02477_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297838M897RAS_N0261004NCAM02477_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297838M897RAS_N0261004NCAM02477_0A0195J02.mtl"
+      },
+      "rejected": 652,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297838m897ras_n0261004ncam02477_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297838_897xym_n0261004ncam02477_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        16,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "871006ef1df2c89377a27a1b46e43f918b4a875970e11187ac1cdbefaa00eb86",
+        "obj.xml": "1825ee87eb06ff9ed2ede0b2c5e4ae777b6dc225ff2439c2d56ee5311bc895bb",
+        "png": "4d20900c5370c602937ab1cb515890c86bd49fd4d9d3c638864c14e6c8deee5c"
+      },
+      "fusedSamples": 37049,
+      "atlasTriangles": 57375
+    },
+    {
+      "id": "NLF_0477_0709298005M099RAS_N0261004NCAM02477_0A0195J02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298005M099RAS_N0261004NCAM02477_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298005M099RAS_N0261004NCAM02477_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298005M099RAS_N0261004NCAM02477_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298005M099RAS_N0261004NCAM02477_0A0195J02.mtl"
+      },
+      "rejected": 1808,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298005m099ras_n0261004ncam02477_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298005_099xym_n0261004ncam02477_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        18,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "2cd9f637a7ed55751da406a1694b376763335387e2e9d3f05ceaaf0057966cc0",
+        "obj.xml": "cb4e5c7bf442d3d1017a3903cc01e4c7216d4618f715a9d94e444181e507e425",
+        "png": "a8fe170b92425cfa90adfc589fc7faca17bef15101d31f4c59e8e69d61d4884c"
+      },
+      "fusedSamples": 36616,
+      "atlasTriangles": 64887
+    },
+    {
+      "id": "NLF_0474_0709025891M862RAS_N0260850NCAM00708_0A1095J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709025891M862RAS_N0260850NCAM00708_0A1095J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709025891M862RAS_N0260850NCAM00708_0A1095J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709025891M862RAS_N0260850NCAM00708_0A1095J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709025891M862RAS_N0260850NCAM00708_0A1095J02.mtl"
+      },
+      "rejected": 311,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709025891m862ras_n0260850ncam00708_0a1095j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709025891_862xym_n0260850ncam00708_0a1095j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "03d6fe09ad24d65dfa79813d7e271d915364ff39591bb936d0e354ee00ebd86f",
+        "obj.xml": "3bc9b458b5a55f21df86bef99858fb8dad80ebf5cbbfb55fd5505d5ac48066e9",
+        "png": "a3630abed492307b36699383f0cea69c514216ec20a6e348ccfb58d704e7e943"
+      },
+      "fusedSamples": 8436,
+      "atlasTriangles": 14749
+    },
+    {
+      "id": "NLF_0474_0709026308M550RAS_N0260850NCAM03474_0A0195J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026308M550RAS_N0260850NCAM03474_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026308M550RAS_N0260850NCAM03474_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026308M550RAS_N0260850NCAM03474_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026308M550RAS_N0260850NCAM03474_0A0195J02.mtl"
+      },
+      "rejected": 3676,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026308m550ras_n0260850ncam03474_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026308_550xym_n0260850ncam03474_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        8,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "0b6eb8bc5db31dbe9ad29ac92e09dde7ce68ddc4b3d32336b004f0667ea3d976",
+        "obj.xml": "17fa98ffb3bfbc0977b61a6653e2d1ef64ebd7e9375e59ac17ab044e92483871",
+        "png": "34960a391f504de99492defd562211c24c4f5c6c239d0ea4e6ebb2b324331fec"
+      },
+      "fusedSamples": 62580,
+      "atlasTriangles": 113022
+    },
+    {
+      "id": "NLF_0474_0709026492M481RAS_N0260850NCAM03474_0A0195J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026492M481RAS_N0260850NCAM03474_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026492M481RAS_N0260850NCAM03474_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026492M481RAS_N0260850NCAM03474_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026492M481RAS_N0260850NCAM03474_0A0195J02.mtl"
+      },
+      "rejected": 1031,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026492m481ras_n0260850ncam03474_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026492_481xym_n0260850ncam03474_0a0195j::3.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        10,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "02feb8e69843d20caf6ad2f93a8503d5e1f8dc5d8d584f61096f8c1b8388a0e9",
+        "obj.xml": "0877e5675d0ead7f335e74034c0b3599632c9c9ba3d90473ea2835802124522a",
+        "png": "04f87ce7d85b91f6c8d1335dafac22f587b742503c9edd33a3f58ec7bc2f759f"
+      },
+      "fusedSamples": 86252,
+      "atlasTriangles": 164103
+    },
+    {
+      "id": "NLF_0474_0709026657M743RAS_N0260850NCAM03474_0A0195J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026657M743RAS_N0260850NCAM03474_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026657M743RAS_N0260850NCAM03474_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026657M743RAS_N0260850NCAM03474_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026657M743RAS_N0260850NCAM03474_0A0195J02.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026657m743ras_n0260850ncam03474_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026657_743xym_n0260850ncam03474_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        12,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "e44e80e7b4298d26be559af5b4ee7526382bb329ea0a7945fdd9114056166a76",
+        "obj.xml": "c402203c055ff942cf666cef6ffc969385bc60de6a6fd6eeaca40772ba4d9741",
+        "png": "80b427813790c9835c59442146fc425e7d7d5e5629175e2087cd77755eff624a"
+      },
+      "fusedSamples": 16446,
+      "atlasTriangles": 32054
+    },
+    {
+      "id": "NLF_0474_0709026896M746RAS_N0260850NCAM02474_0A0195J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026896M746RAS_N0260850NCAM02474_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026896M746RAS_N0260850NCAM02474_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026896M746RAS_N0260850NCAM02474_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026896M746RAS_N0260850NCAM02474_0A0195J02.mtl"
+      },
+      "rejected": 1159,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026896m746ras_n0260850ncam02474_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026896_746xym_n0260850ncam02474_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        14,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "f803a0213156e390f29332a106267f2cf94ca7327914a80819b7d5e937a18524",
+        "obj.xml": "45ab048e3938c7058f4e829f7fb535099f53e544c330b76fc3f8a3e52fa040a9",
+        "png": "1215f615202f9c3f40f5877812f04611d33f90eb113e23974fd22d054c9def36"
+      },
+      "fusedSamples": 14525,
+      "atlasTriangles": 25427
+    },
+    {
+      "id": "NLF_0501_0711420522M006RAS_N0261110NCAM00301_0A0295J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1110,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711420522M006RAS_N0261110NCAM00301_0A0295J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711420522M006RAS_N0261110NCAM00301_0A0295J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711420522M006RAS_N0261110NCAM00301_0A0295J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711420522M006RAS_N0261110NCAM00301_0A0295J02.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711420522m006ras_n0261110ncam00301_0a0295j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711420522_006xym_n0261110ncam00301_0a0295j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1110,
+        4,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "149c7813490ab6541242c97c1859b889bce7c91734e668dd79c9163affaead7c",
+        "obj.xml": "32abcb8a8ae6c1abc908916b0c7a788f8e20f9a875a7854af2343b7353cda286",
+        "png": "e3066c9e40503770cdfed55054c7a6fab64c9303df27da90e7610c82f801633c"
+      },
+      "fusedSamples": 0,
+      "atlasTriangles": 0
+    },
+    {
+      "id": "NLF_0474_0709027043M288RAS_N0260850NCAM02474_0A1195J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027043M288RAS_N0260850NCAM02474_0A1195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027043M288RAS_N0260850NCAM02474_0A1195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027043M288RAS_N0260850NCAM02474_0A1195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027043M288RAS_N0260850NCAM02474_0A1195J02.mtl"
+      },
+      "rejected": 1527,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027043m288ras_n0260850ncam02474_0a1195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027043_288xym_n0260850ncam02474_0a1195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        16,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "2513697247f2bedbb91a9e7fe08fc175d3d2531f5edc63cabe94269989a18dd1",
+        "obj.xml": "be6d97fe75139b4809cc48a7eda1a630b03de4daee0d2da68bc227378fcd9af5",
+        "png": "74465082628f1ce307f0cd3c867a535e3c7539e58783aac856d8554a854435e4"
+      },
+      "fusedSamples": 46879,
+      "atlasTriangles": 80654
+    },
+    {
+      "id": "NLF_0474_0709027186M885RAS_N0260850NCAM13474_0A1195J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027186M885RAS_N0260850NCAM13474_0A1195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027186M885RAS_N0260850NCAM13474_0A1195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027186M885RAS_N0260850NCAM13474_0A1195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027186M885RAS_N0260850NCAM13474_0A1195J02.mtl"
+      },
+      "rejected": 3593,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027186m885ras_n0260850ncam13474_0a1195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027186_885xym_n0260850ncam13474_0a1195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        18,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "0d74d69fdbc4c93b542c9293b4957b5b81d8e60facc569d515f8e3efe24f0843",
+        "obj.xml": "401245fc8baf53f70915134fc5b8521a582a5f8669a7a3b5dca5aa8854e1641a",
+        "png": "b4df31ea60071d95208aa652048e2b71ad50bb1ed804569d0c6a19f91792003a"
+      },
+      "fusedSamples": 58417,
+      "atlasTriangles": 91160
+    },
+    {
+      "id": "NLF_0474_0709027279M633RAS_N0260850NCAM13474_0A0195J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027279M633RAS_N0260850NCAM13474_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027279M633RAS_N0260850NCAM13474_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027279M633RAS_N0260850NCAM13474_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027279M633RAS_N0260850NCAM13474_0A0195J02.mtl"
+      },
+      "rejected": 5459,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027279m633ras_n0260850ncam13474_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027279_633xym_n0260850ncam13474_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        20,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "51cebf4d1940fc773c8f344b75b48fd1a4d54313e9de16d133abb30758095925",
+        "obj.xml": "527601a314b7370f0e1e4c39317e0e23e31e71709f90d56de86174c3d36baf96",
+        "png": "d5285927c0b0211590ca2aa607ba09ea67a37d077dbc7375bf3156e5a4013ef9"
+      },
+      "fusedSamples": 86794,
+      "atlasTriangles": 142685
+    },
+    {
+      "id": "NLF_0474_0709027389M491RAS_N0260850NCAM13474_0A0195J02",
+      "sol": 474,
+      "site": 26,
+      "drive": 850,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027389M491RAS_N0260850NCAM13474_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027389M491RAS_N0260850NCAM13474_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027389M491RAS_N0260850NCAM13474_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027389M491RAS_N0260850NCAM13474_0A0195J02.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027389m491ras_n0260850ncam13474_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027389_491xym_n0260850ncam13474_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        850,
+        8,
+        0,
+        0,
+        0,
+        22,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "0b969330103081dc1f6057565f6a1a18dae2e05e0edc1e0724a9bbb48be2fe2d",
+        "obj.xml": "95c71ee580b9a7f404852f11d3de6b484a4dfd2426145195c595261423190cf9",
+        "png": "b550bbcd5508723eda084b5ba0bc3a4c50b601b88905a136276c726f342c71f3"
+      },
+      "fusedSamples": 0,
+      "atlasTriangles": 0
+    },
+    {
+      "id": "NLF_0477_0709298187M680RAS_N0261004NCAM13477_0A0195J02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298187M680RAS_N0261004NCAM13477_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298187M680RAS_N0261004NCAM13477_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298187M680RAS_N0261004NCAM13477_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298187M680RAS_N0261004NCAM13477_0A0195J02.mtl"
+      },
+      "rejected": 3210,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298187m680ras_n0261004ncam13477_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298187_680xym_n0261004ncam13477_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        20,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "78826535416f9f35198fb49c3fa570f5a75ef0dc96f204c3f4e130a0fa5822a7",
+        "obj.xml": "1f56bb0a75a449e719864a3bdd2c5c45015bfdf54013fc4a58380ceb1f7ae5bf",
+        "png": "3d648c801caacc516fd72cec2b3bb357d61675d1b17bd2ce4cce2adad7e4fa84"
+      },
+      "fusedSamples": 61369,
+      "atlasTriangles": 101167
+    },
+    {
+      "id": "NLF_0477_0709298299M678RAS_N0261004NCAM13477_0A0195J02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298299M678RAS_N0261004NCAM13477_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298299M678RAS_N0261004NCAM13477_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298299M678RAS_N0261004NCAM13477_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298299M678RAS_N0261004NCAM13477_0A0195J02.mtl"
+      },
+      "rejected": 3567,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298299m678ras_n0261004ncam13477_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298299_678xym_n0261004ncam13477_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        22,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "60427b28ef71211241ca2bf119d2ab22dd2260e795a156d35ef0cfd716aa3476",
+        "obj.xml": "264ee03fcc485ca4060fc8cbaeef29cddb77e0f8376fdcc34a13495d39493834",
+        "png": "fd0689f39d8d3feec8e7c25dda672c8ae67d214ec6e4326260e0b1565614cecf"
+      },
+      "fusedSamples": 60129,
+      "atlasTriangles": 99231
+    },
+    {
+      "id": "NLF_0477_0709298393M010RAS_N0261004NCAM13477_0A0195J02",
+      "sol": 477,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298393M010RAS_N0261004NCAM13477_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298393M010RAS_N0261004NCAM13477_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298393M010RAS_N0261004NCAM13477_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298393M010RAS_N0261004NCAM13477_0A0195J02.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298393m010ras_n0261004ncam13477_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298393_010xym_n0261004ncam13477_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        8,
+        0,
+        0,
+        0,
+        24,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "731c5eff2dc666e2683e090d4c1dd3a706533af044cb0234744d468a78557ad5",
+        "obj.xml": "adbee0f6f5e920a32a88375bc62d70cfce82af73c31b70e03d606407145c2cd0",
+        "png": "202fdc703f8bf944ff7acea7ffc4466ce2415bda2d69ee2358db44dde8c1bd28"
+      },
+      "fusedSamples": 0,
+      "atlasTriangles": 0
+    },
+    {
+      "id": "NLF_0501_0711424234M539RAS_N0261154NCAM02501_0A0195J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1154,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424234M539RAS_N0261154NCAM02501_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424234M539RAS_N0261154NCAM02501_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424234M539RAS_N0261154NCAM02501_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424234M539RAS_N0261154NCAM02501_0A0195J02.mtl"
+      },
+      "rejected": 1702,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424234m539ras_n0261154ncam02501_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424234_539xym_n0261154ncam02501_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1154,
+        10,
+        0,
+        0,
+        0,
+        14,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "4c9c91b79fe5de56cff00197471b9197e3a9c16532bd47e06d1c6a0f7f239799",
+        "obj.xml": "a7fd793686eefad526aaecdb1d012596da364ce29739eb5a2297fb95e91ec164",
+        "png": "bf81d1a49f777ac07a50739cb0e06fef0b6b9673b011355cce227ef939919737"
+      },
+      "fusedSamples": 27727,
+      "atlasTriangles": 48964
+    },
+    {
+      "id": "NLF_0501_0711424443M278RAS_N0261154NCAM02501_0A0195J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1154,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424443M278RAS_N0261154NCAM02501_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424443M278RAS_N0261154NCAM02501_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424443M278RAS_N0261154NCAM02501_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424443M278RAS_N0261154NCAM02501_0A0195J02.mtl"
+      },
+      "rejected": 10148,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424443m278ras_n0261154ncam02501_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424443_278xym_n0261154ncam02501_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1154,
+        10,
+        0,
+        0,
+        0,
+        16,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "9de7c7f4328a333afeaef29a1683d2bd7307fe56b5a1f1cabf37ce05fd3a8365",
+        "obj.xml": "6d24a6f9f26e95b97c5b0f87baa7516feb613f14b6d12734d8a6a7a7498cbb97",
+        "png": "ba40b0ed8a7489ceb7e9e892e2713699c4d3f0da90db262460a0ff6aa5ed3337"
+      },
+      "fusedSamples": 163767,
+      "atlasTriangles": 193929
+    },
+    {
+      "id": "NLF_0501_0711424685M635RAS_N0261154NCAM04501_0A0195J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1154,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424685M635RAS_N0261154NCAM04501_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424685M635RAS_N0261154NCAM04501_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424685M635RAS_N0261154NCAM04501_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424685M635RAS_N0261154NCAM04501_0A0195J02.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424685m635ras_n0261154ncam04501_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424685_635xym_n0261154ncam04501_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1154,
+        10,
+        0,
+        0,
+        0,
+        18,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "a602c1bcfc7051c7861ee19136bcc39ece1035fee046ae79936db3384501a6b0",
+        "obj.xml": "10172e6fabe86763067d2d067163ea89c1249b7ca98c68ed9aadd34ba0ae696f",
+        "png": "d8cddc8decfd37e0e9d8bd7b3335d4f487e4277844fe569d80b586a1e658a97c"
+      },
+      "fusedSamples": 0,
+      "atlasTriangles": 0
+    },
+    {
+      "id": "NLF_0501_0711424795M821RAS_N0261154NCAM04501_0A0195J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1154,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424795M821RAS_N0261154NCAM04501_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424795M821RAS_N0261154NCAM04501_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424795M821RAS_N0261154NCAM04501_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424795M821RAS_N0261154NCAM04501_0A0195J02.mtl"
+      },
+      "rejected": 2929,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424795m821ras_n0261154ncam04501_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424795_821xym_n0261154ncam04501_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1154,
+        10,
+        0,
+        0,
+        0,
+        20,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "9734ecaae8ccbc60ba38b641bfd3ac571601c7fd6049424daa36dea201525bbd",
+        "obj.xml": "db926e74bc57655ebbf18b035f372aac68cb96fc25f78102ae542e784a00ac9e",
+        "png": "de6d51384738b6a09156f686f817f27430f6c13273224a4f5255971ee1427df9"
+      },
+      "fusedSamples": 79707,
+      "atlasTriangles": 132822
+    },
+    {
+      "id": "NLF_0501_0711424926M072RAS_N0261154NCAM04501_0A0195J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1154,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424926M072RAS_N0261154NCAM04501_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424926M072RAS_N0261154NCAM04501_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424926M072RAS_N0261154NCAM04501_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424926M072RAS_N0261154NCAM04501_0A0195J02.mtl"
+      },
+      "rejected": 10949,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424926m072ras_n0261154ncam04501_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424926_072xym_n0261154ncam04501_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1154,
+        10,
+        0,
+        0,
+        0,
+        22,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "cce87fbfe33c70220e510419c8c9030518828ab8667e560c871b47267743bfb7",
+        "obj.xml": "372c4dd0c476b1fabff1302a8e28dfcdbe7be2624a5c1653bd6736e88c3c53bf",
+        "png": "7619dfd169fad1d747fe35499c26e696e04985f449829286a0f12d0dcbc52fbf"
+      },
+      "fusedSamples": 160724,
+      "atlasTriangles": 191452
+    },
+    {
+      "id": "NLF_0470_0708675355M290RAS_N0260756NCAM00700_0A00LLJ03",
+      "sol": 470,
+      "site": 26,
+      "drive": 756,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00470/ids/rdr/mesh/NLF_0470_0708675355M290RAS_N0260756NCAM00700_0A00LLJ03.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00470/ids/rdr/mesh/NLF_0470_0708675355M290RAS_N0260756NCAM00700_0A00LLJ03.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00470/ids/rdr/mesh/NLF_0470_0708675355M290RAS_N0260756NCAM00700_0A00LLJ03.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00470/ids/rdr/mesh/NLF_0470_0708675355M290RAS_N0260756NCAM00700_0A00LLJ03.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0470_0708675355m290ras_n0260756ncam00700_0a00llj::3.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0470_0708675355_290xym_n0260756ncam00700_0a00llj::2.0"
+      ],
+      "motionCounter": [
+        26,
+        756,
+        28,
+        78,
+        0,
+        0,
+        1954,
+        490,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "6c0af650144dd0537fc21c5658485f5aa1ae3b8158743c2b1776a80d085503e5",
+        "obj.xml": "bf4aca1bd732b0954e6058fed4f6313c72cb7850b3351e712e639f822ee6b863",
+        "png": "954355b6cb653af0c63bfc8e3d827db403b37d6c7f3138d4fa885aaacd664981"
+      },
+      "fusedSamples": 10381,
+      "atlasTriangles": 20125
+    },
+    {
+      "id": "NLF_0471_0708752740M364RAS_N0260756NCAM00347_0A0195J02",
+      "sol": 471,
+      "site": 26,
+      "drive": 756,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00471/ids/rdr/mesh/NLF_0471_0708752740M364RAS_N0260756NCAM00347_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00471/ids/rdr/mesh/NLF_0471_0708752740M364RAS_N0260756NCAM00347_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00471/ids/rdr/mesh/NLF_0471_0708752740M364RAS_N0260756NCAM00347_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00471/ids/rdr/mesh/NLF_0471_0708752740M364RAS_N0260756NCAM00347_0A0195J02.mtl"
+      },
+      "rejected": 1437,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0471_0708752740m364ras_n0260756ncam00347_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0471_0708752740_364xym_n0260756ncam00347_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        756,
+        44,
+        128,
+        0,
+        54,
+        2442,
+        544,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "5ef15af89e75ecfdcc1fafb9787b1c4677f5404cb22bd1a41f16d0db6b90f5a3",
+        "obj.xml": "c4264546b32036c3999ff1aa20806eb2139819e4cd57adbaf4858fd4406c67ad",
+        "png": "6a483a51d318f616c88646e35468dbf2f1e8fe246989c789e4003f5983fa6c4b"
+      },
+      "fusedSamples": 26439,
+      "atlasTriangles": 47919
+    },
+    {
+      "id": "NLF_0499_0711256332M612RAS_N0261004NCAM00347_0A1195J03",
+      "sol": 499,
+      "site": 26,
+      "drive": 1004,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00499/ids/rdr/mesh/NLF_0499_0711256332M612RAS_N0261004NCAM00347_0A1195J03.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00499/ids/rdr/mesh/NLF_0499_0711256332M612RAS_N0261004NCAM00347_0A1195J03.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00499/ids/rdr/mesh/NLF_0499_0711256332M612RAS_N0261004NCAM00347_0A1195J03.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00499/ids/rdr/mesh/NLF_0499_0711256332M612RAS_N0261004NCAM00347_0A1195J03.mtl"
+      },
+      "rejected": 541,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0499_0711256332m612ras_n0261004ncam00347_0a1195j::3.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0499_0711256332_612xym_n0261004ncam00347_0a1195j::3.0"
+      ],
+      "motionCounter": [
+        26,
+        1004,
+        536,
+        1292,
+        2684,
+        1594,
+        1788,
+        1188,
+        268,
+        84
+      ],
+      "sha256": {
+        "obj": "ed35addfa68e3ca723487684b4f3be83bf7b02acf4611101c58e2a306092eae0",
+        "obj.xml": "5be152c40c77da28954095809ad61c1403232fb64e7863f063490a16e4fb7032",
+        "png": "11e53e72a11e9b1fcd21c3c1d7cd2330a3bd79204812d001fb61b62367fd8606"
+      },
+      "fusedSamples": 27591,
+      "atlasTriangles": 51199
+    },
+    {
+      "id": "NLF_0501_0711423715M491RAS_N0261154NCAM03501_0A1195J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1154,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423715M491RAS_N0261154NCAM03501_0A1195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423715M491RAS_N0261154NCAM03501_0A1195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423715M491RAS_N0261154NCAM03501_0A1195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423715M491RAS_N0261154NCAM03501_0A1195J02.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711423715m491ras_n0261154ncam03501_0a1195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711423715_491xym_n0261154ncam03501_0a1195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1154,
+        10,
+        0,
+        0,
+        0,
+        8,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "4a73cfe243160184127867f74d879f7e5e0318a1f78ef597d9c49fd7a3ae587f",
+        "obj.xml": "92739378d3bc5285c06ec454b4f10d3fa1509ee20116e8046bc8f35f931b97bf",
+        "png": "db1f51457cfd95b10f401bdd2479566b7efe316dcf7c4c7dcac5b03faed2c0b7"
+      },
+      "fusedSamples": 0,
+      "atlasTriangles": 0
+    },
+    {
+      "id": "NLF_0501_0711423861M851RAS_N0261154NCAM03501_0A0195J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1154,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423861M851RAS_N0261154NCAM03501_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423861M851RAS_N0261154NCAM03501_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423861M851RAS_N0261154NCAM03501_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423861M851RAS_N0261154NCAM03501_0A0195J02.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711423861m851ras_n0261154ncam03501_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711423861_851xym_n0261154ncam03501_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1154,
+        10,
+        0,
+        0,
+        0,
+        10,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "4aeabdf7eeca0399d523aed4b2466065511f5aee80d62e502be7e15ad3d614ef",
+        "obj.xml": "323b12f2cbb96844270f297b062d2937763d68d8f118d6384e9c486f80c82c94",
+        "png": "178384f89691b631f9cf76f6f8b8121b26610d9e17da3698a30408229c5a8bd9"
+      },
+      "fusedSamples": 0,
+      "atlasTriangles": 0
+    },
+    {
+      "id": "NLF_0501_0711424026M495RAS_N0261154NCAM03501_0A0195J02",
+      "sol": 501,
+      "site": 26,
+      "drive": 1154,
+      "camera": "Left Navcam (stereo-derived)",
+      "frame": "SITE_FRAME 26",
+      "credit": "NASA/JPL-Caltech",
+      "products": {
+        "obj": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424026M495RAS_N0261154NCAM03501_0A0195J02.obj",
+        "obj.xml": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424026M495RAS_N0261154NCAM03501_0A0195J02.obj.xml",
+        "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424026M495RAS_N0261154NCAM03501_0A0195J02.png",
+        "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424026M495RAS_N0261154NCAM03501_0A0195J02.mtl"
+      },
+      "rejected": 0,
+      "references": [
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424026m495ras_n0261154ncam03501_0a0195j::2.0",
+        "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424026_495xym_n0261154ncam03501_0a0195j::2.0"
+      ],
+      "motionCounter": [
+        26,
+        1154,
+        10,
+        0,
+        0,
+        0,
+        12,
+        0,
+        0,
+        0
+      ],
+      "sha256": {
+        "obj": "a77498e2d06b08fce690d514bca9b433068be9de5586bf6f030cf6c380418e8d",
+        "obj.xml": "fc63b3da915f484ba59e127562bd3dcb411f3c14421756db60db2b241a217d7a",
+        "png": "540caae8c23d2ac5fe8d6a5097e53a28414859a8c06f3c1b05091b44edb6552d"
+      },
+      "fusedSamples": 0,
+      "atlasTriangles": 0
+    }
+  ]
+}

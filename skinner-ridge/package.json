@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "jpeg-js": "0.4.4",
+    "pngjs": "7.0.0",
+    "three": "0.180.0"
+  },
+  "scripts": {
+    "start": "node serve.mjs",
+    "download": "node download.mjs",
+    "build": "node reconstruct.mjs && node polish-atlas.mjs && node route-check.mjs",
+    "capture": "node capture.mjs"
+  }
+}

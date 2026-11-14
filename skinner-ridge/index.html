@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skinner Ridge · Perseverance</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#9e8173;color:#fff8eb;font-family:system-ui,sans-serif} canvas{display:block;width:100vw;height:100dvh}
+header,footer{position:fixed;left:clamp(16px,4vw,56px);right:clamp(16px,4vw,56px);display:flex;align-items:flex-end;justify-content:space-between;gap:16px;pointer-events:none}
+header{top:28px} footer{bottom:24px;align-items:center} h1{font:normal clamp(29px,4vw,48px)/1 Georgia,serif;margin:.15em 0 0} p{margin:0}
+.panel{padding:14px 18px;background:#241912e8;border:1px solid #ad9281;border-radius:6px}
+small{font-size:12px;letter-spacing:.02em} button{font:inherit;color:inherit;padding:.6em 1em;background:#241912;border:1px solid #dfcab2;border-radius:6px;cursor:pointer;pointer-events:auto}
+button:hover,button:focus-visible{background:#704733} button:disabled{opacity:.6;cursor:wait}
+.actions{display:flex;gap:8px} #reticle{position:fixed;left:50%;top:50%;width:4px;height:4px;background:#fff8eb;border-radius:100%;display:none;pointer-events:none} .locked #reticle{display:block} .locked #enter{display:none}
+@media(max-width:670px){footer{flex-wrap:wrap} header{top:16px} footer{bottom:16px}}
+</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head>
+<body>
+<header><div class="panel"><small>JEZERO CRATER · SOLS 470–501</small><h1>Skinner Ridge</h1></div></header>
+<div id="reticle" aria-hidden="true"></div>
+<footer><div class="panel"><p id="status" role="status">Loading rover terrain…</p><small>NASA/JPL-Caltech Navcam · Includes inferred terrain</small></div>
+<div class="actions"><button id="enter" disabled>Enter terrain</button><button id="reset" disabled>Reset</button></div></footer>
+<script type="module" src="./viewer.mjs"></script>
+</body>
+</html>
