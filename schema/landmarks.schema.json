@@ -1,0 +1,245 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://marswalk.local/schema/landmarks.schema.json",
+  "title": "Marswalk landmark catalog 1.0.0",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "landmarks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "kind": {
+            "enum": [
+              "rock",
+              "outcrop",
+              "sample site",
+              "abrasion patch",
+              "rover stop",
+              "feature"
+            ]
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "position_status": {
+            "enum": [
+              "VERIFIED",
+              "ESTIMATED",
+              "UNKNOWN"
+            ]
+          },
+          "scene_status": {
+            "enum": [
+              "IN_SCENE_REACHABLE",
+              "IN_SCENE_BLOCKED_TARGET",
+              "OUTSIDE_PATCH",
+              "POSITION_UNVERIFIED"
+            ]
+          },
+          "viewing_points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "position": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                },
+                "facing": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "position",
+                "facing"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "science": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "instruments": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "sol": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "site_drive": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "data_class": {
+                "enum": [
+                  "OBSERVATION",
+                  "TERRAIN-DERIVED",
+                  "ORBITAL-CONTEXT",
+                  "SIMULATION",
+                  "ASSUMPTION",
+                  "TEST-DATA",
+                  "UNKNOWN"
+                ]
+              },
+              "photo": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "pattern": "^(?!/)(?!.*\\.\\.)(?!.*[:\\\\?#]).+\\.(?:png|jpg|jpeg|webp)$"
+                  },
+                  "image_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sol": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "camera": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "credit": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "source_url": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "path",
+                  "image_id",
+                  "sol",
+                  "camera",
+                  "credit",
+                  "source_url"
+                ],
+                "additionalProperties": true
+              }
+            },
+            "required": [
+              "description",
+              "instruments",
+              "products",
+              "sol",
+              "site_drive",
+              "data_class"
+            ],
+            "additionalProperties": true
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "url": {
+                  "type": "string"
+                },
+                "credit": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "license": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "product_id",
+                "url",
+                "credit",
+                "license"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "aliases",
+          "kind",
+          "position",
+          "position_status",
+          "scene_status",
+          "viewing_points",
+          "science",
+          "sources"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "landmarks"
+  ],
+  "additionalProperties": true
+}

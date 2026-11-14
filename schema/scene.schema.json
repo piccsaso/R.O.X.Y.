@@ -1,0 +1,495 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "scene_id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "is_test_data": {
+      "type": "boolean"
+    },
+    "units": {
+      "const": "metres"
+    },
+    "axes": {
+      "const": "+X east, +Y up, -Z north"
+    },
+    "origin": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "site_frame": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "site_to_local": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 16,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "description",
+        "site_frame"
+      ],
+      "additionalProperties": true
+    },
+    "map_transform": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "VERIFIED",
+            "ESTIMATED",
+            "NONE"
+          ]
+        },
+        "reference_body": {
+          "const": "Mars"
+        },
+        "datum": {
+          "type": "string",
+          "minLength": 1
+        },
+        "latitude": {
+          "type": "number",
+          "minimum": -89,
+          "maximum": 89
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "error_m": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "VERIFIED",
+                  "ESTIMATED"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reference_body",
+              "datum",
+              "latitude",
+              "longitude",
+              "radius_m"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "ESTIMATED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "error_m"
+            ]
+          }
+        }
+      ]
+    },
+    "playable_bounds": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "minItems": 3
+    },
+    "spawn": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "heading": {
+          "type": "number"
+        },
+        "eye_height": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "position",
+        "heading",
+        "eye_height"
+      ],
+      "additionalProperties": true
+    },
+    "terrain": {
+      "const": "terrain.glb"
+    },
+    "collision": {
+      "const": "collision.glb"
+    },
+    "prior_collision": {
+      "const": "prior_collision.glb"
+    },
+    "landmarks": {
+      "const": "landmarks.json"
+    },
+    "ground_grid": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[:\\\\?#]).+\\.(?:json|glb|png|geojson)$"
+        },
+        "cell_size": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "origin": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 2
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "encoding": {
+          "const": "json-row-major-v1"
+        }
+      },
+      "required": [
+        "path",
+        "cell_size",
+        "origin",
+        "dimensions",
+        "encoding"
+      ],
+      "additionalProperties": true
+    },
+    "prior_ground_grid": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[:\\\\?#]).+\\.(?:json|glb|png|geojson)$"
+        },
+        "cell_size": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "origin": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 2
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "encoding": {
+          "const": "json-row-major-v1"
+        }
+      },
+      "required": [
+        "path",
+        "cell_size",
+        "origin",
+        "dimensions",
+        "encoding"
+      ],
+      "additionalProperties": true
+    },
+    "overlays": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[:\\\\?#]).+\\.(?:json|glb|png|geojson)$"
+          },
+          "format": {
+            "enum": [
+              "png",
+              "geojson"
+            ]
+          },
+          "data_class": {
+            "enum": [
+              "OBSERVATION",
+              "TERRAIN-DERIVED",
+              "ORBITAL-CONTEXT",
+              "SIMULATION",
+              "ASSUMPTION",
+              "TEST-DATA",
+              "UNKNOWN"
+            ]
+          },
+          "units": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resolution": {
+            "type": "number",
+            "minimum": 0
+          },
+          "coverage": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 3
+          },
+          "bounds": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "value_range": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "credit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "license": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provenance_notes": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default_visible": {
+            "type": "boolean"
+          },
+          "render_mode": {
+            "enum": [
+              "3d",
+              "map",
+              "both"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "path",
+          "format",
+          "data_class",
+          "units",
+          "resolution",
+          "coverage",
+          "source",
+          "credit",
+          "license",
+          "provenance_notes",
+          "default_visible",
+          "render_mode"
+        ],
+        "additionalProperties": true,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "format": {
+                  "const": "png"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "bounds",
+                "value_range"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[:\\\\?#]).+\\.(?:json|glb|png|geojson)$"
+          },
+          "data_class": {
+            "enum": [
+              "OBSERVATION",
+              "TERRAIN-DERIVED",
+              "ORBITAL-CONTEXT",
+              "SIMULATION",
+              "ASSUMPTION",
+              "TEST-DATA",
+              "UNKNOWN"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "credit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "license": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "data_class",
+          "source",
+          "credit",
+          "license"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "credits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string"
+          },
+          "credit": {
+            "type": "string",
+            "minLength": 1
+          },
+          "license": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "product_id",
+          "url",
+          "credit",
+          "license"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "scene_id",
+    "title",
+    "is_test_data",
+    "units",
+    "axes",
+    "origin",
+    "map_transform",
+    "playable_bounds",
+    "spawn",
+    "terrain",
+    "collision",
+    "landmarks",
+    "ground_grid",
+    "overlays",
+    "routes",
+    "credits"
+  ],
+  "additionalProperties": true,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://marswalk.local/schema/scene.schema.json",
+  "title": "Marswalk scene contract 1.0.0"
+}
