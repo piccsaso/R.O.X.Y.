@@ -1,0 +1,329 @@
+# MASTER PROMPT, STEP 2: Overlays, Landmark Catalog, Hazard-Aware Routing, Voice
+# Project: Ground-Truth Marswalk (NASA Space Apps 2026, "Interplanetary Survival Guide: Martian Map")
+
+This prompt continues the Step 1 master prompt (marswalk-master-prompt). Step 1 reconstructs a real patch of Mars from Perseverance observations, exports terrain.glb, and makes it walkable. Step 2 turns that walkable patch into the thing the challenge asks for: a layered, multi-mission view that helps a human plan and carry out a safe, science-rich Marswalk.
+
+All of Step 1 still applies, especially Part B (evidence labels, decision log, time boxes, repeatability, honest reporting) and Part D (scope tiers and the submission reserve). Where this prompt and Step 1 overlap (Step 1, Phase 3.2), this prompt is the detailed version and replaces that section.
+
+Read the whole prompt before acting. Part A explains the purpose. Part B adds working rules on top of Step 1. Part C is the execution plan. Part D defines done.
+
+======================================================================
+PART A: PURPOSE
+======================================================================
+
+## A1. What Step 2 adds and why it matters for judging
+
+Step 1 delivers "rehearse on rover data." Step 2 delivers "plan on orbital data" and "do science on the real rock":
+  - Science overlays and a landmark catalog give the scene meaning: what is here, what is dangerous, what is worth visiting, and how much of the ground we actually know.
+  - A hazard-aware route planner answers the core challenge question: how does an explorer get from here to that science target safely?
+  - Voice and polish make the demo fast to understand in a 30-second video.
+
+Judging fit:
+  - Relevance: the challenge's "layered, integrated view" and "plan and carry out a Marswalk" are answered here.
+  - Validity: comes from honest provenance (observed vs. derived vs. simulated) and routes that can actually be walked.
+  - Creativity: comes from linking an orbital-scale plan to a ground-truth first-person route.
+  - Presentation: comes from one clean flow: say or type "Take me to [landmark]," watch the route bend around a real hazard, walk it.
+
+## A2. The product sequence
+
+  1. Reconstruct the terrain and make it walkable (Step 1).
+  2. Add scientific overlays and a searchable landmark catalog.
+  3. Build a map that plans a walkable route around terrain hazards and, when enabled, around simulated radiation exposure.
+  4. Add speech commands and polish the demo.
+Each stage must work with typing and clicking before the next one starts. Voice never becomes a dependency.
+
+## A3. Work in parallel against one shared contract
+
+The reconstruction (Track A) is the slowest and riskiest work, so nothing else may wait for it. Define the shared scene contract and a synthetic test scene first. Then build the other tracks against it in parallel:
+  - Track A, terrain (Step 1): delivers the real scene package at integration.
+  - Track B, overlays and landmark catalog.
+  - Track C, navigation and route planner.
+  - Track D, voice, UI polish, and demo assets.
+At integration, Track A should only need to hand over the real assets and metadata. No feature code should change.
+
+## A4. Constraints carried from Step 1
+
+  - Deadline: Nov 15, 2026 submission. Keep Step 1's backward schedule and its protected 4-hour submission reserve.
+  - Integration freeze: the real scene must be integrated no later than about T−10 h. Step 2 features that are not integrated by T−6 h are cut, not rushed.
+  - Windows, local, free, open-licensed tools and data. The core demo must run offline once assets are loaded.
+  - Tier 0 guarantee: Step 1's Tier 0 is an orbital-DTM walkable scene. Every Step 2 feature must also work on that scene, so the route-planning demo survives even if the rover reconstruction slips.
+  - Demo format: ≤30 s video or ≤7 slides.
+
+======================================================================
+PART B: WORKING RULES (in addition to Step 1, Part B)
+======================================================================
+
+## B1. One source of truth for the ground
+
+Collision, slope, obstacles, coverage, and routing must all come from the same ground surface: the scene's collision/walkability geometry. Never compute slope from one mesh and route on another. If the visual mesh and the collision mesh differ, the collision mesh wins for anything that affects walking. Visual only affects looks.
+
+## B2. Label every number by what it is
+
+Every overlay, legend entry, catalog field, and route-summary number carries one data class:
+  - OBSERVATION: measured by a mission instrument (rover imagery, orbital imagery, archived positions).
+  - TERRAIN-DERIVED: computed by us from measured geometry (slope, obstacles, contours).
+  - ORBITAL-CONTEXT: published orbital or USGS product at its own resolution.
+  - SIMULATION: a modeled scenario (radiation). Always shown as "Simulated" in the legend AND in the route summary.
+  - ASSUMPTION: a gameplay/config value (slope limit, walking speed, clearance).
+  - TEST-DATA: synthetic. Visibly labeled on screen whenever the test scene is loaded.
+  - UNKNOWN: no trustworthy data.
+Also keep Step 1's terrain provenance tags (ROVER-MEASURED, ROVER-STEREO, ORBITAL, INTERPOLATED) and add UNKNOWN for ground with no coverage.
+
+## B3. Honest uncertainty over impressive output
+
+  - Don't show precision the data doesn't have. Render a 1:75,000 geologic map at its published scale, not as if it were mapped at rover scale.
+  - Place a landmark at a position only once you have verified that position (from metadata, registered imagery, or a documented manual pick from overlapping images). Otherwise it is informational.
+  - Phrase radiation results as scenario outcomes ("in this scenario"), never as real dose predictions for Jezero.
+
+## B4. Test-first for anything that decides where a person walks
+
+The planner is safety-themed software. It gets automated tests on the test scene before integration, plus a manual 3D walk of every segment after integration.
+
+======================================================================
+PART C: EXECUTION PLAN
+======================================================================
+
+Time boxes assume Step 1's schedule (about 30 working hours left). Rescale them to the verified deadline. Track B, C, and D boxes run in parallel with Step 1 Phases 1–2.
+
+----------------------------------------------------------------------
+## C0. Shared scene contract and test scene (≤ 2 h, do first)
+----------------------------------------------------------------------
+### C0.1 Scene package (versioned; one directory per scene)
+
+scenes/<scene_id>/
+  scene.json          main manifest (schema below)
+  terrain.glb         visual mesh (Step 1 output)
+  collision.glb       walkable surface and solid obstacles (Step 1 output)
+  ground_grid.*       precomputed raster: height, provenance class, valid mask
+  landmarks.json      landmark catalog
+  overlays/           one file per layer plus its metadata entry in scene.json
+  routes/             optional historical routes (e.g., Perseverance traverse)
+
+scene.json must define:
+  - schema_version, scene_id, title, is_test_data (true/false)
+  - units: metres; axes: +Y up, +X east, −Z north (or state the exact convention). This must match Step 1's Z-down-to-glTF conversion, written down once.
+  - The local origin and its relation to the rover SITE frame.
+  - map_transform: local metres to Mars map coordinates (planetocentric lat/lon and the reference body/datum). Status is VERIFIED, ESTIMATED (with error in metres), or NONE. Never silently assume it.
+  - playable_bounds: a polygon in local coordinates.
+  - spawn: position, heading, and eye height (this absorbs Step 1's spawn.json; keep spawn.json readable for compatibility).
+  - ground_grid: cell size, origin, dimensions, and encoding.
+  - overlays[]: id, name, data_class, units, resolution, coverage polygon, source, credit, license, provenance notes, default_visible, render_mode (3d / map / both).
+  - credits[]: links back to Step 1's data manifest product IDs.
+
+landmarks.json entries:
+  - id (stable, never reused), display_name, aliases[], kind (rock, outcrop, sample site, abrasion patch, rover stop, feature)
+  - position (local metres) or null
+  - position_status: VERIFIED, ESTIMATED, or UNKNOWN
+  - scene_status: IN_SCENE_REACHABLE, IN_SCENE_BLOCKED_TARGET, OUTSIDE_PATCH, or POSITION_UNVERIFIED
+  - viewing_points[]: reachable standing positions with facing, used as route destinations for blocked targets like a rock
+  - science: what was observed and by which instruments, with links to source images/products, sol, and site/drive
+  - sources[]: credits
+
+### C0.2 Shared core library (single implementation, used by every track)
+
+A small TypeScript module ("scene-core") that loads a scene package, validates it against the schema, and provides:
+  - ground height and normal sampling
+  - ground-grid access
+  - local ↔ map coordinate conversion
+  - provenance lookup
+  - landmark search: normalized text, aliases, and fuzzy match returning ranked candidates with an ambiguity flag
+The overlay, navigation, and voice tracks consume this library. Nobody re-parses files on their own.
+
+Grid build: a repeatable script turns collision.glb into ground_grid by casting rays down per cell and recording height, hit/miss, and provenance. Choose a cell size suited to walking (start around 0.25 m and justify the final value in DECISIONS.md). Misses become UNKNOWN, which is how holes and gaps get detected without special cases.
+
+### C0.3 Synthetic test scene ("test_scene", is_test_data: true)
+
+Use the identical package format. Generate it with a script so it can be regenerated and tweaked. It contains:
+  - flat-to-gently-sloping ground of about 60 × 40 m
+  - a boulder that blocks the straight line between spawn and a target
+  - a steep slope band above the slope threshold
+  - a gap or hole (missing ground) and a steep ledge (a drop larger than the max step height)
+  - two walkable corridors to the same destination, one short and one longer
+  - a simulated exposure field where the short corridor passes a higher dose-rate zone, plus one hard exclusion zone
+  - a rock landmark with a reachable viewing point, an ambiguous alias pair (two landmarks sharing a word), and one OUTSIDE_PATCH landmark
+  - a visible "TEST DATA" watermark in the 3D view and on the map
+Each hazard is designed to trigger one acceptance test in C2.6. Document which test uses which feature.
+
+Output: the schema (JSON Schema file), scene-core with unit tests, test_scene, and a short CONTRACT.md that teammates can read in five minutes.
+
+Freeze rule: after C0, schema changes need a version bump plus a note in DECISIONS.md. Additive changes are preferred.
+
+----------------------------------------------------------------------
+## C1. Track B: scientific overlays and landmark catalog (≤ 6 h)
+----------------------------------------------------------------------
+### C1.1 Research first, then place (sources to verify)
+
+Start with these sources. Verify each one: URL works, license and credit, coordinate system, resolution, and coverage of the chosen site.
+  - Perseverance location map and its traverse/waypoint data. The public map is at science.nasa.gov/mission/mars-2020-perseverance/location-map/. Its layer data has been served as GeoJSON (M20_traverse.json, M20_waypoints.json under mars.nasa.gov/mmgis-maps/M20/Layers/json/). Verify these URLs still work, what fields they carry (sol, site/drive, lon/lat, elevation), and how accurate their positions are.
+  - USGS Jezero landing-site products (orthoimages and DTMs): https://astrogeology.usgs.gov/search/map/mars-2020-jezero-crater-landing-site-products
+  - USGS SIM 3464, Geologic Map of Jezero Crater and the Nili Planum Region (Sun & Stack 2020). It is mapped at 1:75,000 on a 6 m/px CTX base and is public domain: https://pubs.usgs.gov/publication/sim3464. Its GIS database also bundles CTX DTMs and THEMIS day/night IR mosaics, which are candidate second-mission layers.
+  - If the 1:75,000 units are too coarse to matter inside the patch (likely), check whether there is a finer published traverse-scale geologic mapping of the Perseverance corridor that covers the site. Use it only if it is verified and openly available. Otherwise show SIM 3464 as map-only regional context with a scale note.
+  - The official Space Apps resource list for this challenge (from Step 1, Phase 0). Prefer its datasets where they fit.
+  - Step 1's data manifest, for rover image viewpoints, sample/abrasion targets, and observation IDs.
+
+Before placing any feature, register the orbital products to the scene through map_transform. Check registration visually (the traverse should sit on the rover tracks or stop locations in the ortho) and report the estimated offset in metres.
+
+### C1.2 Required layers (all must work on test_scene first)
+  1. Slope (TERRAIN-DERIVED, degrees). Compute it from the ground grid over a walking-scale baseline (state it, e.g., ~1 m), not per triangle, so mesh noise doesn't create fake cliffs. Mark cells above the configured slope threshold.
+  2. Obstacles and drop-offs (TERRAIN-DERIVED). Find solid obstacles (collision geometry above the ground surface), ledges (height step between neighbours above max step height), and holes/UNKNOWN cells. Show the player-clearance buffer around them, because that is what the planner blocks.
+  3. Terrain coverage (provenance). Color by ROVER-MEASURED, ROVER-STEREO, ORBITAL, INTERPOLATED, or UNKNOWN. The planner reads the same classes.
+  4. Landmarks (OBSERVATION). Show a marker on the target and a separate marker on its viewing point(s). Unverified, outside-patch, and informational entries appear in the catalog with their status, not as walkable destinations.
+
+### C1.3 Site-dependent layers (add where the chosen site has data, in this priority order)
+  5. Perseverance historical route (OBSERVATION). Use a visual style that can't be confused with the player's planned route (different color, dashed, and labeled).
+  6. Sample or abrasion sites and rover photo viewpoints. Tie each to its source images/observations. Clicking one shows the image thumbnail and links to the source.
+  7. Elevation and contours, from the ground grid or a registered USGS DTM (state which). Pick a contour interval suited to the patch's relief.
+  8. Second-mission context layer: at least one non-Perseverance dataset that helps Marswalk planning (HiRISE ortho/DTM, CTX, THEMIS thermal inertia/IR, or CRISM mineralogy). It is required for the "multiple missions" criterion. Show it in map view if its resolution is coarser than the patch.
+  9. USGS geologic units at their published resolution (ORBITAL-CONTEXT, map view, scale note).
+ 10. Radiation scenario (SIMULATION). See C1.4.
+
+### C1.4 Radiation scenario: be honest, and make it physically motivated
+There is no measured dose-rate map at Jezero. The Curiosity RAD instrument measures dose rate in Gale Crater; if used, it is a REFERENCE PROXY for a baseline value, labeled as such. Over a patch tens of metres wide, real dose-rate variation from location alone is small. So:
+  - Frame the layer as an explicit scenario (for example, a solar particle event alert) with stated assumptions.
+  - Prefer a physically motivated spatial model over arbitrary blobs. Candidate: scale a baseline dose rate by the visible-sky fraction at each cell, computed from the terrain, so walls, ridges, and boulders give partial shielding. This also creates a meaningful "seek shelter" use case. Compare it with simpler alternatives and log the decision.
+  - Exclusion zones are scenario rules (e.g., "unshielded ridge crest during an alert"), drawn as hard blocks.
+  - The scenario supplies either a dose rate in stated units (preferred) or a unitless relative risk. The UI must state which one is active.
+  - If the real patch's scenario produces negligible route differences, say so. Demonstrate the exposure tradeoff on test_scene (allowed, labeled), and explain why in the README.
+
+### C1.5 Layer panel and readability
+  - A panel with a toggle, legend, data-class badge, units, resolution, and a "source" disclosure for each layer.
+  - Defaults: only landmark markers and essential navigation cues are on. Everything else is off.
+  - In 3D, use translucent ground-draped fills and outlines, never opaque paint over the rover texture. Coarse layers are map-only.
+  - Coverage, slope, obstacles, and radiation must line up exactly between 3D and map, because they share the ground grid.
+
+Output: working layer panel on test_scene; overlay generation scripts; populated landmarks.json for the chosen site with verified/unverified status; source verification notes in docs/SOURCES.md.
+
+----------------------------------------------------------------------
+## C2. Track C: hazard-aware route planner (≤ 7 h)
+----------------------------------------------------------------------
+### C2.1 Top-down map
+  - A 2D map in local metres (a simple canvas/SVG or orthographic view is enough; no full web-GIS stack needed). Show the registered orbital basemap crop, the playable bounds, and the selected layers.
+  - Sync with the 3D scene in both directions: live player position and heading; click-to-set destination (optional); the route drawn in both views.
+
+### C2.2 Destination search
+  - A text box that searches display names and aliases through scene-core.
+  - One confident match: select it. Several close matches: show a short pick list. No match: "No landmark called '…' in this scene", with closest suggestions.
+  - OUTSIDE_PATCH or POSITION_UNVERIFIED: explain the status and offer the info card. No route.
+  - Blocked targets (rocks): route to the best reachable viewing point (shortest feasible). Name which one in the summary.
+
+### C2.3 Walkability model (from the ground grid only)
+Blocked cells:
+  - slope above threshold
+  - step or drop above max step height (ledges, drop-offs)
+  - solid obstacles dilated by player radius plus a safety margin
+  - UNKNOWN cells and holes
+  - outside playable_bounds
+  - provenance classes the config marks as not walkable for navigation (default: allow ROVER-MEASURED, ROVER-STEREO, ORBITAL; INTERPOLATED allowed only with a warning; UNKNOWN never)
+  - when the radiation scenario is on: exclusion zones
+Costs on passable cells:
+  - horizontal distance plus optional penalties for slope and roughness
+  - a walking-time model, e.g., a Tobler-style slope speed function scaled to a configurable flat suited walking speed. Label it ASSUMPTION; it is not a validated EVA model.
+All thresholds, weights, radii, and speeds live in ONE documented config file (config/navigation.json). Each value has a short rationale and the ASSUMPTION label. Show the active values in a "route settings" disclosure in the UI.
+
+### C2.4 Search, smoothing, and segment validation
+  - Use A* on an 8-connected grid (or a navmesh if you can justify it in DECISIONS.md) with an admissible heuristic.
+  - Diagonal moves must not cut corners: require both orthogonal neighbours to be passable.
+  - Smoothing (e.g., string-pulling / line-of-sight shortcuts) is allowed only if each new segment passes validation. Sample along the segment at ≤ half the cell size and check clearance, slope, step height, provenance, bounds, and exclusion zones. A segment that fails is not shortcut.
+  - The final route is a polyline draped on the ground surface. That same polyline drives the map line, the 3D breadcrumbs, and the summary numbers.
+
+### C2.5 Route options and summary
+  - "Shortest walkable" is always available.
+  - "Lower exposure" is available only when the radiation scenario is active. It minimizes a documented combination of time and exposure (exposure = Σ dose rate × time in segment). Terrain restrictions apply to both options.
+  - If both options produce the same path (within a small tolerance), show one result and say "Both options take the same route."
+  - The summary shows: distance (m), estimated walking time (labeled assumption), elevation gain/loss, max slope on route, terrain-provenance mix along the route, and simulated exposure with units or relative score, labeled "Simulated scenario."
+  - Explain detours in one line, generated from what actually caused them. Compare against the straight line or the other option and name the dominant blocker (e.g., "Routes around a boulder" / "Avoids a steep slope" / "Takes a longer path through a lower-exposure area in this scenario: +18 m, −32% simulated dose"). Never use a generic explanation.
+  - When the lower-exposure route is longer, say plainly what it costs and what it saves.
+  - Failure states: "No walkable route found", plus the reason when you can tell (e.g., "destination enclosed by steep ground" or "only connection crosses unknown terrain").
+
+### C2.6 Following the route
+  - Optional ground-following breadcrumbs in 3D, kept slightly above the surface and readable without hiding the texture.
+  - Recalculate on request, and automatically when the player strays beyond a configurable distance from the route. Use hysteresis so it doesn't flicker.
+  - An arrival cue at the viewing point, facing the landmark, that opens the science card.
+
+### C2.7 Acceptance tests (automated, on test_scene, before integration)
+  1. The route goes around the boulder even though the straight line is shorter.
+  2. The gap, the steep ledge, and a deliberately blocked corridor each produce a detour or a clear no-route result with a reason.
+  3. With the exposure scenario on, "Lower exposure" picks the longer corridor and the summary explains the tradeoff. With it off, the planner picks the shorter one.
+  4. Every route segment passes the segment validator, and a scripted walker (the same collision and controller code as the player) follows the full route without falling, clipping, or leaving bounds.
+Also add tests for: ambiguous alias → pick list; OUTSIDE_PATCH → status message; identical options → single result; diagonal corner-cutting rejected.
+Report the results with test output (VERIFIED), not prose.
+
+----------------------------------------------------------------------
+## C3. Track D: voice and polish (≤ 3 h; start only after typed routing works)
+----------------------------------------------------------------------
+### C3.1 One command router
+Typed search, clicks, and speech all go through the same command parser and the same scene-core lookup. Voice is just another input to that router, never a separate code path.
+Supported commands (also typeable in a command box):
+  - "Take me to [landmark]"
+  - "Show slopes" / "Hide slopes"
+  - "Show radiation scenario"
+  - "Use the lower-exposure route"
+  - "Clear route"
+Matching should tolerate filler words and close mispronunciations of landmark names (fuzzy match against names and aliases). Ambiguous → the same pick list as typing.
+
+### C3.2 Speech engine
+  - A push-to-talk button. Show the recognized text before acting, so a mishearing is visible.
+  - Use the browser's Web Speech API. Newer Chromium-based browsers can run recognition on the device (SpeechRecognition.processLocally = true, where supported). Default recognition sends audio to an online service. Check which mode your tested browser and version actually supports. Prefer on-device. If only cloud recognition works, keep it opt-in and disclose it in the UI and README.
+  - If the microphone is denied, the API is unsupported, or the network is missing, hide or disable the mic with a short reason. Typed and click controls are always there.
+  - Document: browser and version tested, on-device vs. cloud, and recognition accuracy on the five commands (a quick tally of tries).
+
+### C3.3 Polish for the demo
+  - A clean first frame, readable legends, keyboard shortcuts listed in a help overlay, credits one click away, and no console errors.
+  - Performance check on a mid-range laptop. Overlays must not drop the frame rate noticeably; precompute rasters where possible.
+
+----------------------------------------------------------------------
+## C4. Integration and delivery (within Step 1's schedule; ≤ 4 h before the reserve)
+----------------------------------------------------------------------
+### C4.1 Swap test_scene for the real scene
+  - Track A delivers scenes/<real_id>/ in the frozen format. Run the grid build and overlay scripts unchanged on it.
+  - Spatial agreement check: the 3D mesh, collision, ground grid, overlays, map basemap, landmarks, and historical traverse line up. Spot-check at least 3 identifiable features and report offsets in metres.
+  - At least one VERIFIED, searchable landmark with a reachable viewing point.
+  - If the real footprint supports it, demonstrate a terrain-based detour there. If it has only one viable corridor, say so, and demonstrate alternate routes on the labeled test_scene with an explanation.
+  - Run the 3D walk test along every segment of at least one real route (from Step 1, Phase 4), with standing-height screenshots.
+  - Confirm the Tier 0 orbital scene also loads and routes (insurance).
+
+### C4.2 Deliverables (added to Step 1's repository)
+  - The runnable app, with typed, clicked, and (optional) voice control
+  - Scene packages: the real scene, test_scene, and the Tier 0 orbital scene if built
+  - Schema, CONTRACT.md, and the scene-core library with tests
+  - config/navigation.json with documented rationale
+  - landmarks.json, the overlay files, and docs/SOURCES.md (credits, licenses, verification notes)
+  - README additions: launch commands, the layer table (layer, data class, source, resolution), route settings, voice notes (browser, on-device or cloud), and known limitations
+  - One recorded tested flow: type or say a destination, get a route with a detour explanation, follow the breadcrumbs in 3D, arrive at the viewing point, see the science card. The recording doubles as raw footage for the 30-second video.
+  - A statement listing which layers use real observations, which are terrain-derived, which are orbital context, and which are simulated
+
+### C4.3 30-second video beat (align with Step 1's storyboard)
+Orbital map → "Take me to [landmark]" (spoken or typed) → route bends around a real hazard with its one-line reason → first-person walk along the breadcrumbs → arrive and turn to the rock → science card and "Simulated" badge if the scenario is on.
+
+======================================================================
+PART D: DEFINITION OF DONE AND REPORTING
+======================================================================
+
+## D1. Scope tiers for Step 2 (ship in order)
+TIER 1 (must ship): shared contract, scene-core, test_scene; slope, obstacles, coverage, and landmark layers; typed search; shortest walkable route with segment validation, map, breadcrumbs, summary, and failure states. Works on the real scene or the Tier 0 orbital scene.
+TIER 2 (target): historical traverse, sample/viewpoint links, contours, a second-mission layer, the radiation scenario with "Lower exposure," and detour explanations.
+TIER 3 (stretch): voice, geologic units, off-route auto-recalculation polish, extra landmarks.
+Voice is Tier 3 because judges see it only in the video, while routing and overlays carry Relevance and Validity. If time is short, cut voice first.
+
+## D2. Step 2 is done when all of these are VERIFIED
+  1. A teammate can build and test overlays, navigation, and voice against test_scene without the real terrain.
+  2. The real scene swaps in without changing feature code, and all layers and routes line up spatially (offsets reported).
+  3. All C2.7 acceptance tests pass, and at least one real route was walked end to end in 3D without falls or clipping.
+  4. Every layer, legend, and route number shows its data class. Simulated values are labeled "Simulated" in both the legend and the summary.
+  5. The core demo works offline with typing and clicking. Voice degrades gracefully.
+  6. The recorded end-to-end flow exists and matches the README.
+
+## D3. Checkpoint reports
+After C0, after each track reaches Tier 1, and after integration, send: what works (with evidence labels and test output), decisions made, contract changes, risks to the deadline, and what is needed from teammates or from me.
+
+## D4. Anti-patterns
+  - Computing slope, obstacles, or routes from a different surface than collision
+  - Routing across UNKNOWN or interpolated ground without saying so
+  - Smoothed paths that cut corners or pass between obstacles narrower than the player
+  - Radiation numbers without a scenario label, units, or source of the baseline
+  - Showing coarse orbital or geologic data as if it had rover-scale precision
+  - Placing landmarks at guessed positions
+  - Generic detour explanations that don't reflect the actual blocker
+  - Separate code paths for voice and typing
+  - Changing the scene contract without a version bump and note
+  - Building Tier 3 while Tier 1 is broken, or eating into the submission reserve

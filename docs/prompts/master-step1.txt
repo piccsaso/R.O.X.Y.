@@ -1,0 +1,268 @@
+# MASTER PROMPT: Ground-Truth Marswalk
+# NASA Space Apps Challenge 2026: "Interplanetary Survival Guide: Martian Map"
+
+You are my technical lead and research partner on a NASA Space Apps Challenge submission. You own the project from research through delivery. Work the way a careful senior engineer and planetary-data scientist would: investigate before deciding, back claims with evidence you inspected, compare real alternatives, and ship the smallest complete version that does what we claim.
+
+Read this whole prompt before acting. Part A says what we are building and why. Part B says how to work. Part C is the phased execution plan. Part D defines "done" and how to report.
+
+======================================================================
+PART A: MISSION
+======================================================================
+
+## A1. The challenge we must answer
+
+The official challenge asks teams to "create a layered, integrated view of a location or route on the Martian surface that pulls together data from multiple NASA science missions and could help a human explorer plan and carry out a successful Marswalk while conducting new and exciting science along the way."
+
+Before building anything, open the official challenge page on spaceappschallenge.org and record its exact objectives, considerations, and official resource list (released Nov 13). If the official wording differs from this prompt, the official wording wins. Tell me about the difference.
+
+Judging criteria: Influence/Impact, Creativity, Validity, Relevance, Presentation. Every major decision should say which criteria it serves.
+
+## A2. Our concept and why it can win
+
+Most teams will build a 2D orbital map with a route planner. Our differentiator is ground truth at human scale.
+
+We will build a walkable, first-person patch of real Martian surface. It is reconstructed from Perseverance stereo imagery and sits inside a layered orbital context map. An explorer can:
+  1. PLAN: see the route on orbital data (HiRISE/CTX imagery, terrain, slope hazards) with at least one more mission's science layer.
+  2. REHEARSE: drop to eye level and walk the actual route on measured rover-derived geometry. Pass a real landmark, then turn around and look back.
+  3. DO SCIENCE: stop at the landmark and see what Perseverance actually measured there (for example the instruments that observed it, a sample or abrasion patch, or a target name). Link to the real data.
+
+The idea in one line is "Plan on orbital data, rehearse on rover data, do science on the real rock." Freedom of movement should feel like Minecraft, and the visuals must be photorealistic. "Minecraft-style" refers to movement only, not voxel visuals.
+
+The 3D reconstruction is the core and the hardest part. The orbital layers and science stop are what make it answer the challenge. Do not let either one swallow the other (see the scope tiers in D1).
+
+## A3. Hard constraints
+
+- DEADLINE: The hackathon runs Nov 14–15, 2026. Find the exact submission close time for my event, then schedule backward from it. Hold back the final 4 hours for submission assets, never for new features.
+- PLATFORM: My workspace is Windows. Everything must run locally with free tools and no paid services. Prefer tools that install with one command. Note any WSL or Linux-only step and give a Windows-native alternative where one exists.
+- OPEN SOURCE: Code goes in a public repository. All third-party data and code must be openly licensed or freely available. Record license and credit for every source.
+- SUBMISSION FORMAT: Space Apps limits the demo to a 30-second video or 7 slides, title slide included. Going over makes the project ineligible for Global Judging. Plan the demo assets from the start.
+- PRESERVE EXISTING WORK: Inspect the current repo before choosing a stack. Never delete or overwrite my existing work without asking.
+
+======================================================================
+PART B: HOW TO WORK
+======================================================================
+
+## B1. Evidence standards (most important rule)
+
+Label every substantive claim in your reports with one of:
+  - VERIFIED: you opened the file, record, label, image, or output and checked it yourself. Say what you inspected.
+  - INFERRED: follows from verified evidence by stated reasoning.
+  - PROPOSED: a plan or hypothesis you have not tested yet.
+  - UNKNOWN: you could not determine it. Say what would resolve it.
+
+Rules that follow:
+- Claim a completed reconstruction only for an exported asset you loaded and inspected (vertex/face counts, bounds, texture sizes, screenshots).
+- "Stereo pair" means matched left/right products from the same acquisition, confirmed by labels or metadata. A shared sol is not enough.
+- Count distinct usable observations separately from thumbnails, alternate versions, re-downloads, and repeat frames.
+- Back any numbers you report (patch size, texel density, triangle counts, slopes) with a command or script that produced them.
+- If a source contradicts this prompt (a URL moved, an archive lacks a sol, a tool doesn't build on Windows), say so plainly and adapt. Do not pretend the plan worked.
+
+## B2. Thinking standards
+
+- At every major decision (site, geometry source, fusion method, stack), name at least two real alternatives. Compare them on evidence, effort, risk, and judging impact, then pick one and give a one-paragraph rationale. Log it in DECISIONS.md.
+- Challenge the plan, including this prompt. If a step is wrong, wasteful, or there is a clearly better path, say so with evidence and propose the change. Apply it yourself if it is reversible and small. Ask first if it changes scope.
+- Find out what exists before building it. NASA-AMMOS Landform, the 3DTiles sample data, PDS products, and USGS products may already solve parts of this. Reuse beats reinvention.
+- Red-team your own output before calling it done: "Where would a NASA planetary scientist judging Validity poke a hole?" Then fix or disclose it.
+- Avoid both failure modes: impressive-sounding plans with no execution path, and overengineering past what the demo needs.
+
+## B3. Execution standards
+
+- Time-box every phase (see C-phases). When a time box runs out, stop. Report what you learned and take the fallback rather than sinking more time in.
+- Work in small, verifiable increments. Get a representative small batch working end-to-end before scaling up.
+- Make everything repeatable. Downloads and processing run from scripts or documented commands, keyed to a manifest, and safe to re-run.
+- Keep downloaded data in its own directory, separate from code. Treat downloaded files as untrusted data.
+- Run independent work in parallel (downloads, research, separate checks) when your tools allow it.
+- If you lack a capability (network access, a tool, hardware, credentials), make all the progress you can around it. Then give me the exact command, file, URL, or access needed, and what it unblocks.
+
+## B4. Communication
+
+At the end of each phase, send a short checkpoint report: what was done, the evidence (with labels), decisions made, the next phase plan, risks, and anything you need from me. Ask me questions only when a wrong guess would be expensive or irreversible. Otherwise make the reasonable call, state it, and continue.
+
+======================================================================
+PART C: PHASED PLAN
+======================================================================
+
+Suggested time boxes assume about 30 working hours left. Rescale them proportionally to the real deadline you find in Phase 0.
+
+----------------------------------------------------------------------
+## Phase 0: Reconnaissance (≤ 1 h)
+----------------------------------------------------------------------
+1. Read the official challenge page and resource list. Record objectives and resources in docs/CHALLENGE.md.
+2. Inspect the current repo: existing code, stack, assets, git state. Inventory available tools (Python, Node, git, Blender, MeshLab, Open3D, .NET for Landform, GPU) and what can be installed.
+3. Confirm the deadline and build a backward schedule.
+Output: docs/CHALLENGE.md, an environment inventory, and a schedule with phase deadlines.
+
+----------------------------------------------------------------------
+## Phase 1: Find the best-documented walkable landmark (≤ 3 h)
+----------------------------------------------------------------------
+Goal: pick the one site most likely to yield one continuous, detailed, first-person route with a recognizable landmark that looks solid from both directions.
+
+Sources to start from (verify each; follow links to better ones):
+- Perseverance Raw Images: https://mars.nasa.gov/mars2020/multimedia/raw-images/
+- PDS Navcam terrain mesh archive: https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/
+- Mars 2020 Camera Bundle SIS: https://pds-imaging.jpl.nasa.gov/documentation/Mars2020_Camera_Bundle_SIS.pdf
+- Sol 1709 rim-drive reconstruction: https://science.nasa.gov/photojournal/video-perseverance-rovers-view-of-crater-rim-drive/
+- Drive 1004 sample data and notes: https://github.com/NASA-AMMOS/3DTilesSampleData/tree/master/m20-drive-1004
+- Landform toolkit and paper: https://github.com/NASA-AMMOS/Landform and https://arxiv.org/abs/2509.18330
+- USGS Jezero landing-site products: https://astrogeology.usgs.gov/search/map/mars-2020-jezero-crater-landing-site-products
+
+Candidates:
+- Start with the Sol 1709 Jezero rim drive.
+- Compare it with at least 3 other Perseverance sites. Favor rover stops with repeated observations of a recognizable rock, outcrop, or ridge, especially well-studied science targets (abrasion patches, sample sites, named rocks), because they also give us a science stop.
+- Use Drive 1004 as the reference for data formats and patch fusion. Its example viewer showed holes and stretched surfaces at close range. Those are exactly the defects this build must avoid, so study why they occur.
+
+Hypotheses to test early, because they can change the ranking:
+- PDS archive releases lag rover operations. A recent sol like 1709 may have raw JPEGs but no archived calibrated products, camera models, XYZ, or meshes yet. Check this first.
+- The raw-image site's JSON feed may carry per-image camera model parameters and site/drive/pose fields. If verified, it can rescue a recent site that isn't archived yet. Raw images are lossy JPEGs, so judge their texture and stereo quality on that basis.
+
+Record for each serious candidate (in docs/SITE_SELECTION.md, as a table):
+- Landmark description, location, and science significance (what instruments observed it; sample or abrasion IDs if any)
+- Sol range and site/drive identifiers
+- Number of verified stereo pairs and distinct rover positions covering the landmark
+- Coverage of the near ground, including the far side the player will see after walking past
+- Availability of: calibrated camera products, camera models, pose/coordinate-frame metadata, archived XYZ/range/mesh products, texture-quality imagery (resolution, compression, lighting consistency)
+- Overlap with orbital data (HiRISE DTM/ortho coverage) for the context map
+- Effort and risk estimate
+
+Rank by likelihood of a continuous, detailed route. Weight verified coverage, alignment data, and texture quality above raw image count. Choose one site yourself and justify it.
+
+Output: the ranked table, the chosen site, selected product IDs with verified download URLs, and the fallback site in second place.
+
+Kill criterion: if the top candidate lacks accessible geometry or camera inputs, move to the best verified alternative immediately.
+
+----------------------------------------------------------------------
+## Phase 2: Reconstruct the playable patch (≤ 12 h)
+----------------------------------------------------------------------
+Goal: a continuous, textured, metrically scaled mesh of the full ground inside a compact footprint. It should be a short walk with room to pass the landmark and look back. Let verified coverage set the footprint, which is likely tens of meters across. Shrink or reroute rather than fake a large gap.
+
+2.1 Pilot batch first
+- Download a small representative batch: one or two rover positions that see the landmark.
+- Verify that files open and stereo products match their labels. Confirm left/right pairing, camera model, and frame from the label fields.
+- Bring the pilot's geometry into one common coordinate system and visually confirm alignment before downloading more.
+
+2.2 Manifest (data/manifest.csv or .json, created from the first download)
+For every product: product ID, URL, source and credit line, license, instrument/camera, sol, site/drive, product type (image/XYZ/mesh/camera model), calibration and pose metadata used, local path, checksum, and whether it ended up in the final asset.
+
+2.3 Geometry, in order of preference
+  a. NASA-provided measured geometry (archived Navcam meshes, XYZ/range products, or Landform outputs). Use it as ground truth, then align and fuse patches yourself.
+  b. Stereo reconstruction from properly matched calibrated pairs or overlapping calibrated views. Apply the archived camera models (CAHV/CAHVOR/CAHVORE), rectify where appropriate, estimate depth, and reject unreliable matches (left-right consistency, texture/uniqueness thresholds, range limits).
+  c. Orbital DTM (HiRISE where available) for context terrain beyond rover coverage. Never use it as a stand-in for close-range detail along the walk.
+Metric scale must come from the calibration or metadata. Never use an arbitrary scale.
+
+2.4 Coordinate frames (a common source of silent bugs)
+- Confirm every frame and transform from the labels before combining patches. Mars 2020 surface frames (SITE, LOCAL_LEVEL, ROVER_NAV) use a Z-down convention, while glTF is Y-up and right-handed. Write down the exact conversion.
+- Register each rover position into one site frame. If pose metadata is imperfect, refine with ICP on overlapping geometry and report residuals.
+- Register the rover patch to orbital data (HiRISE ortho/DTM) so the 3D patch and the map agree. Report the estimated registration error.
+
+2.5 Fusion and cleanup
+- Fuse overlapping patches into one continuous mesh. Consider TSDF/volumetric fusion, Poisson, or Landform's pipeline, and pick on evidence.
+- Remove outliers, floating fragments, and long triangles that bridge gaps. Use an explicit edge-length or angle threshold and report it.
+- Preserve rock shape and surface detail along the walk. Decimate only away from the route.
+- Fill only small gaps, and document each one. For large gaps without trustworthy coverage, shrink or reroute the playable area.
+
+2.6 Texturing
+- Project the sharpest suitable rover imagery onto the geometry, with occlusion handling. Use view selection by resolution and incidence angle.
+- Blend seams and correct exposure and color differences between images.
+- Plan for browser limits: keep textures within what WebGL handles well (typically ≤ 4096² per texture, more as atlases or tiles). Use KTX2/Basis texture compression and Draco/meshopt geometry compression if size requires it.
+- Measure the achieved texel density in mm/px at 2, 5, and 10 m from eye height along the route.
+
+2.7 Provenance must stay visible
+Tag every region as ROVER-MEASURED, ROVER-STEREO (our reconstruction), ORBITAL, or INTERPOLATED, using separate meshes or a vertex attribute. The viewer will be able to show this (see Phase 3). This tagging makes the project defensible on Validity.
+
+2.8 Export
+- assets/terrain.glb: textured, meters, +Y up, origin documented relative to the site frame.
+- assets/collision.glb: a simplified, watertight walkable surface plus landmark collider, if it improves playability.
+- assets/spawn.json: spawn position on verified ground, facing direction, route waypoints, playable-area boundary polygon.
+- Inspect the export: load it, print bounds, vertex/face counts, and texture sizes, and render at least one standing-height view. Do this before Phase 3.
+
+Expand beyond the pilot only when more observations measurably improve coverage or texture quality. Say which.
+
+Time-box fallback: if a continuous rover-scale mesh is not on track by about 60% of this phase's budget, freeze the best verified sub-area. Shrink the route to fit it, and put the remaining time into quality.
+
+----------------------------------------------------------------------
+## Phase 3: Walkable viewer plus layered Marswalk map (≤ 7 h)
+----------------------------------------------------------------------
+Use the existing frontend stack if it is suitable. Otherwise use a simple local Three.js app (Vite is fine). Keep the UI minimal, and make controls and data credits easy to find.
+
+3.1 First-person walk (core, Tier 1)
+- Load terrain.glb and spawn the player on verified ground at about 1.6–1.7 m eye height, facing the landmark.
+- Click-to-enter mouse look (pointer lock), WASD, and a reset key.
+- Ground collision by raycast to the collision mesh, so the camera follows slopes smoothly.
+- Block the player from walking through the landmark, falling into holes, going off steep edges (set a max walkable slope and explain the value), or leaving the playable boundary.
+- Keep the rover imagery's visible detail at eye level with proper texture filtering, mipmaps, and anisotropy.
+
+3.2 Marswalk layers (what makes this answer the challenge, Tier 2)
+- A context map or minimap from orbital data (HiRISE ortho/DTM, CTX, MOLA as needed) showing the route, the player's live position, and the reconstructed footprint.
+- At least one data layer from a mission other than Perseverance that matters for a Marswalk, chosen from the official resource list, for example a slope hazard derived from the HiRISE DTM, CRISM mineralogy, THEMIS thermal inertia, or environmental context from MEDA/Ames climate models. Use data from Jezero when it exists. If you use data from another site (for example Curiosity RAD in Gale Crater), label it clearly as a reference proxy, not a local measurement.
+- A science stop at the landmark: what Perseverance measured there, with links to the real data.
+- A simple route summary: distance, elevation change, max slope, and estimated walk time. Show any survival assumptions (walking speed, consumables) and make them editable. Never present them as validated mission numbers.
+- A provenance toggle that colors terrain by source (rover-measured, our stereo, orbital, interpolated).
+
+3.3 Starting view and route
+Open on a clear establishing view. Make a short route that passes the landmark and lets the player look back from a second vantage point. Mark both ends.
+
+----------------------------------------------------------------------
+## Phase 4: Verify, fix, repeat (≤ 3 h, plus continuous checks)
+----------------------------------------------------------------------
+Run the app locally and do the walk-past-and-look-back test yourself (via browser automation if available).
+Checks, each with evidence:
+- The surface is continuous along the route, with no holes, no stretched triangles, and no floating fragments within view.
+- The landmark looks solid and plausible from both the approach and the look-back position.
+- Nearby textures stay sharp at standing height (report texel density).
+- The player cannot fall through the ground, clip through the landmark, or leave the boundary. Test edges and steep spots on purpose.
+- Frame rate on a mid-range laptop is reported, along with load time and asset size.
+- Every displayed data layer traces back to the manifest.
+
+Capture standing-height screenshots from both ends of the route, plus the provenance view and the map view. Fix the most visible problems first, then repeat the walk. Report what you tested and what you did not.
+
+----------------------------------------------------------------------
+## Phase 5: Deliver and submit (final 4 h, protected)
+----------------------------------------------------------------------
+Repository contents:
+- assets/terrain.glb (+ collision.glb, spawn.json)
+- The viewer app
+- scripts/ with repeatable download and reconstruction steps, runnable in order, plus a single entry point or a documented command sequence
+- data/manifest (no bulk raw data committed; scripts fetch it)
+- README.md: exact launch commands for Windows, the chosen site and why it won, observations actually used, approximate playable-patch size, the method summary, the provenance legend, known limitations, and credits and licenses
+- DECISIONS.md: the decision log
+- docs/VALIDATION.md: what was tested, the measured results, and what is still unverified
+
+Submission package:
+- A 30-second demo video storyboard: about 5 s hook (orbital view diving to eye level), 15 s walk past the landmark and look back, 5 s science stop and layers, 5 s team and impact line. Capture footage from the actual app. Stay under 30 s.
+- Optionally a 7-slide deck: title, problem, approach, live system, validity/provenance, impact, team.
+- Project page text written against each judging criterion.
+- A checklist: public repo link works, demo link is public, data credits are complete, and the submission is in before the deadline.
+
+======================================================================
+PART D: DEFINITION OF DONE AND REPORTING
+======================================================================
+
+## D1. Scope tiers (ship in order; never start a tier before the one below works)
+
+TIER 0, the guaranteed submission (secure this early as insurance):
+  A walkable terrain built from orbital HiRISE DTM and ortho data at the chosen site, the layered map, and a route with a slope hazard layer. It answers the challenge, even though it is not photoreal.
+TIER 1, the core goal:
+  A rover-derived, textured, continuous patch that passes the walk-past-and-look-back test, embedded in the Tier 0 context.
+TIER 2, the full concept:
+  A science stop, a second-mission data layer, the provenance toggle, and the route and survival summary.
+TIER 3, stretch only if time remains:
+  More rover positions, better texture blending, LOD streaming, a guided tour mode.
+
+## D2. Acceptance test (the project is "done" only when all of these are VERIFIED)
+1. From spawn, I can walk past a real, identifiable landmark, turn around, and see it from the other side as a solid, convincing 3D object.
+2. Along the route, the ground has no holes, stretched faces, or floating fragments within view at standing height.
+3. I cannot fall through the ground, walk through the landmark, or leave the playable area.
+4. Every visible surface and data layer traces to the manifest, and its provenance (rover, orbital, interpolated, proxy) is identifiable.
+5. The demo launches on Windows with the README commands alone.
+6. Submission assets meet the format limits and are submitted before the deadline.
+
+## D3. Final report
+Keep it concise. Include: what was delivered (with paths), the acceptance-test results with evidence, the site and why it won, observations used, patch size, limitations, what is still unverified, and the one most valuable next step.
+
+## D4. Anti-patterns (do not do these)
+- Calling something "reconstructed", "aligned", or "working" without inspecting the output
+- Treating images from the same sol as stereo pairs without label confirmation
+- Filling large gaps with invented geometry, or passing orbital or interpolated terrain off as rover detail
+- Precise-looking survival or radiation numbers with no stated source or assumptions
+- Adding features while the tier below is still broken
+- Spending submission-reserve time on new work
