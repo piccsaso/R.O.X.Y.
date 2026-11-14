@@ -39,7 +39,7 @@ The idea: the route is first planned on what was known before the walk, and corr
 - The map shows scanned ground distinctly from prior-only ground.
 - Add automated tests on `test_scene`: the initial route crosses where the boulder is (absent from the prior); after a scripted walker approaches, the route is replaced by one that passes the validator on the true grid, and the alert names an obstacle.
 
-## Part 4: voice (1.5 h, cut first)
+## Part 4: voice (1.5 h, cut second)
 
 - One command router. Typed commands, clicks and speech all go through the same parser and the same scene-core lookup. Add a command box if one does not exist. Commands: "take me to [landmark]", "show slopes", "hide slopes", "show radiation scenario", "use the lower-exposure route", "clear route", "scan" (toggle scanner display).
 - Tolerate filler words and near-miss landmark names by fuzzy matching against names and aliases. Ambiguous input gives the same pick list as typing.
