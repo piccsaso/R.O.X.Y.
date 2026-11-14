@@ -43,3 +43,5 @@ The mesh uses a 3.5 cm grid with 1,120,000 indexed triangles. World X is west, Y
 The capture command uses Chrome at its default Windows path. Pass a different executable after `npm.cmd run capture --`. It checks pointer lock, the slab and expansion walks, boundary collision, reset, and ground contact over inferred surfaces, then writes screenshots. The route generator estimates 613 m² of walkable ground connected to spawn and finds a 14.47 m continuation beyond the 3.55 m slab route. Chrome verified a 17.71 m walk past the slab and into the expansion, then a separate 7.10 m route across inferred terrain. Boundary collision and reset passed.
 
 Rover imagery and stereo products are credited to NASA/JPL-Caltech. [JPL image use policy](https://www.jpl.nasa.gov/jpl-image-use-policy/).
+
+[Project history](PROJECT_HISTORY.md)
