@@ -5,10 +5,10 @@ import { resolve, sep, extname } from 'node:path';
 
 const directory = process.cwd();
 const port = Number(process.argv[2] || 8080);
-const appFiles=new Set(['/','/index.html','/viewer.mjs','/ground.mjs','/landscape.mjs','/terrain.glb','/ground.bin','/terrain.json','/route.json']);
+const appFiles=new Set(['/','/index.html','/viewer.mjs','/ground.mjs','/landscape.mjs','/terrain.glb','/ground.bin','/terrain.json','/route.json','/hud.mjs','/nav.mjs','/terrain-coverage.png']);
 const mime = {
   '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.mjs':'text/javascript',
-  '.json':'application/json', '.glb':'model/gltf-binary'
+  '.json':'application/json', '.png':'image/png', '.glb':'model/gltf-binary'
 };
 createServer(async (request,response) => {
   try {
