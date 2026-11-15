@@ -80,6 +80,10 @@ The walk opens with a simulated helmet display and a route to the demo goal, the
 - **Options button**: Slope, Ground truth (rover-measured, inferred, or context terrain), Map (planning view), Clear route, Mute.
 - **Return warning**: appears only when the oxygen or power left, after a 20% reserve, is close to what the safe walk back to Home Base needs. It pulses in the centre, then docks at the left with a red route home. Say or type "low oxygen" to trigger it for a demo. **R** resets the suit and position.
 
+### Recording the promo video
+
+Open `http://127.0.0.1:8080/?sky=day&promo` and start your screen recorder. The view opens as bare Martian landscape with no display. Click once to take control; four seconds later the display comes online in stages (compass, title, minimap, suit gauge, route lines, destination pin). Use `&promo=8` for a different delay in seconds. Press **B** to bring it online or take it offline by hand, for another take. The Esc buttons and the sky panel are hidden in this mode; Roxy, T and the other keys still work.
+
 ### How the safe route is chosen
 
 The safe route minimises walking time multiplied by a hazard factor, per 20 cm grid cell:

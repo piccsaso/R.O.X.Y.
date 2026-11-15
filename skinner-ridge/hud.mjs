@@ -86,6 +86,17 @@ footer{display:none!important}
 .sky-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;margin-top:-5px;background:${AMBER};border:0;transform:rotate(45deg);box-shadow:0 0 0 3px #ffb45433}
 .sky-controls input[type=range]::-moz-range-thumb{width:10px;height:10px;background:${AMBER};border:0;border-radius:0;transform:rotate(45deg)}
 #reticle{background:#fff!important;opacity:.7}
+/* Promo mode (?promo): start on bare landscape, then bring the display online piece by piece. */
+body.promo #hud>*:not(.return),body.promo header,body.promo #reticle{transition:opacity 1.4s ease}
+body.promo:not(.online) #hud>*,body.promo:not(.online) header,body.promo:not(.online) #reticle{opacity:0!important;transition:opacity .5s ease}
+body.promo.online #hud .vignette{transition-delay:0s}
+body.promo.online #hud .compass{transition-delay:.5s}
+body.promo.online header{transition-delay:.9s}
+body.promo.online #hud .mini{transition-delay:1.3s}
+body.promo.online #hud .suit{transition-delay:1.8s}
+body.promo.online #hud .pin{transition-delay:2.6s}
+body.promo.online #hud .ear,body.promo.online #hud .credit{transition-delay:3s}
+body.promo .sky-controls,body.promo #hud .dock{display:none!important}
 `;
 
 const html = `
@@ -690,6 +701,7 @@ export async function initHud(ctx) {
       if (overlayFade===0 && pendingClear) { pendingClear = false; state.layer = null; }
     }
     if (overlayDirty && state.layer) paintOverlay();
+    fadeLines(dt);
     quick += dt; slow += dt; straightTick += dt;
     if (quick>0.15) { telemetry(quick); quick = 0; follow(); }
     if (straightTick>0.5) { straightTick = 0; if (state.show.straight && !state.cleared) { plan('straight'); drawLine('straight', state.routes.straight.dense); } }
@@ -700,6 +712,31 @@ export async function initHud(ctx) {
   }
 
   replanAll(); buildMenus();
+  // Promo mode: ?promo or ?promo=<seconds>. The view starts as bare landscape; the display comes online
+  // that many seconds after the first click (default 4), or when B is pressed. B again takes it offline for another take.
+  const promoParam = new URLSearchParams(location.search).get('promo');
+  let lineFade = 1, lineTarget = 1;
+  if (promoParam!==null) {
+    document.body.classList.add('promo');
+    lineFade = lineTarget = 0;
+    const online = on => {
+      document.body.classList.toggle('online', on);
+      lineTarget = on ? 1 : 0;
+      if (on && !state.muted && 'speechSynthesis' in window) { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance('Display online.')); }
+    };
+    let armed = false;
+    document.addEventListener('pointerlockchange', () => {
+      if (isLocked() && !armed) { armed = true; setTimeout(() => { if (!document.body.classList.contains('online')) online(true); }, 1000*(Number(promoParam) || 4)); }
+    });
+    addEventListener('keydown', event => { if (event.code==='KeyB' && !event.repeat && event.target!==input) { armed = true; online(!document.body.classList.contains('online')); } });
+  }
+  const fadeLines = dt => {
+    if (lineFade===lineTarget && lineFade===1) return;
+    lineFade += Math.sign(lineTarget-lineFade)*Math.min(Math.abs(lineTarget-lineFade), dt/1.6);
+    for (const mesh of Object.values(lines)) mesh.material.opacity = 0.9*lineFade;
+    beacon.material.opacity = 0.8*lineFade;
+    redraw = true;
+  };
   // Optional overlay files. A missing or malformed file is skipped and the layer stays out of the cost.
   for (const name of ['weather','thermal']) {
     fetch('overlays/'+name+'.json').then(response => response.ok ? response.json() : null).then(grid => {
