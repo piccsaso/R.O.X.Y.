@@ -1,35 +1,32 @@
-﻿# Skinner Ridge handoff
+﻿# Skinner Ridge handoff: expanded terrain and Mars sky
 
-## Current revision
+## Current work
 
-The November 14, 2026 expansion doubles the previous 686 m² footprint to **1,372.833 m²**, with about **1,275 m² connected walkable area**. Work is based on `8662c85`, prepared on `improve-skinner-ridge`. Check Git and the remote before assuming publication.
+Work is on `expand-mars-sky-cycle`, based on local commit `73e3846`. Check Git and remote state before assuming publication. Read [README.md](README.md), [SKY.md](SKY.md), and [PROJECT_HISTORY.md](PROJECT_HISTORY.md). Keep repo-root planning documents intact.
 
-Read [README.md](README.md) for current commands, dimensions, and limitations, then [PROJECT_HISTORY.md](PROJECT_HISTORY.md) for prior work and original prompts. Historical numbers describe their respective revisions. Keep repository-root planning documents intact.
+The latest user request was to double the rendered map area again, allow walking anywhere including steep rocks, speed up walking, and improve the atmosphere, Sun, and NASA-based night sky. Clarifications: automatic eight-minute day/night cycle; grounded climbing, not flight; a documented Skinner Ridge observation date; naturally dark ground with an optional exploration light. Preserve the previously selected subtle photo-matched terrain style.
 
-## User intent
+## Current assets
 
-Improve visual detail and mesh quality, especially the lower area without measurements. Double **ground area**, not both dimensions. Favor subtle sand, gravel, and layered rocks matching NASA photographs. First-person exploration is the main use. Plausible inference is authorized in missing areas. The user reviewed the lower-path before/after previews and chose to keep the subtle photo-matched treatment.
+- Core: 56 × 49.07 m / 2,747.92 m², 1,601 × 1,403 vertices, 4,486,400 triangles. Grid spacing remains 3.5 cm.
+- Four GLBs: `terrain-0.glb` through `terrain-3.glb`. They already use world coordinates. Do not translate them separately or substitute the superseded single GLB.
+- `ground.bin`, `terrain.json`, `terrain-coverage.png`, and `route.json` match those tiles. Geometry and textures retain measured/inferred provenance.
+- `apron.mjs` provides both rendered context geometry and exact triangle collision outside the core. Its finite bounds are X [-110,166], Z [-110,159.07]. It is inferred scenery, not observed topography.
+- `ground.foot` deliberately permits all core slopes. The viewer removes the former step-rise restriction. Walking is 2.6 m/s; Shift sprint is 5 m/s. Never reintroduce blocked rock regions accidentally.
+- `terrain-normals.mjs` generates shared normals from the complete heightfield, keeping tile borders consistent.
 
-## Reproduce
+## Sky
 
-Run `git status --short`, `git remote -v`, and `git log -1 --oneline` before editing. Inside `skinner-ridge`, run `npm.cmd ci` then `npm.cmd start`. Open [the slab](http://127.0.0.1:8080/) or [the lower apron](http://127.0.0.1:8080/?view=lower-path). WASD moves, mouse looks, R resets to the slab, Esc releases the mouse.
+`build-sky.py` produces `sky-data.json` using NASA/JPL SPICE, the site 26/1004 waypoint, and the sol-477 Navcam timestamp 2022-06-23T22:55:32.782Z. It uses DE440s, PCK00011, and NAIF0012. `build-star-texture.mjs` converts NASA SVS Deep Star Maps 2020 from EXR to the bundled PNG. Both downloads and hashes are traceable; Python dependencies are build-only.
 
-## Keep aligned
+`sky.mjs` transforms the NASA celestial map into the local west/up/north frame and interpolates solar directions. It converts the map to a cubemap to avoid polar filtering artifacts. `lighting.mjs` supplies terrain day/night illumination and the F-key exploration light. The eight-minute cycle uses elapsed wall time; movement uses bounded substeps to handle slow rendering. Esc reveals pause/time controls.
 
-- `terrain.glb`, `ground.bin`, `terrain.json`, `terrain-coverage.png`, and `route.json` are one build.
-- Grid: 1,133 × 991 at 0.035 m; crop: 39.62 × 34.65 m. Site origin: `[72.45, 8.32, -14]` north/east/down. Export axes: west/up/north.
-- 2,241,360 triangles; 54.15% stereo-supported; 26 of 30 inputs contribute. Do not describe synthesis as measured.
-- `terrain-synthesis.mjs` quilts photo patches and detrended height residuals together, fading relief to zero at measured triangle vertices. The bake modifies inferred heights, so it must run before vertex and collision buffers are exported.
-- Camera weights are continuous vertex fields in `atlas.mjs`. Per-triangle winners caused grid seams and were replaced.
-- `polish-atlas.mjs` bakes contact shading. The material stays unlit because imagery already contains lighting.
-- NASA's annotated Mastcam-Z mosaic informed appearance only. Archived Navcam textures and meshes provide the actual donors.
+See SKY.md for the scientific limitations: this is an observation-anchored single-sol replay with approximate atmospheric scattering and display exposure. Terrain photo shadows remain baked. It is not a calibrated radiative-transfer simulation, and no planets/moons are rendered.
 
-## Verify
+## Run and check
 
-Run `npm.cmd run download`, `npm.cmd run build`, `npm.cmd run verify`, then `npm.cmd run capture`. See `verification.json` for export consistency and `screenshots/verification.json` for actual browser distances and checks. Final Chrome checks passed the slab route, expansion, boundary collision, reset, inferred-ground route, and lower-extension walk without browser errors.
+Inside `skinner-ridge`: `npm.cmd ci`, `npm.cmd start`. Open the local viewer at port 8080. Build with `npm.cmd run build`; check exports using `npm.cmd run verify`. Run `npm.cmd run capture` for walking and `node capture-sky.mjs` for sky, lamp, cycle timing, and speeds.
 
-Inspect `screenshots/lower.png`, `screenshots/lower-path-start.png`, `screenshots/walked-lower.png`, `screenshots/walked-return.png`, and `screenshots/survey.png`. Tested with Node.js 25.6.1 and Chrome/SwiftShader on Windows. The restricted environment needed `CHROME_NO_SANDBOX=1`, an explicit opt-in. Captures are not GPU performance benchmarks.
+The test environment uses Chrome/SwiftShader, Node.js 25.6.1, and Windows. Its restricted sandbox needs the explicit environment setting `CHROME_NO_SANDBOX=1`. Loopback network access must also be granted to browser automation. `QA_FAST=1` reduces the capture viewport, not the assets. Exact outcomes are recorded in `verification.json` and `screenshots/*verification.json`.
 
-## Limitations
-
-Some steep or occluded close-ups remain soft; heightfields cannot model overhangs; inferred patches may repeat; distant scenery is decorative. No particular GPU frame-rate target was verified. Preserve these limitations and the inference mask in future work.
+Before release, inspect day, sunset, night, exploration-light, lower-path, and slab screenshots. Retain the source masks and limitations. Do not describe the surrounding estimated terrain as measured, the visual atmosphere as physically exact, or software-rendered checks as a hardware performance benchmark.

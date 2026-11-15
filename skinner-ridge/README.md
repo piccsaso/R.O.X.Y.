@@ -1,72 +1,66 @@
-﻿# Skinner Ridge walk
+﻿# Skinner Ridge: extended Mars walk
 
-Explore a **39.62 × 34.65 m** patch of Perseverance's Skinner Ridge workspace at Hawksbill Gap, Jezero crater. Its **1,372.833 m²** footprint is twice the previous 686 m². The original pale-slab approach is preserved, with photo-based ground completion across the lower apron and new margins.
+Explore **56 × 49.07 m (2,747.92 m²)** of detailed terrain, twice the previous 1,372.833 m² crop. Every point of the core terrain is traversable, including steep rocks. The surrounding rendered context is also collidable: you can cross the detailed crop edge without meeting an invisible wall. Only the outer edge of the rendered context stops movement.
 
 ## Run
-
-From this directory in PowerShell:
 
 ```powershell
 npm.cmd ci
 npm.cmd start
 ```
 
-Open [the slab approach](http://127.0.0.1:8080/) or [the lower path](http://127.0.0.1:8080/?view=lower-path) in desktop Chrome or Edge. Click **Enter terrain**, walk with **WASD**, and look with the mouse. **R** resets to the slab; **Esc** releases the mouse. Eye height is 1.65 m. Export units are metres, Y up.
+Open [the terrain](http://127.0.0.1:8080/) or [the lower path](http://127.0.0.1:8080/?view=lower-path). Click **Enter terrain**.
 
-[Slab look-back](screenshots/walked-return.png) · [Lower comparison pose](screenshots/lower.png) · [Lower extension](screenshots/walked-lower.png) · [Expansion](screenshots/walked-expanded.png) · [Survey](screenshots/survey.png)
+- **WASD:** walk at 2.6 m/s, increased from 1.1 m/s.
+- **Shift:** sprint at 5 m/s.
+- **Mouse:** look; **R:** reset to the slab; **Esc:** release the mouse.
+- **F:** toggle the exploration light. Night ground is deliberately dark without it.
+- With the mouse released, use the sky panel to pause/resume or scrub time.
 
-## What changed
+An automatic **eight-minute** cycle replays one observation-anchored Mars sol. The Sun and NASA star field follow dated Mars orientation data. Startup uses sol 477, June 23, 2022, at the archived Navcam observation time. [Sky sources and assumptions](SKY.md)
 
-- Expanded each dimension by approximately √2, preserving 3.5 cm vertex spacing and 5 mm atlas texel spacing.
-- Replaced small averaged texture swatches with **joint photo/relief quilting**. 410 intact 1.4 m patches from supported Navcam surfaces supply colors and detrended stereo relief together. Minimum-error seams preserve gravel and surface features.
-- Faded inferred relief to zero at measured triangle vertices. Rendered ground and collision use the same completed heightfield.
-- Made camera preferences continuous across shared triangle vertices to reduce grid seams while favoring sharper projections.
-- Added restrained baked contact shading, capped at 12% darkening, and a dedicated lower-path walking test.
+## Terrain and visual changes
 
-The user selected subtle sand, gravel, and layered rocks matching NASA photographs, then confirmed that treatment after viewing the lower-path before/after previews.
+The expanded crop retains 3.5 cm geometry spacing and 5 mm baked texture spacing. It is delivered as **four aligned GLB tiles**, each with a 5,600 × 4,907 texture, avoiding browser texture-size and individual GitHub file-size limits. All four tiles are required. Shared boundary normals eliminate lighting discontinuities between tiles.
 
-## Evidence and inference
+Photo and relief completion uses 528 intact 1.4 m Navcam donor patches, with texture seams chosen to preserve features. Inference remains the subtle, photo-matched sand/gravel/rock treatment previously selected by the user. The new lighting adds warm dust haze, a finite solar disk, blue scattering near sunset, fading catalog stars, and an optional local exploration beam.
 
-Twenty-six of thirty archived Navcam observations contribute, from sols 470, 471, 474, 477, 499, and 501. **54.15%** of the horizontal triangle area has stereo support. Remaining areas use surrounding heights and example patches: plausible completions, **not measurements recovered from unseen terrain**. The Mastcam-Z [Skinner Ridge mosaic](https://science.nasa.gov/resource/perseverance-workspace-at-skinner-ridge/) was inspected as a visual reference, not used as calibrated geometry or directly projected onto the model.
+The sky orientation is data-derived, but atmospheric color, dust density, photographic exposure, and relighting are visual approximations. The original terrain imagery contains baked lighting and shadows; these cannot become fully physically correct moving shadows. Some steep close-ups remain soft, and heightfields cannot reproduce overhangs. No claim of scientifically exact radiometry or uniformly photorealistic terrain is made.
 
-The [coverage map](terrain-coverage.png) marks full stereo support in light tan, partial support in intermediate tan, and inference in dark brown. Its top is the low-Z edge. Slope refinement can also affect supported surfaces. Scenery beyond the collision boundary is decorative.
+## Assets
 
-Close-up detail remains softer on some steep and occluded faces. A heightfield cannot represent overhangs, and donor patches may repeat. This is an improved image-based walkable reconstruction, not a claim of uniform photographic fidelity or a fully observed scan.
-
-## Export and checks
-
-| Item | Current export |
+| Property | Current value |
 | --- | --- |
-| Footprint | 39.62 × 34.65 m / 1,372.833 m² |
-| Connected walkable area | About 1,275 m² on a 14 cm sampling grid; previously 613 m² |
-| Grid | 1,133 × 991 vertices at 3.5 cm spacing |
-| Triangles | 2,241,360 |
-| Texture | 7,924 × 6,930 embedded JPEG |
-| Site-frame origin | North 72.45 m, east 8.32 m, down −14 m |
-| Axes | X west, Y up, Z north |
+| Detailed crop | 56 × 49.07 m / 2,747.92 m² |
+| Core grid | 1,601 × 1,403 vertices |
+| Core triangles | 4,486,400 |
+| Stereo-supported horizontal area | About 44.49% |
+| Site-frame origin | North 65.24 m, east 16.51 m, down −14 m |
+| Export axes and units | X west, Y up, Z north; metres |
+| Rendered context bounds | X −110 to 166 m; Z −110 to 159.07 m |
 
-`terrain.glb`, `ground.bin`, `terrain.json`, `route.json`, and `terrain-coverage.png` are a matched set. Collision consists of little-endian Float32 heights followed by a Uint8 triangle mask, with both triangles present in every cell. `sources.json` and `terrain.json` preserve URLs, hashes, coordinate metadata, and actual source contributions. Metadata also records donor cells and the inference method.
+`terrain-0.glb` through `terrain-3.glb`, `ground.bin`, `terrain.json`, `terrain-coverage.png`, and `route.json` form one matched set. The old single `terrain.glb` is superseded. Each tile already has world-coordinate positions. Load all tiles without additional translation.
 
-`verification.json` records valid GLB lengths/buffer views, finite heights, exact render/collision height agreement, continuous collision, doubled area, and valid route endpoints. `screenshots/verification.json` records Chrome tests: 3.48 m past the slab, 21.52 m farther into the expansion, 8.29 m across inferred ground, and 6.40 m through the lower extension. Pointer lock, boundary collision, reset, and ground contact passed with no browser errors.
+The coverage image identifies full measured support in light tan, partial support in intermediate tan, and inferred ground in dark brown. Top is low Z. `sources.json` and `terrain.json` preserve archived product URLs, checksums, coordinate frames, and contributions. Outside the core, `apron.mjs` generates estimated context and samples collision from its exact rendered triangles; this extended scenery is not a NASA reconstruction.
 
-Tested with Node.js 25.6.1 and Chrome on Windows. Dependencies remain pinned to Three.js 0.180.0, pngjs 7.0.0, and jpeg-js 0.4.4. Captures use SwiftShader and verify correctness, not a hardware GPU frame-rate target. No target GPU was specified.
+`sky-data.json` contains 721 SPICE-derived samples. `stars.png` is a display-exposure conversion of NASA SVS's celestial-coordinate star map. Runtime cubemap reprojection avoids pole-related texture filtering artifacts. See [SKY.md](SKY.md) for astronomy limitations and credits.
 
-## Rebuild
+## Rebuild and verify
 
 ```powershell
-npm.cmd ci
 npm.cmd run download
 npm.cmd run build
 npm.cmd run verify
 npm.cmd run capture
+node capture-sky.mjs
 ```
 
-Downloads run four at a time, with checksums and bounded retries. Network access is required; the large source cache is ignored by Git. Builds use several gigabytes of memory. If needed, set `$env:NODE_OPTIONS='--max-old-space-size=6144'` before building.
+The source cache is ignored. The build needs several gigabytes of memory; if necessary set `$env:NODE_OPTIONS='--max-old-space-size=8192'`. `verification.json` checks every core cell, render/collision consistency, tile sizes, normals, surrounding context samples, and sky matrices. Browser results are in `screenshots/verification.json` and `screenshots/sky-verification.json`.
 
-Supply a non-default Chrome executable after `npm.cmd run capture --`. The restricted test environment needed the explicit opt-in `$env:CHROME_NO_SANDBOX='1'`; ordinary interactive browsing does not need it. `CAPTURE_STILLS_ONLY=1` captures fixed views without movement tests.
+The current tests use Node.js 25.6.1 and Chrome/SwiftShader on Windows. Restricted environments can explicitly opt into `$env:CHROME_NO_SANDBOX='1'`. `QA_FAST=1` uses a smaller capture viewport for software-rendered movement checks. These are correctness checks, not a GPU frame-rate guarantee.
 
-Start implementation work in `reconstruct.mjs`, `infill.mjs`, `atlas.mjs`, `texture-infill.mjs`, and `terrain-synthesis.mjs`. `polish-atlas.mjs` bakes seam refinement and contact shading. `route-check.mjs`, `verify-assets.mjs`, and `capture.mjs` verify the result. The viewer culls terrain tiles outside the camera view.
+Sky regeneration requires Python with `spiceypy` and `numpy`: run `python build-sky.py`, then `node build-star-texture.mjs`. These fetch the documented NASA data into the ignored source cache. The normal viewer needs no Python and runs from the bundled assets after `npm ci`.
 
-Rover imagery and stereo geometry: NASA/JPL-Caltech. Mastcam-Z reference: NASA/JPL-Caltech/ASU/MSSS. [JPL image use policy](https://www.jpl.nasa.gov/jpl-image-use-policy/).
+[History](PROJECT_HISTORY.md) · [Handoff](HANDOFF.md) · [NASA source selection](SITE_SELECTION.md)
 
-[Project history](PROJECT_HISTORY.md) · [Handoff](HANDOFF.md) · [Original site selection](SITE_SELECTION.md)
+Terrain imagery and meshes: NASA/JPL-Caltech. Star-map visualization: NASA/Goddard Space Flight Center Scientific Visualization Studio, Ernie Wright; Hipparcos-2, Tycho-2 and Gaia DR2 catalogs. [JPL image use policy](https://www.jpl.nasa.gov/jpl-image-use-policy/).

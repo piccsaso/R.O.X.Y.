@@ -26,7 +26,7 @@ let expansion;
 for (let angle=0;angle<Math.PI*2;angle+=Math.PI/120) {
   const dx=Math.cos(angle), dz=Math.sin(angle);
   let distance=0;
-  for (let d=0.035;d<=26;d+=0.035) {
+  for (let d=0.035;d<=45;d+=0.035) {
     const x=start.x+dx*d, z=start.z+dz*d;
     if (![0,-0.10,0.10].every(off=>Number.isFinite(ground.foot(x-dz*off,z+dx*off)))) break;
     distance=d;
@@ -34,8 +34,8 @@ for (let angle=0;angle<Math.PI*2;angle+=Math.PI/120) {
   // Leave room to turn and avoid framing the crop edge at the endpoint.
   distance-=0.55;
   const x=start.x+dx*distance, z=start.z+dz*distance;
-  const ox=meta.origin[1]-2.51, oz=77.49-meta.origin[0];
-  const inOldCrop=x>ox && x<ox+28 && z>oz && z<oz+24.5;
+  const ox=meta.origin[1]-8.32, oz=72.45-meta.origin[0];
+  const inOldCrop=x>ox && x<ox+39.62 && z>oz && z<oz+34.65;
   if (!inOldCrop && distance>7 && (!expansion || distance>expansion.length)) {
     expansion={length:distance,end:{x,z,targetX:start.x,targetZ:start.z}};
   }

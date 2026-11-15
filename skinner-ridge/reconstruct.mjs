@@ -3,12 +3,13 @@ import crypto from 'node:crypto';
 import { bakeAtlas } from './atlas.mjs';
 import { completeHeights, softenStitchSteps, polishSurface } from './infill.mjs';
 import { PNG } from 'pngjs';
+import {exportTerrain} from './export-terrain.mjs';
 
 const sources = JSON.parse(fs.readFileSync('sources.json'));
 const step = 0.035;
-const origin = [72.45, 8.32, -14];
-const width = 1133;
-const depth = 991;
+const origin = [65.24, 16.51, -14];
+const width = 1601;
+const depth = 1403;
 const shiftX=origin[1]-2.51, shiftZ=77.49-origin[0];
 const count = width * depth;
 const index = (x, z) => z * width + x;
@@ -147,82 +148,24 @@ const completed=completeHeights(fused,measuredFaces,width,depth,step);
 const limited=softenStitchSteps(completed,width,depth,step,{x0:7.7+shiftX,x1:9.3+shiftX,z0:9.8+shiftZ,z1:11.3+shiftZ});
 const filled=polishSurface(limited,fused,width,depth);
 // Joint photo/relief completion modifies inferred heights before either export.
-const {image,counts,coverage} = bakeAtlas({sources,layers,width,depth,fused,filled,mask:measuredFaces,agreement});
+const {pixels,counts,coverage} = bakeAtlas({sources,layers,width,depth,fused,filled,mask:measuredFaces,agreement});
 let softenedSamples=0;
 for (let i=0;i<filled.length;i++) {
   if (Math.abs(filled[i]-completed[i])>0.04) softenedSamples++;
 }
-const positions=new Float32Array(count*3);
-const uv=new Float32Array(count*2);
-for (let i=0;i<count;i++) {
-  const col=i%width, row=Math.floor(i/width);
-  positions.set([col*step,filled[i],row*step],i*3);
-  uv.set([col/cols,row/rows],i*2);
-}
 const ground=new Uint8Array(cols*rows).fill(3);
-const triangles=new Uint32Array(ground.length*6);
-for (let i=0;i<ground.length;i++) {
-  const a=Math.floor(i/cols)*width+i%cols, b=a+1, c=a+width, d=c+1;
-  triangles.set([a,c,b,b,c,d],i*6);
-}
-const faces=triangles.length/3;
-const gltf = {
-  asset:{version:'2.0', generator:'Skinner Ridge surface fusion'},
-  extensionsUsed:['KHR_materials_unlit'],
-  scene:0, scenes:[{nodes:[0]}], nodes:[{mesh:0}], meshes:[{primitives:[]}],
-  buffers:[{byteLength:0}], bufferViews:[], accessors:[], images:[], textures:[], materials:[]
-};
-const chunks = [];
-let offset = 0;
-function view(buffer, target) {
-  const id = gltf.bufferViews.length;
-  gltf.bufferViews.push({buffer:0, byteOffset:offset, byteLength:buffer.length, ...(target ? {target} : {})});
-  const pad = Buffer.alloc((4-buffer.length%4)%4);
-  chunks.push(buffer,pad);
-  offset += buffer.length+pad.length;
-  return id;
-}
-function accessor(data, n) {
-  const type = n === 3 ? 'VEC3' : 'VEC2';
-  const min = Array(n).fill(Infinity), max = Array(n).fill(-Infinity);
-  for (let i=0; i<data.length; i++) {
-    const component = i%n;
-    min[component] = Math.min(min[component],data[i]);
-    max[component] = Math.max(max[component],data[i]);
-  }
-  const id = gltf.accessors.length;
-  gltf.accessors.push({bufferView:view(Buffer.from(new Float32Array(data).buffer),34962),
-    componentType:5126,count:data.length/n,type,min,max});
-  return id;
-}
-
-const indexAccessor=gltf.accessors.length;
-gltf.accessors.push({bufferView:view(Buffer.from(triangles.buffer),34963),componentType:5125,
-  type:"SCALAR",count:triangles.length,min:[0],max:[count-1]});
-gltf.images.push({bufferView:view(image),mimeType:'image/jpeg'});
-gltf.textures.push({source:0});
-gltf.materials.push({extensions:{KHR_materials_unlit:{}},pbrMetallicRoughness:{baseColorTexture:{index:0}}});
-gltf.meshes[0].primitives.push({attributes:{POSITION:accessor(positions,3),TEXCOORD_0:accessor(uv,2)},indices:indexAccessor,material:0});
+const faces=cols*rows*2;
+const tiles=exportTerrain({filled,pixels,width,depth,step});
 const used = sources.map((source,j) => {
   const { rejected, references, motionCounter, sha256 } = layers[j];
   return {...source,rejected,references,motionCounter,sha256,fusedSamples:sampleUse[j],atlasTriangles:counts[j]};
 });
-gltf.buffers[0].byteLength = offset;
-const json = JSON.stringify(gltf);
-const doc = Buffer.from(json.padEnd(json.length+(4-json.length%4)%4,' '));
-const header = Buffer.alloc(20);
-header.write('glTF'); header.writeUInt32LE(2,4);
-header.writeUInt32LE(28+doc.length+offset,8);
-header.writeUInt32LE(doc.length,12); header.write('JSON',16);
-const binary = Buffer.alloc(8);
-binary.writeUInt32LE(offset); binary.write('BIN\0',4);
-fs.writeFileSync('terrain.glb',Buffer.concat([header,doc,binary,...chunks]));
 fs.writeFileSync('ground.bin', Buffer.concat([Buffer.from(filled.buffer),Buffer.from(ground)]));
-const metadata = {step,width,depth,origin,boundsMeters:[(width-1)*step,(depth-1)*step],
+const metadata = {tiles,step,width,depth,origin,boundsMeters:[(width-1)*step,(depth-1)*step],
   faces,surveyedFaces,inferredFaces:faces-surveyedFaces,softenedSamples,covered,overlap,crossDrive,disagreements,coverage,sources:used,
   completion:{method:'Joint Navcam photo and detrended relief quilting; inferred, not new stereo measurements',seed:671167,
     reference:'https://science.nasa.gov/resource/perseverance-workspace-at-skinner-ridge/',
-    baselineAreaSquareMeters:686,areaSquareMeters:(width-1)*(depth-1)*step*step}};
+    baselineAreaSquareMeters:1372.833,areaSquareMeters:(width-1)*(depth-1)*step*step}};
 fs.writeFileSync('terrain.json',JSON.stringify(metadata,null,2)+'\n');
 const provenance=new PNG({width:cols,height:rows});
 for (let i=0;i<measuredFaces.length;i++) {

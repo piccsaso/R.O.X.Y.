@@ -1,17 +1,20 @@
 import {readFileSync,writeFileSync,renameSync} from 'node:fs';
 import jpeg from 'jpeg-js';
 
-const file='terrain.glb';
+const master=JSON.parse(readFileSync('terrain.json'));
+for(const tile of master.tiles) polish(tile);
+function polish(tile) {
+const file=tile.file;
 const original=readFileSync(file);
 const jsonLength=original.readUInt32LE(12);
 const document=JSON.parse(original.subarray(20,20+jsonLength));
 const binary=original.subarray(28+jsonLength);
 const imageView=document.bufferViews[document.images[0].bufferView];
-if (document.extras?.photoSeamsPolished) process.exit(0);
+if (document.extras?.photoSeamsPolished) return;
 const photo=jpeg.decode(binary.subarray(imageView.byteOffset,imageView.byteOffset+imageView.byteLength),{
   useTArray:true,maxMemoryUsageInMB:1536
 });
-const meta=JSON.parse(readFileSync('terrain.json'));
+const meta={...master,...tile};
 const scale=photo.width/(meta.width-1);
 const {data,width,height}=photo;
 
@@ -42,7 +45,9 @@ for (let y=scale;y<height-1;y+=scale) for (let x=0;x<width;x++) feather((y*width
 // Gentle geometry-derived contact shading. Remove the local tangent plane
 // so a uniformly sloping sand sheet is not darkened like a crevice.
 const ground=readFileSync('ground.bin');
-const heights=new Float32Array(ground.buffer,ground.byteOffset,meta.width*meta.depth);
+const allHeights=new Float32Array(ground.buffer,ground.byteOffset,master.width*master.depth);
+const heights=new Float32Array(meta.width*meta.depth);
+for(let z=0;z<meta.depth;z++)for(let x=0;x<meta.width;x++)heights[z*meta.width+x]=allHeights[(z+tile.z0)*master.width+x+tile.x0];
 const occlusion=new Float32Array(meta.width*meta.depth);
 const directions=[[1,0],[-1,0],[0,1],[0,-1],[0.707,0.707],[-0.707,0.707],[0.707,-0.707],[-0.707,-0.707]];
 for(let z=2;z<meta.depth-2;z++) for(let x=2;x<meta.width-2;x++) {
@@ -90,3 +95,5 @@ binHeader.writeUInt32LE(document.buffers[0].byteLength,0);
 writeFileSync(file+'.part',Buffer.concat([header,padded,binHeader,before,polished,pad,after]));
 renameSync(file+'.part',file);
 console.log({featheredTextureEdges:edges});
+
+}

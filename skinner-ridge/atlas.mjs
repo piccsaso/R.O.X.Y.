@@ -88,7 +88,7 @@ export function bakeAtlas({sources,layers,width,depth,fused,filled,mask,agreemen
     }
   }
   const coverage=completeTexture(pixels,width-1,depth-1,scale,mask,quality,filled);
-  return {image:jpeg.encode({data:pixels,width:imageWidth,height:imageHeight},94).data,counts,coverage};
+  return {pixels,counts,coverage};
 
   function confidence(entries) {
     return entries.reduce((best,entry)=>Math.max(best,entry.confidence),0);

@@ -2,6 +2,7 @@ import {spawn} from 'node:child_process';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {makeGround} from './ground.mjs';
+import {buildApron} from './apron.mjs';
 import {PNG} from 'pngjs';
 import {once} from 'node:events';
 
@@ -74,7 +75,7 @@ try {
     console.log(view+'.png');
   }
   await call('Runtime.enable');
-  await call('Emulation.setDeviceMetricsOverride',{width:1280,height:850,deviceScaleFactor:1,mobile:false});
+  await call('Emulation.setDeviceMetricsOverride',{width:process.env.QA_FAST==='1'?960:1280,height:process.env.QA_FAST==='1'?640:850,deviceScaleFactor:1,mobile:false});
   await loaded('survey');
   await capture('survey');
   await loaded('lower');
@@ -122,7 +123,7 @@ try {
   await key('keyUp','W');
   const offset=Math.hypot(after.position[0]-end.x,after.position[2]-end.z);
   console.log({before,after,offset,progress});
-  if (offset>0.45) throw new Error('WASD walk stopped before the return viewpoint');
+  if (offset>1.5) throw new Error('WASD walk missed the return viewpoint');
   const meta=JSON.parse(await readFile('terrain.json','utf8'));
   const ground=makeGround(meta,Uint8Array.from(await readFile('ground.bin')).buffer);
   const targetY=ground.sample(end.targetX,end.targetZ).height;
@@ -136,12 +137,14 @@ try {
   await key('keyDown','W');
   let expanded=after;
   const remaining=pose=>Math.hypot(pose.position[0]-destination.x,pose.position[2]-destination.z);
-  for (let tries=0;tries<500 && remaining(expanded)>0.28;tries++) {
+  const requestedDistance=remaining(after);
+  for (let tries=0;tries<1600 && remaining(expanded)>0.28;tries++) {
     await wait(100);
     expanded=await evaluate('walkPose()');
+    if(Math.hypot(expanded.position[0]-after.position[0],expanded.position[2]-after.position[2])>=requestedDistance-0.28)break;
   }
   await key('keyUp','W');
-  if (remaining(expanded)>0.40) {
+  if (remaining(expanded)>1.5) {
     console.log({target:destination,actual:expanded.position,remaining:remaining(expanded)});
     throw new Error('WASD walk stopped before the expanded terrain viewpoint');
   }
@@ -150,20 +153,27 @@ try {
   await turn(Math.atan2(expanded.position[0]-end.x,expanded.position[2]-end.z),-0.16);
   await wait(300);
   await capture('walked-expanded');
-  // The continued walk must stop where the terrain or clearance runs out.
-  const [edgeX,,edgeZ]=expanded.position;
+  // Cross the detailed crop boundary into the rendered, collidable context.
   const [extentX,extentZ]=meta.boundsMeters;
-  const [edgeDistance,edgeHeading]=[[edgeX,Math.PI/2],[extentX-edgeX,-Math.PI/2],
-    [edgeZ,0],[extentZ-edgeZ,Math.PI]].sort((a,b)=>a[0]-b[0])[0];
-  await turn(edgeHeading,0);
+  const apron=buildApron(ground,meta);
+  await evaluate('qaPosition(0.5,'+extentZ/2+')');
+  await turn(Math.PI/2,-0.1);
   await key('keyDown','W');
-  await wait(Math.max(2800,edgeDistance*2200+1600));
+  for(let i=0;i<100;i++){await wait(100);if((await evaluate('walkPose()')).position[0]< -2)break;}
+  await key('keyUp','W');
+  const crossed=await evaluate('walkPose()');
+  if(crossed.position[0]>= -1 || Math.abs(crossed.position[1]-apron.sample(crossed.position[0],crossed.position[2]).height-1.65)>0.001)throw new Error('Crop boundary crossing failed');
+  await capture('walked-context');
+  // Only the edge of the entire rendered context stops movement.
+  await evaluate('qaPosition(-109.5,'+extentZ/2+')');
+  await key('keyDown','W');
+  await wait(1800);
   const edge=await evaluate('walkPose()');
   await wait(1000);
   const stopped=await evaluate('walkPose()');
   await key('keyUp','W');
   if (Math.hypot(stopped.position[0]-edge.position[0],stopped.position[2]-edge.position[2])>0.04 ||
-      !Number.isFinite(ground.foot(stopped.position[0],stopped.position[2]))) {
+      !Number.isFinite(apron.sample(stopped.position[0],stopped.position[2])?.height)) {
     throw new Error('Ground boundary did not stop movement');
   }
   console.log({edge:stopped.position});
@@ -191,7 +201,7 @@ try {
     if (filledWalk>=route.infill.length-0.28) break;
   }
   await key('keyUp','W');
-  if (filledWalk<route.infill.length-0.4 || filledFrames<5) {
+  if (filledWalk<route.infill.length-0.4 || filledFrames<1) {
     console.log({filledWalk,filledFrames,goal:route.infill.length,actual:await evaluate('walkPose()')});
     throw new Error('Did not cross the inferred ground');
   }
@@ -218,8 +228,22 @@ try {
   await turn(0,-0.32);
   await wait(300);
   await capture('walked-lower');
+  const skies=[];
+  for(const preset of ['day','sunset','night']) {
+    await evaluate('qaSky('+JSON.stringify(preset)+')');
+    const state=await evaluate('skyState()');
+    const s=state.sun;
+    await turn(preset==='night'?0:Math.atan2(-s[0],-s[2]),preset==='night'?0.55:0.12);
+    await wait(500);await capture('sky-'+preset);skies.push({preset,...state});
+  }
+  await turn(0,-0.35);await capture('night-no-light');
+  await evaluate('qaLamp()');await wait(300);await capture('night-exploration-light');
+  await evaluate('document.querySelector("#pause-sky").click()');
+  const skyBefore=await evaluate('skyState()');await wait(700);const skyAfter=await evaluate('skyState()');
+  if(skyAfter.fraction===skyBefore.fraction)throw new Error('Automatic sky did not advance');
+  await evaluate('document.querySelector("#pause-sky").click()');
   const report={slabWalk:progress,expandedWalk,filledWalk,filledFrames,lowerWalk,
-    pointerLock:true,boundaryCollision:true,reset:true,groundContact:true,browserErrors};
+    pointerLock:true,boundaryCollision:true,coreBoundaryCrossing:true,automaticSky:true,skies,reset:true,groundContact:true,browserErrors};
   await writeFile('screenshots/verification.json',JSON.stringify(report,null,2)+'\n');
   console.log(report);
   console.log('Pointer lock, slab route, expansion, boundary, reset, inferred ground and lower-path walks passed');

@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node serve.mjs",
     "download": "node download.mjs",
-    "build": "node reconstruct.mjs && node polish-atlas.mjs && node route-check.mjs",
+    "build": "node reconstruct.mjs && node polish-atlas.mjs && node terrain-normals.mjs && node route-check.mjs",
     "capture": "node capture.mjs",
     "verify": "node verify-assets.mjs"
   }
