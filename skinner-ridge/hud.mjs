@@ -1,3 +1,4 @@
+import {createSpeech} from './speech.mjs';
 // Helmet HUD: route guidance, simulated scanner, live re-route, data highlights,
 // planning view, typed and spoken commands. Everything reads the same ground
 // the walker collides with.
@@ -232,6 +233,8 @@ export async function initHud(ctx) {
   }
 
   // ---- alerts, speech ----
+  const speech = createSpeech(() => { $('hudHeard').textContent = window.speechSynthesis ? 'ElevenLabs unavailable. Using browser voice.' : 'Voice unavailable.'; });
+  addEventListener('pagehide', () => speech.cancel());
   let alertTimer;
   function alert(text, {warn=false, speak=true}={}) {
     const box = $('hudAlert');
@@ -239,10 +242,7 @@ export async function initHud(ctx) {
     state.lastAlert = text;
     clearTimeout(alertTimer);
     alertTimer = setTimeout(() => box.classList.remove('on'), 7000);
-    if (speak && !state.muted && 'speechSynthesis' in window) {
-      speechSynthesis.cancel();
-      speechSynthesis.speak(Object.assign(new SpeechSynthesisUtterance(text), {rate:1.05}));
-    }
+    if (speak && !state.muted) void speech.speak(text);
   }
 
   // ---- navigation ----
@@ -466,7 +466,7 @@ export async function initHud(ctx) {
     else if (parsed.type==='layer') { setLayer(parsed.layer, parsed.on); alert(parsed.on ? layers[parsed.layer].name+' highlight on.' : 'Highlight off.', {speak:false}); }
     else if (parsed.type==='map') enterMap();
     else if (parsed.type==='walk') ctx.enterButton.click();
-    else if (parsed.type==='mute') { state.muted = parsed.on; if (parsed.on) window.speechSynthesis?.cancel(); alert(parsed.on ? 'Voice callouts muted.' : 'Voice callouts on.', {speak:false}); }
+    else if (parsed.type==='mute') { state.muted = parsed.on; if (parsed.on) speech.cancel(); alert(parsed.on ? 'Voice callouts muted.' : 'Voice callouts on.', {speak:false}); }
     else if (parsed.type==='unknown') alert(parsed.message, {speak:false});
     return parsed.type;
   }
@@ -508,6 +508,7 @@ export async function initHud(ctx) {
     listening = on;
     mic.classList.toggle('on', on);
     if (on) {
+      speech.cancel();
       heard = '';
       recogniser = Object.assign(new Recognition(), {lang:'en-US', interimResults:true, continuous:true});
       recogniser.onresult = event => {
