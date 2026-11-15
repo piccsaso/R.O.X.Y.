@@ -15,6 +15,10 @@ const targetX=xOffset+1.992710848690013, targetZ=zOffset+4.099211867188213;
 const spawn={x:xOffset+0.90,z:zOffset+2.82,targetX,targetZ};
 const end={x:spawn.x+Math.cos(angle)*length,z:spawn.z+Math.sin(angle)*length,targetX,targetZ};
 const best={length,spawn,return:end};
+// Screenshot-matched opening view, anchored in the rover site frame.
+// Keep spawn as the original slab-route regression anchor.
+best.start={x:meta.origin[1]+13.49,z:63.24-meta.origin[0],
+  targetX:meta.origin[1]+13.49,targetZ:83.24-meta.origin[0],yaw:Math.PI,pitch:0.025};
 for (let t=0;t<=1;t+=0.005) {
   if (!Number.isFinite(ground.foot(spawn.x+(end.x-spawn.x)*t,spawn.z+(end.z-spawn.z)*t))) {
     throw new Error('The original slab route has lost walkable clearance');
@@ -26,7 +30,7 @@ let expansion;
 for (let angle=0;angle<Math.PI*2;angle+=Math.PI/120) {
   const dx=Math.cos(angle), dz=Math.sin(angle);
   let distance=0;
-  for (let d=0.035;d<=16;d+=0.035) {
+  for (let d=0.035;d<=45;d+=0.035) {
     const x=start.x+dx*d, z=start.z+dz*d;
     if (![0,-0.10,0.10].every(off=>Number.isFinite(ground.foot(x-dz*off,z+dx*off)))) break;
     distance=d;
@@ -34,7 +38,8 @@ for (let angle=0;angle<Math.PI*2;angle+=Math.PI/120) {
   // Leave room to turn and avoid framing the crop edge at the endpoint.
   distance-=0.55;
   const x=start.x+dx*distance, z=start.z+dz*distance;
-  const inOldCrop=x>3.5 && x<23.1 && z>3.5 && z<21;
+  const ox=meta.origin[1]-8.32, oz=72.45-meta.origin[0];
+  const inOldCrop=x>ox && x<ox+39.62 && z>oz && z<oz+34.65;
   if (!inOldCrop && distance>7 && (!expansion || distance>expansion.length)) {
     expansion={length:distance,end:{x,z,targetX:start.x,targetZ:start.z}};
   }
@@ -59,6 +64,23 @@ for (let heading=0;heading<Math.PI*2;heading+=Math.PI/120) {
 }
 if (!infill) throw new Error('No walkable route across the inferred sections');
 best.infill=infill;
+
+// Exercise the lower apron specifically, including the newly added margin.
+const lowerStartZ=depth-8, lowerEndZ=depth-1.5;
+let lowerPath;
+for(let x=1;x<width-1;x+=0.14) {
+  let clear=true;
+  for(let z=lowerStartZ;z<=lowerEndZ;z+=meta.step) {
+    if(![-0.12,0,0.12].every(off=>Number.isFinite(ground.foot(x+off,z)))) {clear=false;break;}
+  }
+  if(clear && (!lowerPath || Math.abs(x-width/2)<Math.abs(lowerPath.start.x-width/2))) {
+    lowerPath={length:lowerEndZ-lowerStartZ,
+      start:{x,z:lowerStartZ,targetX:x,targetZ:lowerEndZ},
+      end:{x,z:lowerEndZ,targetX:x,targetZ:lowerStartZ}};
+  }
+}
+if(!lowerPath) throw new Error('No continuous route through the lower expansion');
+best.lowerPath=lowerPath;
 
 // Estimate connected walkable area by tracing neighborhood links on a 14 cm grid.
 const spacing=4*meta.step;

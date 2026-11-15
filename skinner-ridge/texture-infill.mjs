@@ -1,4 +1,5 @@
 import {completeField, sampleDistance} from './infill.mjs';
+import {quiltSurface} from './terrain-synthesis.mjs';
 
 export function completeTexture(pixels, width, depth, scale, measuredFaces, quality, heights) {
   const imageWidth=width*scale, imageDepth=depth*scale;
@@ -32,57 +33,7 @@ export function completeTexture(pixels, width, depth, scale, measuredFaces, qual
   const distance=sampleDistance(valid.map(value=>1-value),width);
   const trust=soften(Float32Array.from(quality,(value,i)=>
     Math.min(1, value*1.45)*Math.min(1,(distance[i]+2)/5)),width,depth,4);
-  const period=42;
-  const donors=[];
-  for (let y=9;y<depth-9;y+=6) for (let x=9;x<width-9;x+=6) {
-    if (distance[y*width+x] < 2*Math.ceil(period/scale)+2) continue;
-    const cx=x*scale+Math.floor(scale/2), cy=y*scale+Math.floor(scale/2);
-    const sums=[0,0,0];
-    let count=0, min=255,max=0,grain=0;
-    for (let v=-period;v<period;v+=4) for (let u=-period;u<period;u+=4) {
-      const at=((cy+v)*imageWidth+cx+u)*4;
-      const luma=pixels[at+1];
-      min=Math.min(min,luma);
-      max=Math.max(max,luma);
-      grain+=Math.abs(luma-pixels[at+5])+Math.abs(luma-pixels[at+imageWidth*4+1]);
-      for (let c=0;c<3;c++) sums[c]+=pixels[at+c];
-      count++;
-    }
-    if (max-min<9 || max-min>100 || grain/count<1.4) continue;
-    donors.push({cx,cy,mean:sums.map(sum=>sum/count)});
-  }
-  if (!donors.length) throw new Error('No well-projected Navcam texture swatches for terrain completion');
-
-  // Snapshot the source swatches before modifying any atlas pixels.
-  const span=period*2+1;
-  for (const donor of donors) {
-    donor.detail=new Int8Array(span*span*3);
-    for (let v=0;v<span;v++) for (let u=0;u<span;u++) {
-      const at=((donor.cy+v-period)*imageWidth+donor.cx+u-period)*4;
-      for (let c=0;c<3;c++) {
-        donor.detail[(v*span+u)*3+c]=Math.max(-47,Math.min(47,Math.round(pixels[at+c]-donor.mean[c])));
-      }
-    }
-  }
-  const tileCols=Math.ceil(imageWidth/period)+1;
-  const tileRows=Math.ceil(imageDepth/period)+1;
-  let seed=671167;
-  const patches=Array.from({length:tileCols*tileRows},(_,i)=>{
-    const row=Math.min(depth-1,Math.floor(Math.floor(i/tileCols)*period/scale));
-    const col=Math.min(width-1,Math.floor(i%tileCols*period/scale));
-    const luma=base[1][row*width+col];
-    let best, error=Infinity;
-    for (let sample=0;sample<9;sample++) {
-      seed=(Math.imul(seed,1664525)+1013904223)>>>0;
-      const candidate=donors[(seed>>>8)%donors.length];
-      const delta=Math.abs(candidate.mean[1]-luma);
-      if (delta<error) {
-        best=candidate;
-        error=delta;
-      }
-    }
-    return best.detail;
-  });
+  const quilt=quiltSurface(pixels,width,depth,scale,quality,measuredFaces,heights);
   const smooth=t=>t*t*(3-2*t);
   const shade=reliefShade(heights,width,depth);
   const feather=photoBoundaryDistance(pixels,imageWidth);
@@ -90,7 +41,7 @@ export function completeTexture(pixels, width, depth, scale, measuredFaces, qual
     (field[row*width+col]*(1-u)+field[row*width+right]*u)*(1-v)+
     (field[below*width+col]*(1-u)+field[below*width+right]*u)*v;
   for (let y=0;y<imageDepth;y++) {
-    const tz=Math.floor(y/period), pz=y%period, vz=smooth(pz/period);
+
     const z=Math.max(0,y/scale-0.5), row=Math.floor(z), fz=z-row;
     const below=Math.min(depth-1,row+1);
     for (let x=0;x<imageWidth;x++) {
@@ -100,25 +51,17 @@ export function completeTexture(pixels, width, depth, scale, measuredFaces, qual
       const edge=smooth(Math.min(1,feather[at/4]/15));
       const blend=edge*grid(trust,row,below,col,right,fx,fz);
       if (blend>0.995) continue;
-      const tx=Math.floor(x/period), px=x%period, ux=smooth(px/period);
-      const slot=tz*tileCols+tx;
-      const a=patches[slot], b=patches[slot+1], c=patches[slot+tileCols], d=patches[slot+tileCols+1];
-      const ai=((period+pz)*span+period+px)*3, bi=((period+pz)*span+px)*3;
-      const ci=(pz*span+period+px)*3, di=(pz*span+px)*3;
-      const w1=(1-ux)*(1-vz), w2=ux*(1-vz), w3=(1-ux)*vz, w4=ux*vz;
-      // Power normalization preserves grain at overlapping patch centers.
-      const strength=0.95/Math.sqrt(w1*w1+w2*w2+w3*w3+w4*w4);
       const relief=grid(shade,row,below,col,right,fx,fz);
       for (let channel=0;channel<3;channel++) {
         const tone=grid(base[channel],row,below,col,right,fx,fz);
-        const detail=a[ai+channel]*w1+b[bi+channel]*w2+c[ci+channel]*w3+d[di+channel]*w4;
-        const inferred=tone+strength*detail+relief;
+        const detail=quilt.texture[(at/4)*3+channel];
+        const inferred=tone+detail+relief*0.35;
         pixels[at+channel]=Math.max(0,Math.min(255,Math.round(inferred*(1-blend)+pixels[at+channel]*blend)));
       }
       pixels[at+3]=255;
     }
   }
-  return {measuredPixels,inferredPixels:imageWidth*imageDepth-measuredPixels,textureSwatches:donors.length};
+  return {measuredPixels,inferredPixels:imageWidth*imageDepth-measuredPixels,textureSwatches:quilt.donorCount,patchMeters:quilt.patchMeters,donorCells:quilt.donorCells};
 }
 
 // Feather in image space as well as on the coarser terrain grid.

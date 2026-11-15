@@ -4,13 +4,22 @@ import {createHash} from 'node:crypto';
 const sources=JSON.parse(await readFile('sources.json','utf8'));
 const manifest=JSON.parse(await readFile('terrain.json','utf8').catch(()=> '{"sources":[]}'));
 await mkdir('source',{recursive:true});
-for (const {id,products} of sources) {
+const jobs=sources.flatMap(source=>['obj','obj.xml','png'].map(ext=>({...source,ext})));
+async function worker() {
+while (jobs.length) {
+  const {id,products,ext}=jobs.shift();
   const expected=manifest.sources.find(source=>source.id===id)?.sha256;
-  for (const ext of ['obj','obj.xml','png']) {
     const url=products[ext], path='source/'+id+'.'+ext;
     const local=await stat(path).catch(()=>null);
     if (local?.size && (!expected || hash(await readFile(path))===expected[ext])) continue;
-    const response=await fetch(url,{signal:AbortSignal.timeout(180000)});
+    let response;
+    for (let attempt=0;attempt<3;attempt++) {
+      try {
+        response=await fetch(url,{signal:AbortSignal.timeout(180000)});
+        if (response.ok || response.status<500) break;
+      } catch(error) { if (attempt===2) throw error; }
+      await new Promise(resolve=>setTimeout(resolve,1000*(attempt+1)));
+    }
     if (!response.ok) throw new Error(response.status+' '+url);
     const bytes=Buffer.from(await response.arrayBuffer());
     if (expected && hash(bytes)!==expected[ext]) throw new Error('Checksum mismatch for '+url);
@@ -23,6 +32,7 @@ for (const {id,products} of sources) {
     console.log(path);
   }
 }
+await Promise.all(Array.from({length:4},worker));
 function hash(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
 }

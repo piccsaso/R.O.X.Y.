@@ -1,0 +1,21 @@
+{
+  "areaSquareMeters": 2747.920000000001,
+  "fullyTraversableCore": true,
+  "coreCellsChecked": 2243200,
+  "contextSamplesChecked": 27612,
+  "contextBounds": [
+    -110,
+    166,
+    -110,
+    159.07
+  ],
+  "tiles": 4,
+  "uniqueVertices": 2246203,
+  "exportedVertices": 2249208,
+  "triangles": 4486400,
+  "totalGlbBytes": 167380788,
+  "renderCollisionMatch": true,
+  "unitNormals": true,
+  "skyFramesVerified": 721,
+  "skyReference": "2022-06-23T22:55:32.782Z"
+}

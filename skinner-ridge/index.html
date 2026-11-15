@@ -13,11 +13,11 @@ small{font-size:12px;letter-spacing:.02em} button{font:inherit;color:inherit;pad
 button:hover,button:focus-visible{background:#704733} button:disabled{opacity:.6;cursor:wait}
 .actions{display:flex;gap:8px} #reticle{position:fixed;left:50%;top:50%;width:4px;height:4px;background:#fff8eb;border-radius:100%;display:none;pointer-events:none} .locked #reticle{display:block} .locked #enter{display:none}
 @media(max-width:670px){footer{flex-wrap:wrap} header{top:16px} footer{bottom:16px}}
-</style>
+header{transition:opacity .3s}.locked header{opacity:0;pointer-events:none}.sky-controls{pointer-events:auto;display:grid;gap:8px;max-width:340px}input[type=range]{width:100%;accent-color:#e9bb83}.sky-controls small{font-size:11px}.locked .sky-controls{display:none}button:focus-visible,input:focus-visible{outline:2px solid #f8d7a6;outline-offset:3px}</style>
 <script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
 </head>
 <body>
-<header><div class="panel"><small>JEZERO CRATER · SOLS 470–501</small><h1>Skinner Ridge</h1></div></header>
+<header><div class="panel"><small>JEZERO CRATER · SOLS 470–501</small><h1>Skinner Ridge</h1></div><div class="panel sky-controls"><small id="sky-clock">Sol 477 sky</small><label for="time-of-day">Time of day</label><input id="time-of-day" type="range" min="0" max="1000" value="0"><div class="actions"><button id="pause-sky">Pause sky</button><button id="lamp" aria-pressed="false">Light off</button></div><small>One Mars day in 8 minutes · Esc for sky controls</small></div></header>
 <div id="reticle" aria-hidden="true"></div>
 <footer><div class="panel"><p id="status" role="status">Loading rover terrain…</p><small>NASA/JPL-Caltech Navcam · Includes inferred terrain</small></div>
 <div class="actions"><button id="enter" disabled>Enter terrain</button><button id="reset" disabled>Reset</button></div></footer>
