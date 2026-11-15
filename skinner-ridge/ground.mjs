@@ -24,18 +24,8 @@ export function makeGround(meta, data) {
   }
 
   function foot(x,z) {
-    const center = sample(x,z);
-    if (!center) return;
-    let low=center.height, high=center.height;
-    for (let angle=0;angle<8;angle++) {
-      const a = angle*Math.PI/4;
-      const p = sample(x+0.16*Math.cos(a), z+0.16*Math.sin(a));
-      if (!p || Math.abs(p.height-center.height)>0.17) return;
-      low=Math.min(low,p.height);
-      high=Math.max(high,p.height);
-    }
-    if (high-low>0.25) return;
-    return center.height;
+    // Exploration mode: every surface is traversable, irrespective of slope.
+    return sample(x,z)?.height;
   }
   return {sample,foot};
 }

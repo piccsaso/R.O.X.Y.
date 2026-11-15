@@ -89,8 +89,10 @@ export function completeHeights(heights, measuredFaces, width, depth, step) {
   for (let i=0;i<filled.length;i++) {
     const x=i%width*step, z=Math.floor(i/width)*step;
     const fade=Math.min(1,distance[i]*step/0.85)**2;
-    const ripples=0.035*Math.sin(5.8*x+10.2*z+0.75*Math.sin(z*1.1))+
-      0.045*Math.sin(x*2.8-z*1.7)+0.023*Math.cos(z*5.1+x*3.9);
+    // Low amplitude sand undulations; local rock relief is copied jointly
+    // with photo patches later, instead of unrelated sinusoidal bumps.
+    const ripples=0.008*Math.sin(5.8*x+10.2*z+0.75*Math.sin(z*1.1))+
+      0.018*Math.sin(x*1.1-z*0.7+0.4*Math.sin(z*0.6));
     filled[i]+=ripples*fade;
   }
   return filled;

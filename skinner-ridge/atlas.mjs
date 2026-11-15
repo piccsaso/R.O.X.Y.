@@ -16,8 +16,31 @@ export function bakeAtlas({sources,layers,width,depth,fused,filled,mask,agreemen
     }
     if (!valid.some(Boolean)) return null;
     const support=sampleDistance(valid.map(value=>1-value),width);
-    return {...layer,support,image:PNG.sync.read(fs.readFileSync('source/'+sources[j].id+'.png')),
-      index:j};
+    const image=PNG.sync.read(fs.readFileSync('source/'+sources[j].id+'.png'));
+    let preference=new Float32Array(fused.length);
+    for(let z=1;z<depth-1;z++) for(let x=1;x<width-1;x++) {
+      const i=z*width+x;
+      if(!valid[i] || !valid[i-1] || !valid[i+1] || !valid[i-width] || !valid[i+width]) continue;
+      const ux=(layer.texcoords[2*(i+1)]-layer.texcoords[2*(i-1)])*image.width*0.5;
+      const vx=(layer.texcoords[2*(i+1)+1]-layer.texcoords[2*(i-1)+1])*image.height*0.5;
+      const uz=(layer.texcoords[2*(i+width)]-layer.texcoords[2*(i-width)])*image.width*0.5;
+      const vz=(layer.texcoords[2*(i+width)+1]-layer.texcoords[2*(i-width)+1])*image.height*0.5;
+      const norm=ux*ux+vx*vx+uz*uz+vz*vz,det=ux*vz-vx*uz;
+      const major=Math.sqrt((norm+Math.sqrt(Math.max(0,norm*norm-4*det*det)))*0.5);
+      const minor=Math.abs(det)/Math.max(major,0.001);
+      if(minor<0.32 || major>60) continue;
+      const score=Math.min(1,minor/3)*Math.min(1,5*minor/major)/(1+((fused[i]-filled[i])/0.14)**2);
+      preference[i]=(0.05+score)**4/Math.max(0.022,layer.density[i]);
+    }
+    for(let pass=0;pass<3;pass++) {
+      const next=preference.slice();
+      for(let z=1;z<depth-1;z++) for(let x=1;x<width-1;x++) {
+        const i=z*width+x;
+        next[i]=preference[i]*0.5+(preference[i-1]+preference[i+1]+preference[i-width]+preference[i+width])*0.125;
+      }
+      preference=next;
+    }
+    return {...layer,support,image,preference,index:j};
   }).filter(Boolean);
   const quality = new Float32Array(mask.length);
   const counts = sources.map(() => 0);
@@ -53,7 +76,7 @@ export function bakeAtlas({sources,layers,width,depth,fused,filled,mask,agreemen
           r+=image.data[j]*coeff[k]; g+=image.data[j+1]*coeff[k]; b+=image.data[j+2]*coeff[k];
         }
         const fade=Math.min(1,(entry.support[0]*weights[0]+entry.support[1]*weights[1]+entry.support[2]*weights[2])/7);
-        const weight=entry.weight*fade*fade;
+        const weight=(entry.preference[0]*weights[0]+entry.preference[1]*weights[1]+entry.preference[2]*weights[2])*fade*fade;
         red+=r*weight;green+=g*weight;blue+=b*weight;total+=weight;
       }
       if (total) {
@@ -65,7 +88,7 @@ export function bakeAtlas({sources,layers,width,depth,fused,filled,mask,agreemen
     }
   }
   const coverage=completeTexture(pixels,width-1,depth-1,scale,mask,quality,filled);
-  return {image:jpeg.encode({data:pixels,width:imageWidth,height:imageHeight},94).data,counts,coverage};
+  return {pixels,counts,coverage};
 
   function confidence(entries) {
     return entries.reduce((best,entry)=>Math.max(best,entry.confidence),0);
@@ -95,7 +118,7 @@ export function bakeAtlas({sources,layers,width,depth,fused,filled,mask,agreemen
       const density=indices.reduce((sum,i)=>sum+layer.density[i],0)/3;
       const weight=(0.05+confidence)**2/Math.max(0.022,density);
       counts[layer.index]++;
-      return [{image:layer.image,weight,uv,support,confidence}];
+      return [{image:layer.image,weight,uv,support,confidence,preference:indices.map(i=>layer.preference[i])}];
     });
   }
 }
