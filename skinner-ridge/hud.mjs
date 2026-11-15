@@ -37,14 +37,15 @@ const css = `
 #hud button:hover,.sky-controls button:hover{background:#f4efe61f}
 #hud button:hover::after,#hud button.open::after,.sky-controls button:hover::after{transform:scaleX(1)}
 #hud button.open{background:#f4efe6;color:#17110d;text-shadow:none}
-#hud .menu{position:absolute;bottom:52px;left:0;min-width:230px;${GLASS};background:linear-gradient(180deg,#2a1d15d9,#1c130eeb);border-radius:3px;padding:5px;display:none}
+#hud .menu{position:absolute;bottom:52px;left:-3px;min-width:230px;${GLASS};backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);border-radius:3px;padding:3px;display:none;box-shadow:0 8px 28px #0005;background:linear-gradient(180deg,#1c130e73,#1c130e59);white-space:nowrap}
 #hud .menu.open{display:block}
-#hud .menu div{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:2px;cursor:pointer;font-size:11px;letter-spacing:.18em;border-left:2px solid transparent}
-#hud .menu div:hover{background:#f4efe614}
-#hud .menu div.on{border-left-color:currentColor;background:#f4efe60d}
+#hud .menu div{display:flex;align-items:center;gap:12px;padding:11px 14px 10px;border-radius:2px;cursor:pointer;font-size:11px;letter-spacing:.22em;position:relative}
+#hud .menu div::after{content:"";position:absolute;left:33px;right:14px;bottom:5px;height:1px;background:var(--tone,#ffb454);transform:scaleX(0);transform-origin:left;transition:transform .2s}
+#hud .menu div.on::after{transform:scaleX(1)}
+#hud .menu div:hover{background:#f4efe61f}
 #hud .menu div.off{opacity:.4;cursor:default}
-#hud .menu i{width:7px;height:7px;border:1px solid currentColor;transform:rotate(45deg);flex:none}
-#hud .menu .on i{background:currentColor}
+#hud .menu i{width:7px;height:7px;border:1px solid var(--tone,currentColor);transform:rotate(45deg);flex:none}
+#hud .menu .on i{background:var(--tone,currentColor)}
 #hud .wrap{position:relative}
 #hud .legend{position:absolute;left:50%;top:120px;transform:translateX(-50%);font-size:10px;white-space:nowrap;display:none}
 #hud .legend i{display:inline-block;width:9px;height:9px;margin:0 5px 0 14px;border-radius:1px}
@@ -454,7 +455,7 @@ export async function initHud(ctx) {
     const row = Object.assign(document.createElement('div'), {innerHTML:'<i></i>'+text});
     if (on) row.classList.add('on');
     if (disabled) row.classList.add('off');
-    if (colour) row.style.color = colour;
+    if (colour) row.style.setProperty('--tone', colour);
     row.onclick = event => { event.stopPropagation(); if (!disabled) action(); };
     menu.appendChild(row);
   }
