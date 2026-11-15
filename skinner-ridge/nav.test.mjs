@@ -45,6 +45,12 @@ test('commands', () => {
   assert.equal(parseCommand('return to base', landmarks).landmark.id, 'base');
   assert.deepEqual(parseCommand('show slope', landmarks), {type:'layer', layer:'slope', on:true});
   assert.deepEqual(parseCommand('hide ground truth', landmarks), {type:'layer', layer:'truth', on:false});
+  assert.deepEqual(parseCommand('safe route', landmarks), {type:'route', which:'safe', on:'toggle'});
+  assert.deepEqual(parseCommand('slope', landmarks), {type:'layer', layer:'slope', on:'toggle'});
+  assert.equal(parseCommand('close', landmarks).type, 'close');
+  assert.equal(parseCommand('map', landmarks).type, 'map');
+  assert.equal(parseCommand('reset position', landmarks).type, 'reset');
+  assert.equal(parseCommand('voice route', landmarks).which, 'custom');
   assert.equal(parseCommand('show the straight line', landmarks).which, 'straight');
   assert.equal(parseCommand('clear route', landmarks).type, 'clear');
   assert.equal(parseCommand('open the map', landmarks).type, 'map');

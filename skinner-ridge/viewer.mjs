@@ -124,7 +124,7 @@ try {
   // The HUD is skipped in the plain overhead survey, or with ?hud=0.
   const hud = mode==='survey' || query.get('hud')==='0' ? null : await initHud({
     THREE, scene, camera, renderer, canvas, ground, meta, route, materials:terrainMaterials,
-    terrains:meshes.map(mesh=>mesh.scene), isLocked:lock, enterButton:enter, lighting
+    terrains:meshes.map(mesh=>mesh.scene), isLocked:lock, enterButton:enter, resetButton:reset, lighting
   });
   if (query.has('qa')) window.hud = hud;
   function resize() {

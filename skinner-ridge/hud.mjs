@@ -5,75 +5,104 @@ import {makeNav, makeLandmarks, parseCommand, config} from './nav.mjs';
 const INK = '#f4efe6', AMBER = '#ffb454', RED = '#ff3b30';
 const ROUTE = {safe:'#8dff6a', straight:'#ff6a3d', custom:'#c79bff', home:'#ff3b30'};
 
+const FONT = 'Bahnschrift,"DIN Alternate","Segoe UI",system-ui,sans-serif';
+const GLASS = 'background:linear-gradient(180deg,#f4efe61f,#f4efe60a);border:1px solid #f4efe647;backdrop-filter:blur(10px) saturate(1.2);-webkit-backdrop-filter:blur(10px) saturate(1.2)';
 const css = `
-#hud{position:fixed;inset:0;pointer-events:none;z-index:2;color:${INK};font:600 12px/1.3 Bahnschrift,"DIN Alternate","Segoe UI",system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;text-shadow:0 1px 3px #000c}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:2;color:${INK};font:600 12px/1.3 ${FONT};letter-spacing:.09em;text-transform:uppercase;text-shadow:0 1px 3px #000c}
 #hud canvas{display:block;width:auto;height:auto}
 #hud .vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 46%,transparent 58%,#0007 100%)}
 #hud .compass{position:absolute;top:12px;left:50%;transform:translateX(-50%);text-align:center}
-#hud .bearing{display:inline-block;margin-top:-2px;padding:1px 9px 0;font-size:15px;border:1px solid #fff9;border-radius:3px;background:#0006}
-#hud .mini{position:absolute;top:18px;right:20px;border:2px solid #fffc;border-radius:10px;overflow:hidden;box-shadow:0 4px 18px #0008}
+#hud .bearing{display:inline-block;margin-top:-2px;padding:1px 9px 0;font-size:15px;border-bottom:2px solid ${AMBER}}
+#hud .mini{position:absolute;top:18px;right:20px;border:1px solid #f4efe680;border-radius:3px;overflow:hidden;box-shadow:0 6px 22px #0007}
 #hud .suit{position:absolute;left:20px;bottom:16px}
 #hud .coords{margin:-4px 0 0 4px;font-size:10px;opacity:.85}
 #hud .coords b{font-size:8px;opacity:.7;margin-left:6px;font-weight:600}
-#hud .note{position:absolute;top:88px;left:50%;transform:translateX(-50%);font-size:15px;text-align:center;max-width:70vw;opacity:0;transition:opacity .4s}
+#hud .note{position:absolute;top:92px;left:50%;transform:translateX(-50%);font-size:15px;text-align:center;max-width:60vw;opacity:0;transition:opacity .4s}
 #hud .note.on{opacity:1}
-#hud .pin{position:absolute;transform:translate(-50%,-100%);padding:5px 12px 4px;font-size:15px;white-space:nowrap;background:#0b0a09cc;border:1px solid #fff9;border-radius:14px;display:none}
-#hud .pin::after{content:"";position:absolute;left:50%;top:100%;height:26px;border-left:1px solid #fffc}
-#hud .pin span{opacity:.55;margin:0 7px}
-#hud .return{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(1);padding:14px 26px;font-size:24px;color:#fff;background:#b3140fd9;border:2px solid ${RED};border-radius:6px;display:none;transition:left .9s cubic-bezier(.6,0,.2,1),top .9s cubic-bezier(.6,0,.2,1),font-size .9s,padding .9s;animation:hudPulse 1s ease-in-out infinite;text-align:center}
+#hud .pin{position:absolute;transform:translate(-50%,-100%);padding-bottom:34px;white-space:nowrap;display:none;font-size:11px;letter-spacing:.14em;text-shadow:0 1px 4px #000,0 0 12px #0009}
+#hud .pin b{font-size:24px;font-weight:700;letter-spacing:0;margin-right:3px}
+#hud .pin em{font-style:normal;opacity:.5;margin:0 9px}
+#hud .pin::after{content:"";position:absolute;left:50%;bottom:6px;height:24px;border-left:1px solid #fffd}
+#hud .pin::before{content:"";position:absolute;left:50%;bottom:0;width:7px;height:7px;margin-left:-4px;background:${INK};transform:rotate(45deg)}
+#hud .return{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);padding:14px 26px;font-size:24px;color:#fff;background:#b3140fd9;border:1px solid ${RED};border-radius:2px;display:none;transition:left .9s cubic-bezier(.6,0,.2,1),top .9s cubic-bezier(.6,0,.2,1),font-size .9s,padding .9s;animation:hudPulse 1s ease-in-out infinite;text-align:center}
 #hud .return small{display:block;font-size:.55em;opacity:.9;margin-top:2px}
 #hud .return.docked{left:132px;top:36%;font-size:13px;padding:8px 12px}
 @keyframes hudPulse{0%,100%{box-shadow:0 0 0 0 #ff3b30cc}50%{box-shadow:0 0 34px 10px #ff3b3055}}
 #hud .flash{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,#ff1e1e66 100%);opacity:0;transition:opacity .5s}
 #hud .flash.on{opacity:1;animation:hudFlash 1s ease-in-out infinite}
 @keyframes hudFlash{50%{opacity:.35}}
-#hud .dock{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;gap:10px;pointer-events:auto}
-#hud button{font:inherit;letter-spacing:.14em;color:${INK};background:#0b0a09b3;border:1px solid #fff6;border-radius:4px;padding:9px 22px;cursor:pointer;text-transform:uppercase;backdrop-filter:blur(6px)}
-#hud button:hover,#hud button.open{background:#f4efe6;color:#14110f;border-color:#fff}
-#hud .menu{position:absolute;bottom:46px;min-width:210px;background:#0b0a09e0;border:1px solid #fff5;border-radius:6px;padding:6px;display:none;backdrop-filter:blur(8px)}
+#hud .dock{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;gap:2px;pointer-events:auto;${GLASS};padding:3px;border-radius:3px}
+#hud button,.sky-controls button{font:600 11px ${FONT};letter-spacing:.22em;color:${INK};background:none;border:0;border-radius:2px;padding:11px 26px 10px;cursor:pointer;text-transform:uppercase;position:relative;transition:background .15s,color .15s}
+#hud button::after,.sky-controls button::after{content:"";position:absolute;left:26px;right:26px;bottom:5px;height:1px;background:${AMBER};transform:scaleX(0);transition:transform .2s}
+#hud button:hover,.sky-controls button:hover{background:#f4efe61f}
+#hud button:hover::after,#hud button.open::after,.sky-controls button:hover::after{transform:scaleX(1)}
+#hud button.open{background:#f4efe6;color:#17110d;text-shadow:none}
+#hud .menu{position:absolute;bottom:52px;left:0;min-width:230px;${GLASS};background:linear-gradient(180deg,#2a1d15d9,#1c130eeb);border-radius:3px;padding:5px;display:none}
 #hud .menu.open{display:block}
-#hud .menu div{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:4px;cursor:pointer}
-#hud .menu div:hover{background:#fff2}
-#hud .menu div.off{opacity:.4}
-#hud .menu i{width:9px;height:9px;border-radius:50%;border:1px solid #fffa;flex:none}
+#hud .menu div{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:2px;cursor:pointer;font-size:11px;letter-spacing:.18em;border-left:2px solid transparent}
+#hud .menu div:hover{background:#f4efe614}
+#hud .menu div.on{border-left-color:currentColor;background:#f4efe60d}
+#hud .menu div.off{opacity:.4;cursor:default}
+#hud .menu i{width:7px;height:7px;border:1px solid currentColor;transform:rotate(45deg);flex:none}
 #hud .menu .on i{background:currentColor}
 #hud .wrap{position:relative}
-#hud .legend{position:absolute;left:50%;top:116px;transform:translateX(-50%);font-size:10px;white-space:nowrap;display:none}
-#hud .legend i{display:inline-block;width:9px;height:9px;margin:0 5px 0 14px;border-radius:2px}
-#hud .hint{position:absolute;left:50%;top:60%;transform:translateX(-50%);font-size:13px;letter-spacing:.3em;opacity:.85}
-#hud .heard{position:absolute;left:50%;bottom:74px;transform:translateX(-50%);font-size:13px;text-transform:none;letter-spacing:.02em}
+#hud .legend{position:absolute;left:50%;top:120px;transform:translateX(-50%);font-size:10px;white-space:nowrap;display:none}
+#hud .legend i{display:inline-block;width:9px;height:9px;margin:0 5px 0 14px;border-radius:1px}
+#hud .roxy{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);display:none;flex-direction:column;align-items:center;gap:10px}
+#hud .roxy.on{display:flex}
+#hud .roxy .orb{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:#1c130ecc;border:1.5px solid ${AMBER};backdrop-filter:blur(8px);animation:roxyPulse 1.3s ease-in-out infinite}
+#hud .roxy svg{width:30px;height:30px;fill:none;stroke:${INK};stroke-width:1.8;stroke-linecap:round}
+#hud .roxy span{font-size:14px;text-transform:none;letter-spacing:.03em;min-height:18px}
+#hud .roxy small{font-size:10px;letter-spacing:.3em;color:${INK}}
+@keyframes roxyPulse{0%,100%{box-shadow:0 0 0 0 #ffb45499}50%{box-shadow:0 0 0 14px #ffb45400}}
+#hud .ear{position:absolute;right:24px;top:240px;font-size:9px;letter-spacing:.24em;opacity:.75;display:none}
+#hud .ear.on{display:block}
+#hud .ear::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:${AMBER};margin-right:7px}
 #hud .type{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:none;pointer-events:auto}
-#hud .type input{font:inherit;text-transform:none;letter-spacing:.02em;font-size:16px;width:min(460px,70vw);padding:10px 14px;color:#fff;background:#0b0a09e6;border:1px solid #fff8;border-radius:5px;outline:none}
+#hud .type input{font:500 16px ${FONT};width:min(460px,70vw);padding:11px 14px;color:#fff;${GLASS};background:#1c130ed9;border-radius:3px;outline:none}
 #hud .credit{position:absolute;right:20px;bottom:8px;font-size:8px;opacity:.6;letter-spacing:.12em}
 #hud .label{position:absolute;transform:translate(-50%,-100%);font:italic 15px Georgia,serif;text-transform:none;letter-spacing:0;padding-bottom:32px;pointer-events:auto;cursor:pointer;white-space:nowrap;display:none}
 #hud .label::after{content:"";position:absolute;left:50%;bottom:0;height:28px;border-left:1px solid #fff}
-body.locked #hud .dock,body.locked #hud .hint,body.mapmode #hud .hint{display:none}
-header{left:22px!important;top:16px!important;right:auto!important;flex-direction:column;align-items:flex-start!important;gap:10px!important}
+#hud .label small{display:block;font:600 11px ${FONT};letter-spacing:.1em;text-transform:uppercase;text-align:center;opacity:.9}
+body.locked #hud .dock{display:none}
+header{left:22px!important;top:16px!important;right:auto!important;flex-direction:column;align-items:flex-start!important;gap:12px!important}
 header .panel:first-child{background:none!important;border:0!important;padding:0!important}
-header h1{font:600 15px Bahnschrift,"DIN Alternate","Segoe UI",system-ui,sans-serif!important;letter-spacing:.28em;text-transform:uppercase;margin:0!important;text-shadow:0 1px 3px #000c}
-header small{font:600 9px Bahnschrift,"Segoe UI",system-ui,sans-serif;letter-spacing:.3em;opacity:.7}
+header h1{font:600 15px ${FONT}!important;letter-spacing:.28em;text-transform:uppercase;margin:0!important;text-shadow:0 1px 3px #000c}
+header small{font:600 9px ${FONT};letter-spacing:.3em;opacity:.7;text-transform:uppercase}
 body.locked header{opacity:1!important}
 body.locked .sky-controls,body.mapmode .sky-controls{display:none}
 footer{display:none!important}
-.sky-controls{transform:scale(.78);transform-origin:top left;opacity:.92}
+.sky-controls{${GLASS};background:linear-gradient(180deg,#f4efe61f,#f4efe60a)!important;border-radius:3px!important;padding:12px 14px 10px!important;width:250px;color:${INK};font:600 10px ${FONT};letter-spacing:.2em;text-transform:uppercase;text-shadow:0 1px 3px #000c}
+.sky-controls label{display:block;margin:8px 0 2px;font-size:9px;opacity:.7}
+.sky-controls small{display:block;font-size:9px!important;letter-spacing:.16em!important}
+.sky-controls small:last-child{display:none}
+.sky-controls .actions{gap:2px!important;margin:6px -8px 0}
+.sky-controls button{padding:8px 12px 9px;font-size:10px;letter-spacing:.18em}
+.sky-controls button::after{left:12px;right:12px;bottom:4px}
+.sky-controls input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;background:none;margin:0;pointer-events:auto;cursor:pointer}
+.sky-controls input[type=range]::-webkit-slider-runnable-track{height:1px;background:#f4efe699}
+.sky-controls input[type=range]::-moz-range-track{height:1px;background:#f4efe699}
+.sky-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;margin-top:-5px;background:${AMBER};border:0;transform:rotate(45deg);box-shadow:0 0 0 3px #ffb45433}
+.sky-controls input[type=range]::-moz-range-thumb{width:10px;height:10px;background:${AMBER};border:0;border-radius:0;transform:rotate(45deg)}
 #reticle{background:#fff!important;opacity:.7}
 `;
 
 const html = `
 <div class="vignette"></div><div class="flash" id="hudFlash"></div>
 <div class="compass"><canvas width="640" height="46"></canvas><span class="bearing" id="hudBearing">000</span></div>
-<div class="mini"><canvas width="210" height="210"></canvas></div>
+<div class="mini"><canvas width="224" height="204"></canvas></div>
+<div class="ear" id="hudEar">Say “Roxy”</div>
 <div class="suit"><canvas width="250" height="236"></canvas><div class="coords" id="hudCoords"></div></div>
 <div class="note" id="hudNote"></div>
 <div class="pin" id="hudPin"></div>
 <div class="return" id="hudReturn"></div>
-<div class="hint">Click to walk</div>
-<div class="heard" id="hudHeard"></div>
 <div class="legend" id="hudLegend"></div>
+<div class="roxy" id="hudRoxy"><div class="orb"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></div><small>Roxy listening</small><span id="hudHeard"></span></div>
 <div class="type"><input id="hudCmd" placeholder="Type a command, then Enter" autocomplete="off"></div>
 <div class="dock">
   <div class="wrap"><div class="menu" id="hudOptions"></div><button data-menu="hudOptions">Options</button></div>
   <div class="wrap"><div class="menu" id="hudRoutes"></div><button data-menu="hudRoutes">Routes</button></div>
+  <button id="hudReset">Reset position</button>
 </div>
 <div class="credit">Terrain NASA/JPL-Caltech Navcam · includes inferred terrain · suit telemetry simulated</div>`;
 
@@ -83,7 +112,7 @@ const legends = {
 };
 
 export async function initHud(ctx) {
-  const {THREE, scene, camera, renderer, canvas, ground, meta, route, materials, terrains, isLocked, enterButton, lighting} = ctx;
+  const {THREE, scene, camera, renderer, canvas, ground, meta, route, materials, terrains, isLocked, enterButton, resetButton, lighting} = ctx;
   const [W, D] = meta.boundsMeters;
   const nav = makeNav(meta, ground);
   const [EX, EZ, EW, ED] = nav.extent;
@@ -329,7 +358,7 @@ export async function initHud(ctx) {
   function refill() { state.o2 = state.power = 1; state.eva = 0; arrived = null; checkReturn(); replanAll(); }
 
   // ---- planning view ----
-  let saved = null, flight = null;
+  let saved = null, flight = null, savedFog = null;
   const orbit = {azimuth:Math.PI, elevation:0.6, radius:62};
   const center = new THREE.Vector3(W/2, 2, D*0.5), lookHelper = new THREE.Object3D();
   function orbitPose() {
@@ -343,6 +372,7 @@ export async function initHud(ctx) {
     if (state.mapMode) return;
     saved = {position:camera.position.clone(), rotation:camera.rotation.clone()};
     state.mapMode = true; document.body.classList.add('mapmode');
+    if (scene.fog) { savedFog = [scene.fog.near, scene.fog.far]; scene.fog.near = 140; scene.fog.far = 420; }   // clear air for the overview
     if (document.pointerLockElement) document.exitPointerLock();
     fly(orbitPose(), 1.4); closeMenus(); buildMenus();
   }
@@ -351,6 +381,7 @@ export async function initHud(ctx) {
     fly({position:saved.position.clone(), quaternion:new THREE.Quaternion().setFromEuler(saved.rotation)}, 1.2, () => {
       camera.position.copy(saved.position); camera.rotation.copy(saved.rotation);
       state.mapMode = false; saved = null; buildMenus();
+      if (scene.fog && savedFog) { [scene.fog.near, scene.fog.far] = savedFog; savedFog = null; }
     });
     flight.leaving = true; document.body.classList.remove('mapmode');
   }
@@ -376,6 +407,9 @@ export async function initHud(ctx) {
     const pose = orbitPose(); camera.position.copy(pose.position); camera.quaternion.copy(pose.quaternion); redraw = true;
   }, {passive:true});
   canvas.addEventListener('click', () => { if (!state.mapMode && !isLocked()) { closeMenus(); enterButton.click(); } });
+  // Roxy starts with the first click, because browsers only allow the microphone after a user action.
+  let roxyAsked = false;
+  addEventListener('pointerdown', () => { if (!roxyAsked) { roxyAsked = true; setRoxy(true); } });
   function pick(clientX, clientY) {
     const direction = new THREE.Vector3(clientX/innerWidth*2-1, -(clientY/innerHeight)*2+1, 0.5).unproject(camera).sub(camera.position).normalize();
     for (let t=0; t<220; t+=0.1) {
@@ -385,26 +419,30 @@ export async function initHud(ctx) {
     }
   }
   const labels = landmarks.map(landmark => {
-    const element = Object.assign(document.createElement('div'), {className:'label', textContent:landmark.name});
+    const element = Object.assign(document.createElement('div'), {className:'label', innerHTML:landmark.name+'<small></small>'});
     element.onclick = () => landmark===summit ? (state.show.custom = false, state.cleared = false, refreshLines(), buildMenus()) : setCustom(landmark);
     root.appendChild(element);
-    return {element, point:new THREE.Vector3(landmark.position[0], heightAt(...landmark.position)+0.3, landmark.position[1])};
+    return {element, landmark, point:new THREE.Vector3(landmark.position[0], heightAt(...landmark.position)+0.3, landmark.position[1])};
   });
   const projected = new THREE.Vector3();
 
   // ---- commands: typing, menus and speech share this ----
   function command(text) {
     const parsed = parseCommand(text, landmarks);
-    $('hudHeard').textContent = '“'+text+'”';
-    setTimeout(() => { if ($('hudHeard').textContent==='“'+text+'”') $('hudHeard').textContent = ''; }, 4000);
     if (parsed.type==='goto') {
       if (parsed.landmark===summit) { state.show.custom = false; state.show.safe = true; state.cleared = false; arrived = null; replanAll(); buildMenus(); note('Safe route to Ridge summit', {speak:true}); }
       else setCustom(parsed.landmark);
     } else if (parsed.type==='clear') { state.cleared = true; refreshLines(); note('Route cleared'); }
-    else if (parsed.type==='layer') setLayer(parsed.layer, parsed.on);
-    else if (parsed.type==='route') { state.show[parsed.which] = parsed.on; state.cleared = false; replanAll(); buildMenus(); }
-    else if (parsed.type==='map') enterMap();
-    else if (parsed.type==='mute') { state.muted = parsed.on; if (parsed.on) window.speechSynthesis?.cancel(); buildMenus(); }
+    else if (parsed.type==='layer') { const shown = state.layer===parsed.layer && overlayTarget===1; setLayer(parsed.layer, parsed.on==='toggle' ? !shown : parsed.on); }
+    else if (parsed.type==='route') {
+      if (parsed.which==='custom' && !state.custom) note('No voice route yet. Say "take me to the slab".');
+      else { const shown = state.show[parsed.which] && !state.cleared; state.show[parsed.which] = parsed.on==='toggle' ? !shown : parsed.on; state.cleared = false; replanAll(); buildMenus(); }
+    }
+    else if (parsed.type==='map') state.mapMode ? exitMap() : enterMap();
+    else if (parsed.type==='close') { closeMenus(); if (state.mapMode) exitMap(); }
+    else if (parsed.type==='reset') resetAll();
+    else if (parsed.type==='menu') { const button = root.querySelector('[data-menu=hud'+parsed.menu[0].toUpperCase()+parsed.menu.slice(1)+']'); if (document.pointerLockElement) document.exitPointerLock(); if (!$(button.dataset.menu).classList.contains('open')) button.click(); }
+    else if (parsed.type==='mute') { state.muted = parsed.on==='toggle' ? !state.muted : parsed.on; if (parsed.on) window.speechSynthesis?.cancel(); buildMenus(); }
     else if (parsed.type==='drain') { state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
     else if (parsed.type==='unknown') note(parsed.message);
     return parsed.type;
@@ -428,6 +466,7 @@ export async function initHud(ctx) {
     item(options, 'Map', state.mapMode, () => state.mapMode ? exitMap() : enterMap());
     item(options, 'Clear route', state.cleared, () => { state.cleared = !state.cleared; refreshLines(); buildMenus(); });
     item(options, 'Mute', state.muted, () => command(state.muted ? 'unmute' : 'mute'));
+    item(options, Recognition ? 'Roxy voice' : 'Roxy voice · unavailable', roxy.enabled, () => setRoxy(!roxy.enabled), {colour:AMBER, disabled:!Recognition});
     const toggle = name => () => { state.show[name] = !state.show[name]; state.cleared = false; replanAll(); buildMenus(); };
     item(routes, 'Straight line', state.show.straight && !state.cleared, toggle('straight'), {colour:ROUTE.straight});
     item(routes, 'Safe route', state.show.safe && !state.cleared, toggle('safe'), {colour:ROUTE.safe});
@@ -448,25 +487,55 @@ export async function initHud(ctx) {
   });
   input.addEventListener('keyup', event => event.stopPropagation());
 
-  // Speech: push-to-talk on V. Chrome's recogniser sends audio to an online service, so it listens only while V is held.
+  // Roxy: wake-word voice control. The recogniser listens continuously for "Roxy", then takes the next phrase
+  // as a command. In Chrome the audio goes to an online speech service while Roxy is on, so it is a visible toggle.
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recogniser = null, listening = false, heard = '';
-  function listen(on) {
-    if (on===listening) return;
-    if (!Recognition) { if (on) note('Voice is not available in this browser. Press T to type.'); return; }
-    listening = on;
-    if (on) {
-      heard = '';
-      recogniser = Object.assign(new Recognition(), {lang:'en-US', interimResults:true, continuous:true});
-      recogniser.onresult = event => { heard = Array.from(event.results, r => r[0].transcript).join(' '); $('hudHeard').textContent = '● '+heard; };
-      recogniser.onerror = event => { const why = {'not-allowed':'Microphone permission denied.', 'network':'Voice needs a network connection in this browser.'}[event.error]; if (why) note(why+' Press T to type.'); };
-      recogniser.onend = () => { listening = false; if (heard.trim()) command(heard.trim()); else $('hudHeard').textContent = ''; };
-      try { recogniser.start(); $('hudHeard').textContent = '● Listening'; } catch { listening = false; }
-    } else recogniser?.stop();
+  const roxy = {enabled:false, armed:false, running:false, recogniser:null, timer:null, handled:-1};
+  const WAKE = /\b(roxy|roxie|roxi|rocksy|rocksie|rock ?sea|rocky|proxy|foxy|rox)\b[\s,.!?]*/i;
+  function arm(on) {
+    roxy.armed = on;
+    $('hudRoxy').classList.toggle('on', on);
+    if (on) $('hudHeard').textContent = '';
+    clearTimeout(roxy.timer);
+    if (on) roxy.timer = setTimeout(() => arm(false), 7000);
   }
+  function hear(text, final) {
+    const wake = WAKE.exec(text);
+    let said = text;
+    if (wake) { if (!roxy.armed) arm(true); said = text.slice(wake.index+wake[0].length); }
+    if (!roxy.armed) return;
+    said = said.trim();
+    $('hudHeard').textContent = said;
+    if (said) { clearTimeout(roxy.timer); roxy.timer = setTimeout(() => arm(false), 7000); }
+    if (final && said) { arm(false); command(said); }
+  }
+  function startRecogniser() {
+    if (!Recognition || roxy.running || !roxy.enabled) return;
+    const r = roxy.recogniser = Object.assign(new Recognition(), {lang:'en-US', interimResults:true, continuous:true});
+    r.onresult = event => {
+      for (let i=event.resultIndex; i<event.results.length; i++) {
+        const result = event.results[i];
+        hear(result[0].transcript, result.isFinal);
+      }
+    };
+    r.onerror = event => {
+      if (event.error==='not-allowed' || event.error==='service-not-allowed') { roxy.enabled = false; note('Microphone permission denied. Press T to type commands.'); refreshRoxy(); }
+      else if (event.error==='network') { roxy.enabled = false; note('Roxy needs a network connection in this browser. Press T to type commands.'); refreshRoxy(); }
+    };
+    r.onend = () => { roxy.running = false; if (roxy.enabled) setTimeout(startRecogniser, 250); };   // Chrome stops after silence; keep listening
+    try { r.start(); roxy.running = true; } catch {}
+  }
+  function refreshRoxy() { $('hudEar').classList.toggle('on', roxy.enabled); if (!roxy.enabled) arm(false); buildMenus(); }
+  function setRoxy(on) {
+    roxy.enabled = on && !!Recognition;
+    if (roxy.enabled) startRecogniser(); else roxy.recogniser?.stop();
+    refreshRoxy();
+  }
+  function resetAll() { resetButton?.click(); refill(); closeMenus(); note('Position reset'); }
+  $('hudReset').onclick = resetAll;
   addEventListener('keydown', event => {
     if (event.target===input) return;
-    if (event.code==='KeyV') { listen(true); return; }
+    if (event.code==='KeyV') { if (!event.repeat) { if (!roxy.enabled) setRoxy(true); arm(true); } return; }
     if (event.repeat) return;
     if (event.code==='KeyM') state.mapMode ? exitMap() : enterMap();
     else if (event.code==='KeyC') command('clear route');
@@ -476,7 +545,6 @@ export async function initHud(ctx) {
     else if (event.code==='KeyR') refill();
     else if (event.code==='KeyT') { event.preventDefault(); if (document.pointerLockElement) document.exitPointerLock(); typeBox.style.display = 'block'; input.focus(); }
   });
-  addEventListener('keyup', event => { if (event.code==='KeyV') listen(false); });
 
   // ---- drawing ----
   const bearingOf = yaw => (Math.atan2(Math.sin(yaw), -Math.cos(yaw))*180/Math.PI+360)%360;
@@ -507,9 +575,10 @@ export async function initHud(ctx) {
   }
 
   function drawMini(yaw) {
-    const {width:w} = mini.canvas, c = w/2, s = w/38, [px,pz] = player();
-    const sx = x => c+(px-x)*s, sy = z => c-(z-pz)*s;
-    mini.fillStyle = '#2a211c'; mini.fillRect(0,0,w,w);
+    // Fixed view of the rendered patch (plus a 4 m rim so Home Base shows); only the cursor moves.
+    const {width:w, height:hh} = mini.canvas, rim = 4, s = w/(W+2*rim), [px,pz] = player();
+    const sx = x => (W+rim-x)*s, sy = z => (D+rim-z)*s;
+    mini.fillStyle = '#2a211c'; mini.fillRect(0,0,w,hh);
     mini.imageSmoothingEnabled = true;
     mini.drawImage(baseMap, sx(EX+EW), sy(EZ+ED), EW*s, ED*s);
     if (state.layer && overlayFade>0.02) {
@@ -521,20 +590,20 @@ export async function initHud(ctx) {
       if (!r || !lines[name].visible) continue;
       mini.beginPath();
       r.dense.slice(r.progress ?? 0).forEach(([x,,z],i) => i ? mini.lineTo(sx(x),sy(z)) : mini.moveTo(sx(x),sy(z)));
-      mini.strokeStyle = '#000a'; mini.lineWidth = 5; mini.stroke();
-      mini.strokeStyle = ROUTE[name]; mini.lineWidth = name==='straight' ? 2 : 3; mini.stroke();
+      mini.strokeStyle = '#0009'; mini.lineWidth = 3.5; mini.stroke();
+      mini.strokeStyle = ROUTE[name]; mini.lineWidth = name==='straight' ? 1.5 : 2; mini.stroke();
     }
     const target = !state.cleared && destination();
     if (target) {
-      const tx = Math.max(10, Math.min(w-10, sx(target.position[0]))), ty = Math.max(10, Math.min(w-10, sy(target.position[1])));
-      mini.fillStyle = ROUTE[active()]; mini.strokeStyle = '#000'; mini.lineWidth = 1.5;
-      mini.beginPath(); mini.arc(tx, ty-7, 6, Math.PI, 0); mini.lineTo(tx, ty+3); mini.closePath(); mini.fill(); mini.stroke();
+      const tx = sx(target.position[0]), ty = sy(target.position[1]);
+      mini.fillStyle = ROUTE[active()]; mini.strokeStyle = '#000'; mini.lineWidth = 1.2;
+      mini.beginPath(); mini.moveTo(tx, ty-6); mini.lineTo(tx+5, ty); mini.lineTo(tx, ty+6); mini.lineTo(tx-5, ty); mini.closePath(); mini.fill(); mini.stroke();
     }
     mini.fillStyle = '#fff'; mini.strokeStyle = '#000'; mini.lineWidth = 1;
-    mini.fillRect(sx(base.position[0])-4, sy(base.position[1])-4, 8, 8); mini.strokeRect(sx(base.position[0])-4, sy(base.position[1])-4, 8, 8);
-    mini.save(); mini.translate(c,c); mini.rotate(bearingOf(yaw)*Math.PI/180);
-    mini.beginPath(); mini.moveTo(0,-15); mini.lineTo(11,11); mini.lineTo(0,5); mini.lineTo(-11,11); mini.closePath();
-    mini.fillStyle = '#fff'; mini.strokeStyle = '#111'; mini.lineWidth = 2.5; mini.lineJoin = 'round'; mini.stroke(); mini.fill(); mini.restore();
+    mini.fillRect(sx(base.position[0])-3, sy(base.position[1])-3, 6, 6); mini.strokeRect(sx(base.position[0])-3, sy(base.position[1])-3, 6, 6);
+    mini.save(); mini.translate(Math.max(6, Math.min(w-6, sx(px))), Math.max(6, Math.min(hh-6, sy(pz)))); mini.rotate(bearingOf(yaw)*Math.PI/180);
+    mini.beginPath(); mini.moveTo(0,-8); mini.lineTo(6,6); mini.lineTo(0,3); mini.lineTo(-6,6); mini.closePath();
+    mini.fillStyle = '#fff'; mini.strokeStyle = '#111'; mini.lineWidth = 2; mini.lineJoin = 'round'; mini.stroke(); mini.fill(); mini.restore();
   }
 
   const figure = new Path2D('M-5-22 L5-22 L27-12 L25-4 L8-10 L8 8 L11 36 L3 36 L0 15 L-3 36 L-11 36 L-8 8 L-8-10 L-25-4 L-27-12Z');
@@ -571,17 +640,21 @@ export async function initHud(ctx) {
 
   function placePin() {
     const pin = $('hudPin'), target = !state.cleared && destination(), r = state.routes[active()];
-    if (!target || !r || flight) { pin.style.display = 'none'; return; }
+    if (!target || !r || flight || state.mapMode) { pin.style.display = 'none'; return; }
     projected.set(target.position[0], heightAt(...target.position)+2.4, target.position[1]).project(camera);
     if (projected.z>1 || Math.abs(projected.x)>1.05) { pin.style.display = 'none'; return; }
     const left = r.distance-r.cumulative[r.progress], seconds = r.time*left/Math.max(r.distance,0.01);
-    pin.style.display = 'block'; pin.style.borderColor = ROUTE[active()];
-    pin.style.left = (projected.x+1)/2*innerWidth+'px'; pin.style.top = Math.max(70, (1-projected.y)/2*innerHeight)+'px';
-    pin.innerHTML = Math.round(seconds)+' s<span>·</span>'+Math.round(left)+' m';
+    const px = (projected.x+1)/2*innerWidth, py = Math.max(150, (1-projected.y)/2*innerHeight);
+    // Keep clear of the title, the compass and the minimap.
+    if ((px<330 && py<300) || (px>innerWidth-330 && py<300)) { pin.style.display = 'none'; return; }
+    pin.style.display = 'block'; pin.style.left = px+'px'; pin.style.top = py+'px';
+    pin.innerHTML = '<b>'+Math.round(seconds)+'</b>s<em>/</em><b>'+Math.round(left)+'</b>m';
   }
   function placeLabels() {
-    for (const {element, point} of labels) {
+    for (const {element, point, landmark} of labels) {
       if (!state.mapMode || flight) { element.style.display = 'none'; continue; }
+      const r = landmark===destination() && !state.cleared ? state.routes[active()] : null;
+      element.lastChild.textContent = r ? Math.round(r.time*(1-r.cumulative[r.progress]/Math.max(r.distance,0.01)))+' s / '+Math.round(r.distance-r.cumulative[r.progress])+' m' : '';
       projected.copy(point).project(camera);
       element.style.display = projected.z<1 ? 'block' : 'none';
       element.style.left = (projected.x+1)/2*innerWidth+'px'; element.style.top = (1-projected.y)/2*innerHeight+'px';
@@ -614,6 +687,6 @@ export async function initHud(ctx) {
   }
 
   replanAll(); buildMenus();
-  return {update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill,
+  return {update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill, hear, roxy,
     get flying() { return !!flight; }};
 }

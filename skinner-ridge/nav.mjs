@@ -154,7 +154,7 @@ export function makeNav(meta, ground) {
 // Positions are local metres on this mesh. Names are team labels, not NASA feature names.
 export function makeLandmarks(route) {
   return [
-    {id:'summit', name:'Ridge summit', aliases:['summit','ridge','hill','hilltop','top of the hill','the top','peak','goal','destination'], position:[39,30.5]},
+    {id:'summit', name:'Ridge summit', aliases:['summit','ridge','hill','hilltop','top of the hill','the top','peak','goal','destination'], position:[42,41]},
     {id:'base', name:'Home Base', aliases:['home','base','home base','start','lander','habitat'], position:[route.start.x, route.start.z]},
     {id:'slab', name:'Layered slab', aliases:['slab','pale slab','layered rock','rock'], position:[route.spawn.targetX, route.spawn.targetZ]},
     {id:'lower', name:'Lower path', aliases:['lower path','lower','path'], position:[route.lowerPath.end.x, route.lowerPath.end.z]}
@@ -196,12 +196,19 @@ export function parseCommand(text, landmarks) {
   if (/\b(clear|cancel|remove)\b.*\b(route|path|navigation)\b|^cancel$|^clear$/.test(t)) return {type:'clear'};
   if (/\b(low|drain|simulate)\b.*\b(oxygen|o2|power|fuel)\b/.test(t)) return {type:'drain'};
   if (/\bunmute\b|\bsound on\b/.test(t)) return {type:'mute', on:false};
+  if (/^mute$/.test(t)) return {type:'mute', on:'toggle'};
   if (/\b(mute|quiet|silence)\b/.test(t)) return {type:'mute', on:true};
-  const hide = /\b(hide|off|disable|remove)\b/.test(t);
-  if (/\bslopes?\b|\bsteep\b/.test(t)) return {type:'layer', layer:'slope', on:!hide};
-  if (/\bground truth\b|\bprovenance\b|\bmeasured\b/.test(t)) return {type:'layer', layer:'truth', on:!hide};
-  if (/\b(straight|direct)\b/.test(t)) return {type:'route', which:'straight', on:!hide};
-  if (/\bsafe\b/.test(t) && !/\b(take|go|navigate)\b/.test(t)) return {type:'route', which:'safe', on:!hide};
+  if (/^(close|exit|back|go back|close map|close the map|close menu|never ?mind)$/.test(t)) return {type:'close'};
+  if (/\breset\b/.test(t)) return {type:'reset'};
+  const menu = /^(?:open |show )?(?:the )?(options|routes)(?: menu)?$/.exec(t);
+  if (menu) return {type:'menu', menu:menu[1]};
+  // Saying just the name toggles; "show" or "hide" sets it.
+  const on = /\b(hide|off|disable|remove)\b/.test(t) ? false : /\b(show|on|enable|display)\b/.test(t) ? true : 'toggle';
+  if (/\bslopes?\b|\bsteep\b/.test(t)) return {type:'layer', layer:'slope', on};
+  if (/\bground truth\b|\bprovenance\b|\bmeasured\b/.test(t)) return {type:'layer', layer:'truth', on};
+  if (/\b(straight|direct)\b/.test(t)) return {type:'route', which:'straight', on};
+  if (/\b(voice|custom|saved) (route|path)\b/.test(t)) return {type:'route', which:'custom', on};
+  if (/\bsafe\b/.test(t) && !/\b(take|go|navigate)\b/.test(t)) return {type:'route', which:'safe', on};
   if (/\b(return|go back|back)\b.*\b(start|home|base)\b|^go home$|^return$/.test(t)) return {type:'goto', landmark:landmarks.find(l => l.id==='base')};
   if (/\b(map|plan|planning|overview)\b/.test(t) && !/\b(take|go|route|navigate)\b/.test(t)) return {type:'map'};
   const go = /\b(?:take me to|go to|navigate to|route to|walk to|head to|guide me to|direct me to)\b(.*)$/.exec(t);
