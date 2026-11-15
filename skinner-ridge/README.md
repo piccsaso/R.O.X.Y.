@@ -15,6 +15,37 @@ Open [the local demo](http://127.0.0.1:8080/) in desktop Chrome or Edge. Click *
 
 [Start at the slab](screenshots/spawn.png) · [Look back at the slab](screenshots/walked-return.png) · [Explore beyond the old boundary](screenshots/walked-expanded.png) · [Crossing inferred ground](screenshots/walked-infill.png) · [Overhead view](screenshots/survey.png)
 
+## Helmet HUD, route planner and scanner
+
+The walk now carries a simulated helmet display. It reads the same ground the walker collides with (`ground.bin`), so what it warns about is what actually stops you.
+
+| Do this | Key or command |
+|---|---|
+| Plan a route to a landmark | Press **T** and type `take me to the upper bench`, or hold **V** and say it |
+| Tint the terrain by dataset | **1** hazards, **2** slope, **3** ground truth (measured or inferred), **4** surveyed ground |
+| Open the planning view | **M**. Drag to orbit, scroll to zoom, click the terrain or a label to set a destination. **M** or **Enter terrain** dives back |
+| Clear the route, mute spoken alerts | **C**, **N** |
+
+Other commands: `show hazards`, `hide slopes`, `show ground truth`, `return to start`, `clear route`, `map`. Landmarks: Layered slab, Outcrop band, Upper bench, Look-back point, South-east corner, East edge. These are team labels, not NASA feature names.
+
+**What it does.** The route is planned on a prior map, then corrected as you walk. The scanner sweeps the ground within 7 m, with terrain blocking its view, and marks what it has surveyed. When it finds a rock step the prior map missed on your route, the HUD says what it found and how far ahead, re-plans, and redraws the route. Try `take me to the upper bench` from the start: the first route crosses the outcrop band and is replaced when the scanner reaches it. On arrival a card describes the stop.
+
+**What is real and what is simulated.**
+
+| Item | Class | Source |
+|---|---|---|
+| Terrain shape and colour, measured or inferred flag | Observation | NASA/JPL-Caltech Navcam mesh products, sols 470 to 501 |
+| Hazards, slope, route distance and climb | Derived from the terrain | `ground.bin`, 3.5 cm samples, 14 cm routing grid |
+| Scanner and the surveyed area | Simulated sensor reading the measured surface | `nav.mjs` |
+| Prior map | Simulated: the rover surface averaged to 1 m, the post spacing of the HiRISE elevation product. It is not the HiRISE product itself | `nav.mjs` |
+| Walking time, EVA budget, reserve, safe-return margin | Assumptions, editable on screen | `config` in `nav.mjs` |
+
+A step counts as a hazard when the walker cannot cross it: more than 17 cm between the centre and the edge of a 16 cm footprint, or more than 25 cm across it. Walking time uses a slope-dependent speed scaled to 1.1 m/s on the flat. It is not a validated spacewalk model.
+
+Voice uses the browser's speech recognition and only listens while **V** is held. In Chrome the audio goes to an online service. If the microphone or the service is unavailable, the button says so and typing still works. Spoken alerts use the browser's built-in voice and work offline.
+
+`npm.cmd test` runs the planner checks on the real ground data: routes to every landmark are walked with the viewer's own movement rule, the detour names a real blocker, and the prior route is blocked and replaced after scanning. Add `?hud=0` to the address to open the original demo without the HUD.
+
 ## What was measured and what was filled
 
 NASA/JPL-Caltech Navcam mesh and image products from sols 470, 471, 474, 477, 499, and 501 provide the ground measurements and color. This expansion evaluated six additional views. Twenty-three of the thirty tested inputs contributed. The manifest records every input and its actual contribution. **63%** of the export’s horizontal footprint had sufficient stereo samples to anchor the mesh. Gaps and the remaining margins use estimated heights and texture sampled from sharp rover-covered surfaces. The viewer extends the horizon with decorative terrain beyond the playable mesh. The infill and horizon are approximate.

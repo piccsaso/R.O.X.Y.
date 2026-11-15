@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {makeGround} from './ground.mjs';
 import {addLandscape} from './landscape.mjs';
+import {initHud} from './hud.mjs';
 
 const status = document.getElementById('status');
 const enter = document.getElementById('enter');
@@ -95,6 +96,12 @@ try {
     camera.position.set(meta.boundsMeters[0]/2,Math.max(...meta.boundsMeters)*1.2,meta.boundsMeters[1]/2);
     camera.rotation.set(-Math.PI/2,0,0);
   }
+  // The HUD is skipped in the plain overhead survey, or with ?hud=0.
+  const hud = mode==='survey' || query.get('hud')==='0' ? null : await initHud({
+    THREE, scene, camera, renderer, canvas, ground, meta, route, binary, terrain:mesh.scene,
+    material:terrainMaterial, eyeHeight, isLocked:lock, enterButton:enter
+  });
+  if (query.has('qa')) window.hud = hud;
   function resize() {
     camera.aspect = innerWidth/innerHeight;
     camera.updateProjectionMatrix();
@@ -114,7 +121,7 @@ try {
     status.textContent = lock() ? help : 'Click Enter terrain to walk';
   });
   document.addEventListener('mousemove',event => {
-    if (!lock()) return;
+    if (!lock() || hud?.flying) return;
     yaw -= event.movementX*0.002;
     pitch = THREE.MathUtils.clamp(pitch-event.movementY*0.002,-1.52,1.52);
     camera.rotation.set(pitch,yaw,0);
@@ -133,7 +140,7 @@ try {
     previous = now;
     const forward = Number(keys.has('KeyW'))-Number(keys.has('KeyS'));
     const strafe = Number(keys.has('KeyD'))-Number(keys.has('KeyA'));
-    if (lock() && (forward || strafe)) {
+    if (lock() && !hud?.state.mapMode && (forward || strafe)) {
       const substeps = Math.max(1,Math.ceil(dt/0.025));
       const speed = dt * 1.1 / (Math.hypot(forward,strafe)*substeps);
       const dx = (strafe*Math.cos(yaw)-forward*Math.sin(yaw))*speed;
@@ -148,6 +155,7 @@ try {
         }
       }
     }
+    if (hud?.update(dt,now,yaw)) needsFrame = true;
     if (needsFrame) {
       sky?.position.copy(camera.position);
       renderer.render(scene,camera);

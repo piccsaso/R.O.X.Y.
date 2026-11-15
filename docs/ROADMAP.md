@@ -1,84 +1,58 @@
 # Roadmap: Marswalk HUD
 
-NASA Space Apps 2026, "Interplanetary Survival Guide: Martian Map".
+NASA Space Apps 2026, "Interplanetary Survival Guide: Martian Map". Submission closes Sunday 15 November, 12:00 noon EST. Demo limit: a 30-second video or 7 slides.
 
-**One line:** a voice-driven helmet HUD, rehearsed in first person on real reconstructed Mars terrain, that plans a safe route to a science target, scans for obstacles as the astronaut walks, and re-routes when the ground disagrees with the orbital map.
+**One line:** a voice-driven helmet HUD, rehearsed in first person on real Perseverance terrain, that plans a safe route to a science target, scans for obstacles as the astronaut walks, and re-routes when the ground turns out to differ from the prior map.
 
-This roadmap merges three inputs: the team's HUD idea, `docs/prompts/master-step1.txt` (terrain reconstruction) and `docs/prompts/master-step2.txt` (layers, planner, voice). Where they conflict, the master prompts' evidence and honesty rules win.
+## What changed on Saturday evening
 
-## 1. Who does what
+The first plan split the app across two other models behind a shared scene contract. It produced schemas and a synthetic test scene, not features on the real terrain, and was reverted from `main`. The plan now is simpler:
 
-| Owner | Role | Owns these paths (nobody else edits them) |
-|---|---|---|
-| **6.1 Sol** | Data and terrain (Python) | `scripts/`, `data/` (manifest only is committed), `scenes/jezero_orbital/`, `scenes/jezero_rover/`, `docs/CHALLENGE.md`, `docs/SITE_SELECTION.md`, `docs/SOURCES.md` |
-| **GPT Astra** | App, contract, planner, HUD (TypeScript) | `app/`, `schema/`, `scenes/test_scene/`, `config/`, `tools/`, `CONTRACT.md` |
-| **Lead (Claude)** | Integration, review, validation, submission | `README.md`, `docs/ROADMAP.md`, `docs/VALIDATION.md`, `docs/prompts/` |
-| Shared | Decision log | `DECISIONS.md`: append only, prefix each entry with the owner's name |
+- **Everything is built directly on `skinner-ridge/`**, the working first-person walk on a 28 × 24.5 m patch of Perseverance's Skinner Ridge workspace. No separate app, no contract, no test scene. Plain JavaScript modules, same as the existing demo.
+- **The HUD, planner and scanner are built by the lead (Claude) in this repository** and verified in a browser, instead of being delegated.
+- **One optional data prompt** remains for another model: `docs/prompts/data-pack.md`. The app works without it; the pack adds orbital context and verified science facts.
+- The Astra and Sol prompts are deleted.
 
-The split is by skill type, not by model strength. If one model proves better at the other's work, swap the prompts; the path ownership still prevents merge conflicts.
+## What exists now (in `skinner-ridge/`)
 
-Each model works on its own branch (`sol/<task>`, `astra/<task>`) and merges to `main` at the end of each prompt. Neither waits on the other: Astra builds everything against `test_scene`, Sol delivers real scenes in the same format.
-
-## 2. Work packages
-
-Send the prompts in order within each column. The two columns run in parallel.
-
-| Order | 6.1 Sol | GPT Astra |
-|---|---|---|
-| 1 | `sol-1-orbital-scene.md` (4 h): challenge notes, site choice, Tier 0 orbital scene (the guaranteed submission) | `astra-1-contract-walker.md` (3 h): scene contract, scene-core, test scene, first-person walk, HUD shell |
-| 2 | `sol-3-science-layers.md` (3 h): landmarks, arrival photos, rover traverse, thermal layer, radiation scenario inputs | `astra-2-layers-planner.md` (5 h): layers, hazard-aware route planner, map, acceptance tests |
-| 3 | `sol-2-rover-patch.md` (5 h, stretch): rover-derived textured patch, strictly time-boxed | `astra-3-hud-scanner-voice.md` (5 h): HUD, safe-return gauge, obstacle scanner, live re-route, voice, mission-control mirror |
-| 4 | Lead: integration of the real scene, spatial agreement checks, walk test, README, video and project page | |
-
-Sol runs prompt 3 before prompt 2 on purpose. With about 14 working hours, the landmarks and multi-mission layers are worth more to the judges than photoreal ground, and they work on the orbital scene. The rover patch is attempted last and dropped without regret if it is not ready by 06:00.
-
-Paste `00-shared-rules.md` in front of every prompt. Both models also need the two master prompt files (they are in `docs/prompts/`).
-
-## 3. Schedule
-
-Submission closes **Sunday 15 November 2026, 12:00 noon local time (EST)**. This schedule was written at 18:00 Saturday, leaving 18 hours: 14 for building and 4 protected for submission. The demo is limited to a 30-second video or 7 slides (confirmed by the team).
-
-| Local time | What must be true |
+| Feature | File |
 |---|---|
-| Sat 20:00 | Astra: `CONTRACT.md` on `main` and `test_scene` walkable. Sol: site chosen, orbital data downloading. |
-| Sat 22:30 | Sol 1 merged: the orbital scene loads in Astra's app. This alone is a valid submission. |
-| Sun 02:00 | Astra 2 merged: typed routing works on the orbital scene. Sol 3 merged: landmarks and layers present. |
-| Sun 06:00 | Integration point. The rover scene is integrated, or the orbital scene ships. No waiting on reconstruction after this. |
-| Sun 07:00 | Feature cut. Anything not merged and working is dropped. |
-| Sun 08:00 | Code freeze. Only README, video, slides and project page from here. |
-| Sun 11:00 | Submit. The last hour is slack for upload problems. |
+| First-person walk on Navcam-derived terrain | `viewer.mjs`, `ground.mjs` (teammate) |
+| Route planner on the walking surface: A*, no corner cutting, validated shortcuts, slope-based time, detour reason from the real blocker | `nav.mjs`, tested on the real ground data with `npm test` |
+| Prior map versus surveyed ground, scanner with terrain occlusion, automatic re-route | `nav.mjs`, `hud.mjs` |
+| Helmet HUD: heading tape, slope, ground provenance, route and ETA, safe-return gauge, alerts, radar, minimap | `hud.mjs` |
+| Data highlight buttons that tint the terrain: hazards, slope, ground truth, surveyed | `hud.mjs` |
+| Planning view: oblique camera, labels with leader lines, click to set a destination, dive back to first person | `hud.mjs` |
+| Typed commands, push-to-talk voice, spoken alerts, all through one parser | `hud.mjs`, `nav.mjs` |
 
-Cut order if time runs short: mission-control mirror, voice, radiation scenario, geologic units, rover patch (fall back to orbital scene). The route planner, obstacle scanner and HUD are never cut.
+Verification status is in `skinner-ridge/README.md`.
 
-## 4. Interface pins (v0)
+## What is still missing, in priority order
 
-These are fixed now so that Sol can produce scenes before Astra finishes the schema. Astra formalises them in `schema/` and `CONTRACT.md` and may add fields but not change these.
+1. **Data from a second NASA mission.** Everything shown today comes from Perseverance. The challenge asks for several missions. The data pack prompt covers this (HiRISE orbital image and elevation, THEMIS or geology), and the app then needs a loader for it. This session cannot reach NASA or USGS servers, so someone else has to fetch the files.
+2. **Verified science facts for the stop.** The science card says only what the repository has verified. Sample and abrasion names for Skinner Ridge need a source check (data pack).
+3. **Voice test** on a real machine: which commands are recognised, and whether Chrome recognises on the device or online.
+4. **Demo video** (30 seconds): planning view with a highlight on, say "take me to the upper bench", dive to first person, scanner finds the rock step and re-routes, arrive, science card.
+5. **README and project page text**, written against the judging criteria.
 
-- Units are metres. Axes: +X east, +Y up, −Z north, right-handed (glTF). Scene origin is a documented point in the rover SITE frame or a documented lat/lon.
-- A scene is a directory `scenes/<scene_id>/` with `scene.json`, `terrain.glb`, `collision.glb`, `landmarks.json`, `overlays/`, `routes/`, as listed in master step 2, section C0.1.
-- `collision.glb` node names carry meaning: ground nodes are named `ground_<PROVENANCE>` (`ROVER_MEASURED`, `ROVER_STEREO`, `ORBITAL`, `INTERPOLATED`); solid obstacles are named `obstacle_<name>`.
-- Optional `prior_collision.glb`: the ground as known before the walk (orbital resolution). It feeds the remap feature in section 5. For the rover scene it is the orbital terrain cropped to the same footprint.
-- Raster overlays are PNG files with an entry in `scene.json` giving bounds in local metres, units, value range and data class. Vector overlays and routes are GeoJSON with coordinates in local metres `[x, z]`.
-- `ground_grid` is built by Astra's tool from `collision.glb`. Sol does not produce it.
+## Schedule (local time)
 
-## 5. Changes to the original idea
+| When | What must be true |
+|---|---|
+| Sat 22:00 | HUD, planner and scanner merged to `main` and run on a teammate's Windows machine. |
+| Sun 02:00 | Data pack delivered, or the decision is made to submit without orbital layers. |
+| Sun 06:00 | Orbital context and science facts loaded in the app, if delivered. Voice tested. |
+| Sun 08:00 | Code freeze. Only README, video and project page from here. |
+| Sun 11:00 | Submit. The last hour is slack. |
 
-### Assumed in the prompts (needed to make the idea buildable; say no and the prompts get rewritten)
+## Honesty rules the app follows
 
-1. **"AR" becomes a simulated visor HUD.** There is no headset, so the HUD is drawn over a first-person view of reconstructed real terrain in the browser. It is presented as a rehearsal of what the astronaut would see, not as working AR hardware.
-2. **"LIDAR" becomes a simulated suit scanner.** It casts rays against the scene's measured collision surface around the player and draws the hits as a radar display and a point sweep. It is labelled as a simulated sensor reading real measured geometry.
-3. **"Constant remapping" becomes prior versus ground truth.** The route is first planned on the orbital-resolution map. As the scanner reveals ground, the local map is updated from the rover-scale surface. When a rock or drop that the orbital map missed blocks the route, the HUD says so and re-routes. This turns the remap into a visible event and uses two missions' data for a real reason.
-4. **Voice is built last** and goes through the same command parser as typing, so the demo never depends on a microphone.
-5. **The orbital scene ships first** as insurance. The rover-photoreal patch is an upgrade with a hard cut-off.
+- The scanner is a simulated sensor reading the measured surface. The HUD is a simulated visor. Both are labelled.
+- The "prior map" is the rover surface averaged to 1 m, standing in for orbital-resolution knowledge. It is labelled simulated. If the data pack delivers the real HiRISE elevation, it replaces this.
+- Inferred terrain (37% of the patch) is shown as inferred in the HUD and in the Ground truth highlight.
+- Landmark names other than "Skinner Ridge" are team labels, and the interface says so.
+- Walking speed, the EVA budget and the reserve are assumptions, labelled and editable.
 
-### Approved by the team on 14 November (now in the prompts)
+## Reference
 
-| # | Proposal | Why | Cost |
-|---|---|---|---|
-| A | Safe-return indicator: a HUD gauge showing whether there is enough time and consumables to finish the route and walk back, from editable assumptions | Directly answers the challenge's safety priority and your "insurance" goal | About 1 h, Astra |
-| B | Spoken HUD callouts (browser speech synthesis, works offline): "Obstacle ahead, re-routing left" | Hands-free in both directions; strong in a 30-second video | About 30 min, Astra |
-| C | Mission-control mirror: a second browser tab showing the same map, position and alerts | Demonstrates the "less stress on the support scientists" claim instead of only stating it | About 1.5 h, Astra |
-| D | Arrival photo: on reaching a landmark, show the real Perseverance image of it beside the 3D view | The challenge page suggests point-of-view images; cheap proof of ground truth | About 45 min, Sol data and Astra card |
-| E | Thermal layer (THEMIS, Mars Odyssey) as the third data kind, map only | Gets to the "at least three kinds of data" the challenge suggests: optical, topographic, thermal | About 1 h, Sol |
-
-All five are approved. Because the build window is 14 hours, C is built last and is the first thing cut; E is dropped if the THEMIS product takes more than 45 minutes to register.
+`docs/img/reference/` holds NASA's Curiosity Mount Sharp route map (plain and highlighted), the visual target for the planning view. `docs/prompts/master-step1.txt` and `master-step2.txt` are the original specifications, kept for their evidence rules.
