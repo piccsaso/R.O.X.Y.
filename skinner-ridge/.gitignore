@@ -2,3 +2,7 @@ node_modules/
 source/
 .qa-chrome-*/
 team-briefs/
+
+.env.local
+# Local secrets written by `elevenlabs onboard`
+/.env.local

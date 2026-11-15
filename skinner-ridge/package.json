@@ -1,14 +1,18 @@
 {
   "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.78.0",
     "jpeg-js": "0.4.4",
     "pngjs": "7.0.0",
     "three": "0.180.0"
   },
   "scripts": {
-    "start": "node serve.mjs",
+    "start": "node --env-file=.env.local serve.mjs",
     "download": "node download.mjs",
     "build": "node reconstruct.mjs && node polish-atlas.mjs && node route-check.mjs",
     "capture": "node capture.mjs",
     "test": "node nav.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.9.0"
   }
 }
