@@ -75,4 +75,4 @@ The capture command uses Chrome at its default Windows path. Pass a different ex
 
 Rover imagery and stereo products are credited to NASA/JPL-Caltech. [JPL image use policy](https://www.jpl.nasa.gov/jpl-image-use-policy/).
 
-[Project history](PROJECT_HISTORY.md)
+[Full project history and prompts](PROJECT_HISTORY.md) · [Start here in a new chat](HANDOFF.md)
