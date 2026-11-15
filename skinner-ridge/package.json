@@ -6,7 +6,7 @@
     "three": "0.180.0"
   },
   "scripts": {
-    "start": "node --env-file=.env.local serve.mjs",
+    "start": "node --env-file-if-exists=.env.local serve.mjs",
     "download": "node download.mjs",
     "build": "node reconstruct.mjs && node polish-atlas.mjs && node terrain-normals.mjs && node route-check.mjs",
     "capture": "node capture.mjs",
