@@ -17,7 +17,7 @@ export async function handleTts(request, response) {
     let data;
     try { data = JSON.parse(body); } catch { return fail(400, 'Invalid JSON'); }
     if (typeof data?.text !== 'string' || !data.text.trim() || data.text.length > 2000) return fail(400, 'Text must contain 1 to 2000 characters');
-    const voice = process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb';
+    const voice = process.env.ELEVENLABS_VOICE_ID || 'cgSgspJ2msm6clMCkdW9';
     const client = new ElevenLabsClient();
     const stream = await client.textToSpeech.convert(voice, {
       text: data.text,
