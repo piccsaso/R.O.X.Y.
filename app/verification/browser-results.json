@@ -1,0 +1,118 @@
+{
+  "browser": "Chromium",
+  "headless": true,
+  "viewport": "1440x900",
+  "tests": [
+    {
+      "name": "boulder",
+      "start": {
+        "x": -8,
+        "z": 0,
+        "heading": 90
+      },
+      "stop": {
+        "x": -6.666800000000006,
+        "z": -8.163495563116251e-17,
+        "y": -0.16666999689638629,
+        "heading": 90,
+        "blocked": "obstacle",
+        "warning": null
+      },
+      "remainedBlocked": true
+    },
+    {
+      "name": "hole",
+      "start": {
+        "x": -16,
+        "z": 9,
+        "heading": 90
+      },
+      "stop": {
+        "x": -13.433199999999964,
+        "z": 9,
+        "y": -0.24583000111877829,
+        "heading": 90,
+        "blocked": "hole",
+        "warning": null
+      },
+      "remainedBlocked": true
+    },
+    {
+      "name": "ledge ascent",
+      "start": {
+        "x": 18,
+        "z": 5,
+        "heading": 180
+      },
+      "stop": {
+        "x": 18,
+        "z": 6.088799999999997,
+        "y": 0.510887989616394,
+        "heading": 180,
+        "blocked": "slope",
+        "warning": null
+      },
+      "remainedBlocked": true
+    },
+    {
+      "name": "ledge descent",
+      "start": {
+        "x": 18,
+        "z": 9,
+        "heading": 0
+      },
+      "stop": {
+        "x": 18,
+        "z": 7.916599999999986,
+        "y": 2.029165977144241,
+        "heading": 0,
+        "blocked": "slope",
+        "warning": null
+      },
+      "remainedBlocked": true
+    },
+    {
+      "name": "steep band",
+      "start": {
+        "x": 6,
+        "z": -12,
+        "heading": 90
+      },
+      "stop": {
+        "x": 7.599999999999994,
+        "z": -12,
+        "y": 0.07000000155530856,
+        "heading": 90,
+        "blocked": "slope",
+        "warning": null
+      },
+      "remainedBlocked": true
+    },
+    {
+      "name": "boundary",
+      "start": {
+        "x": 28,
+        "z": 0,
+        "heading": 90
+      },
+      "stop": {
+        "x": 29.58893333333336,
+        "z": -9.729410603626016e-17,
+        "y": 0.7397233431339271,
+        "heading": 90,
+        "blocked": "boundary",
+        "warning": null
+      },
+      "remainedBlocked": true
+    }
+  ],
+  "pointerLock": true,
+  "mouseLook": true,
+  "reset": true,
+  "offlineWalking": true,
+  "hudRegions": 6,
+  "watermark": true,
+  "errors": [],
+  "origin": "http://localhost:4173",
+  "build": "Production Vite build, index-Din04tPs.js"
+}
