@@ -19,6 +19,21 @@ export const config = {
 const speedFactor = grade => Math.exp(-3.5*Math.abs(grade+0.05))/Math.exp(-0.175);
 const maxFactor = 1/Math.exp(-0.175);
 
+// Hazard layers the safe route weighs. Each gives a risk from 0 (none) to 1 (at its limit) per grid cell.
+// ASSUMPTION values: weights and limits are planning choices, editable here.
+export const hazards = {
+  weights: {slope:1, topography:1, weather:1, thermal:1},
+  // At or beyond these, a cell is impassable.
+  limits: {
+    slope: 35,          // degrees over a 0.8 m baseline
+    topography: 0.45,   // m of height change within a 16 cm footprint (ledges, boulders)
+    weather: 0.9,       // normalised risk from the weather layer
+    thermal: 0.9        // normalised risk from the thermal layer
+  },
+  riskScale: 6          // a cell at combined risk 1 costs (1 + riskScale) times its walking time
+};
+export const hazardNames = ['slope','topography','weather','thermal'];
+
 export function makeNav(meta, ground) {
   const [width, depth] = meta.boundsMeters;
   const cell = config.cell, x0 = -config.margin, z0 = -config.margin;
@@ -30,7 +45,7 @@ export function makeNav(meta, ground) {
     const c = Math.floor((x-x0)/cell), r = Math.floor((z-z0)/cell);
     return c<0 || r<0 || c>=cols || r>=rows ? -1 : r*cols+c;
   };
-  // Unsafe footing: the surface steps by more than the limit within a 16 cm footprint.
+  // Height change within a 16 cm footprint.
   function footing(x, z) {
     const centre = ground.sample(x,z);
     if (!centre) return null;
@@ -42,14 +57,74 @@ export function makeNav(meta, ground) {
     }
     return {height:centre.height, step:high-low, slope:centre.slope};
   }
+
+  // Per-cell risk for each layer. NaN means the layer has no data there.
+  const risk = Object.fromEntries(hazardNames.map(name => [name, new Float32Array(count).fill(NaN)]));
+  const combined = new Float32Array(count), blocked = new Uint8Array(count), blockedBy = new Uint8Array(count);
+  const stepSize = new Float32Array(count);
   for (let i=0; i<count; i++) {
     const f = footing(...center(i));
     if (!f) { height[i] = NaN; unsafe[i] = 2; continue; }
-    height[i] = f.height;
+    height[i] = f.height; stepSize[i] = f.step;
     unsafe[i] = f.step>config.stepLimit ? 1 : 0;
   }
+  // Slope over a 0.8 m baseline and topography from the footing step, both from the terrain itself.
+  const span = Math.max(1, Math.round(0.4/cell));
+  for (let i=0; i<count; i++) {
+    if (unsafe[i]===2) continue;
+    const c = i%cols, r = Math.floor(i/cols);
+    const at = (cc,rr) => { const v = height[Math.min(rows-1,Math.max(0,rr))*cols+Math.min(cols-1,Math.max(0,cc))]; return Number.isFinite(v) ? v : height[i]; };
+    const gx = (at(c+span,r)-at(c-span,r))/(2*span*cell), gz = (at(c,r+span)-at(c,r-span))/(2*span*cell);
+    risk.slope[i] = Math.min(1, Math.atan(Math.hypot(gx,gz))*180/Math.PI/hazards.limits.slope);
+    risk.topography[i] = Math.min(1, stepSize[i]/hazards.limits.topography);
+  }
 
-  function astar(start, goal) {
+  // Combine the layers. Layers with no data at a cell are left out and the weights renormalised,
+  // so a missing or misaligned overlay never blocks or distorts the route.
+  function combine() {
+    for (let i=0; i<count; i++) {
+      if (unsafe[i]===2) { combined[i] = 1; blocked[i] = 1; blockedBy[i] = 0; continue; }
+      let sum = 0, weight = 0; blocked[i] = 0; blockedBy[i] = 0;
+      for (let k=0; k<hazardNames.length; k++) {
+        const name = hazardNames[k], value = risk[name][i], w = hazards.weights[name];
+        if (!Number.isFinite(value) || !(w>0)) continue;
+        sum += w*value; weight += w;
+        const hard = name==='slope' || name==='topography' ? value>=1 : value>=hazards.limits[name];
+        if (hard && !blocked[i]) { blocked[i] = 1; blockedBy[i] = k+1; }
+      }
+      combined[i] = weight ? sum/weight : 0;
+    }
+  }
+  combine();
+
+  // Plug in an external layer (weather, thermal, or a replacement for slope or topography).
+  // source is either {sample(x, z)} returning a risk 0..1 (null or NaN where unknown), or a grid
+  // {x0, z0, cell, cols, rows, values, min, max} in local metres whose values are scaled from min..max to 0..1.
+  // Returns how many routing cells received data, so a misaligned overlay is obvious.
+  function setOverlay(name, source) {
+    if (!hazardNames.includes(name)) throw new Error('Unknown hazard layer: '+name);
+    const layer = risk[name];
+    let filled = 0;
+    const read = !source ? () => NaN : typeof source.sample==='function' ? source.sample : (x,z) => {
+      const c = Math.floor((x-source.x0)/source.cell), r = Math.floor((z-source.z0)/source.cell);
+      if (c<0 || r<0 || c>=source.cols || r>=source.rows) return NaN;
+      const v = source.values[r*source.cols+c];
+      if (v===null || v===undefined || !Number.isFinite(v)) return NaN;
+      const lo = source.min ?? 0, hi = source.max ?? 1;
+      return hi>lo ? (v-lo)/(hi-lo) : NaN;
+    };
+    for (let i=0; i<count; i++) {
+      let v;
+      try { v = read(...center(i)); } catch { v = NaN; }
+      layer[i] = Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : NaN;
+      if (Number.isFinite(layer[i])) filled++;
+    }
+    combine();
+    return {name, cellsWithData:filled, coverage:filled/count};
+  }
+  const hasData = name => { const layer = risk[name]; for (let i=0; i<count; i+=37) if (Number.isFinite(layer[i])) return true; return false; };
+
+  function astar(start, goal, allowBlocked) {
     const g = new Float32Array(count).fill(Infinity), from = new Int32Array(count).fill(-1), closed = new Uint8Array(count);
     const heapF = [], heapI = [];
     const push = (f,i) => { let n = heapF.length; heapF.push(f); heapI.push(i);
@@ -76,10 +151,13 @@ export function makeNav(meta, ground) {
         if (!dr && !dc) continue;
         const u = c+dc, v = r+dr, n = v*cols+u;
         if (u<0 || v<0 || u>=cols || v>=rows || closed[n] || unsafe[n]===2) continue;
-        // No corner cutting past unsafe footing.
-        if (dr && dc && (unsafe[r*cols+u] || unsafe[v*cols+c]) && !unsafe[n]) continue;
+        // Hard constraint: impassable cells are not entered (the goal itself is exempt so a route can end at one).
+        if (blocked[n] && !allowBlocked && n!==goal) continue;
+        // No corner cutting past impassable or unsafe footing.
+        if (dr && dc && (blocked[r*cols+u] || blocked[v*cols+c] || unsafe[r*cols+u] || unsafe[v*cols+c]) && !unsafe[n]) continue;
         const dist = cell*(dr && dc ? Math.SQRT2 : 1);
-        const cost = g[i]+dist/(config.walkSpeed*speedFactor((height[n]-height[i])/dist))*(unsafe[n] ? config.steepPenalty : 1);
+        const time = dist/(config.walkSpeed*speedFactor((height[n]-height[i])/dist));
+        const cost = g[i]+time*(1+hazards.riskScale*combined[n])*(blocked[n] ? 50 : 1);
         if (cost<g[n]) { g[n] = cost; from[n] = i; push(cost+h(n), n); }
       }
     }
@@ -89,12 +167,13 @@ export function makeNav(meta, ground) {
     return cells.reverse().map(center);
   }
 
-  // True when the straight segment stays on safe footing.
+  // A shortcut is kept only if it stays on low-risk, passable ground.
   function safeLine(ax, az, bx, bz) {
     const steps = Math.max(1, Math.ceil(Math.hypot(bx-ax,bz-az)/(cell/2)));
+    const ceiling = Math.max(0.2, combined[index(ax,az)] ?? 0, combined[index(bx,bz)] ?? 0);
     for (let s=0; s<=steps; s++) {
       const i = index(ax+(bx-ax)*s/steps, az+(bz-az)*s/steps);
-      if (i<0 || unsafe[i]) return false;
+      if (i<0 || unsafe[i] || blocked[i] || combined[i]>ceiling) return false;
     }
     return true;
   }
@@ -113,8 +192,8 @@ export function makeNav(meta, ground) {
   }
 
   function measure(points) {
-    let distance = 0, time = 0, gain = 0, unsafeDistance = 0, maxSlope = 0;
-    const dense = [];
+    let distance = 0, time = 0, gain = 0, unsafeDistance = 0, maxSlope = 0, impassable = 0, riskCost = 0;
+    const dense = [], tally = Object.fromEntries(hazardNames.map(name => [name, {sum:0, max:0, metres:0, high:0, cost:0}]));
     const y = (x,z) => ground.sample(x,z)?.height ?? 0;
     for (let k=0; k<points.length-1; k++) {
       const [ax,az] = points[k], [bx,bz] = points[k+1];
@@ -123,30 +202,76 @@ export function makeNav(meta, ground) {
         const xa = ax+(bx-ax)*s/steps, za = az+(bz-az)*s/steps, xb = ax+(bx-ax)*(s+1)/steps, zb = az+(bz-az)*(s+1)/steps;
         const ya = y(xa,za), yb = y(xb,zb), d = length/steps, dy = yb-ya;
         if (!d) continue;
-        distance += d; time += d/(config.walkSpeed*speedFactor(dy/d));
+        const seconds = d/(config.walkSpeed*speedFactor(dy/d));
+        distance += d; time += seconds;
         if (dy>0) gain += dy;
         maxSlope = Math.max(maxSlope, Math.atan(Math.abs(dy)/d)*180/Math.PI);
         const i = index(xb,zb);
         if (i<0 || unsafe[i]) unsafeDistance += d;
+        if (i>=0) {
+          if (blocked[i]) impassable += d;
+          let weight = 0;
+          for (const name of hazardNames) if (Number.isFinite(risk[name][i]) && hazards.weights[name]>0) weight += hazards.weights[name];
+          for (const name of hazardNames) {
+            const v = risk[name][i];
+            if (!Number.isFinite(v)) continue;
+            const t = tally[name];
+            t.sum += v*d; t.metres += d; t.max = Math.max(t.max, v);
+            if (v>=0.5) t.high += d;
+            if (weight) t.cost += seconds*hazards.riskScale*hazards.weights[name]*v/weight;
+          }
+          riskCost += seconds*hazards.riskScale*combined[i];
+        }
         dense.push([xa,ya,za]);
         if (k===points.length-2 && s===steps-1) dense.push([xb,yb,zb]);
       }
     }
     if (!dense.length) dense.push([points[0][0], y(...points[0]), points[0][1]]);
-    return {points, distance, time, gain, unsafeDistance, maxSlope, dense};
+    // Explainability: what each layer contributed along this route.
+    const layers = {};
+    for (const name of hazardNames) {
+      const t = tally[name];
+      layers[name] = t.metres ? {hasData:true, weight:hazards.weights[name], meanRisk:t.sum/t.metres, maxRisk:t.max,
+        metresAtHighRisk:t.high, costSeconds:t.cost, coverage:distance ? t.metres/distance : 0}
+        : {hasData:false, weight:hazards.weights[name], note:'no data along this route; left out of the cost'};
+    }
+    const breakdown = {walkSeconds:time, hazardCostSeconds:riskCost, totalCost:time+riskCost, impassableMetres:impassable, layers};
+    return {points, distance, time, gain, unsafeDistance, maxSlope, dense, breakdown};
+  }
+
+  // One line a person can read: which layers shaped the route and by how much.
+  function explain(route, other) {
+    const b = route.breakdown, parts = [];
+    for (const name of hazardNames) {
+      const l = b.layers[name];
+      parts.push(l.hasData ? name+' '+l.meanRisk.toFixed(2)+' avg, '+l.maxRisk.toFixed(2)+' peak' : name+' no data');
+    }
+    let text = 'Hazard cost '+b.hazardCostSeconds.toFixed(0)+' s on a '+b.walkSeconds.toFixed(0)+' s walk · '+parts.join(' · ');
+    if (other) {
+      const worst = hazardNames.filter(n => other.breakdown.layers[n].hasData && b.layers[n].hasData)
+        .map(n => [n, other.breakdown.layers[n].costSeconds-b.layers[n].costSeconds]).sort((p,q) => q[1]-p[1])[0];
+      if (other.breakdown.impassableMetres>0) text += ' · the straight line crosses '+other.breakdown.impassableMetres.toFixed(1)+' m of impassable ground';
+      else if (worst && worst[1]>1) text += ' · avoids mostly '+worst[0]+' hazard ('+worst[1].toFixed(0)+' s less than the straight line)';
+    }
+    if (route.forced) text += ' · WARNING: no route avoids impassable ground; this one crosses '+b.impassableMetres.toFixed(1)+' m of it';
+    return text;
   }
 
   const straight = (from, to) => measure([from, to]);
   function safe(from, to) {
     const start = index(...from), goal = index(...to);
     if (start<0 || goal<0 || unsafe[start]===2 || unsafe[goal]===2) return null;
-    const cells = astar(start, goal);
+    let cells = astar(start, goal, false), forced = false;
+    // If hard constraints cut the goal off, fall back to the least-bad crossing and say so.
+    if (!cells) { cells = astar(start, goal, true); forced = true; }
     if (!cells) return null;
-    return measure(smooth([from, ...cells.slice(1,-1), to]));
+    const route = measure(forced ? [from, ...cells.slice(1,-1), to] : smooth([from, ...cells.slice(1,-1), to]));
+    route.forced = forced;
+    return route;
   }
 
-  return {cols, rows, cell, x0, z0, count, height, unsafe, index, center, footing, straight, safe,
-    extent:[x0, z0, cols*cell, rows*cell]};
+  return {cols, rows, cell, x0, z0, count, height, unsafe, risk, combined, blocked, blockedBy, index, center, footing,
+    straight, safe, explain, setOverlay, hasData, recombine:combine, extent:[x0, z0, cols*cell, rows*cell]};
 }
 
 // ---- Landmarks and commands -------------------------------------------------
@@ -200,6 +325,7 @@ export function parseCommand(text, landmarks) {
   if (/\b(mute|quiet|silence)\b/.test(t)) return {type:'mute', on:true};
   if (/^(close|exit|back|go back|close map|close the map|close menu|never ?mind)$/.test(t)) return {type:'close'};
   if (/\breset\b/.test(t)) return {type:'reset'};
+  if (/^(why|explain|explain route|why this route|hazards?|route report)$/.test(t)) return {type:'explain'};
   const menu = /^(?:open |show )?(?:the )?(options|routes)(?: menu)?$/.exec(t);
   if (menu) return {type:'menu', menu:menu[1]};
   // Saying just the name toggles; "show" or "hide" sets it.

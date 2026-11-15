@@ -1,6 +1,6 @@
 // Helmet HUD for the Skinner Ridge walk: compass, minimap, suit gauge,
 // destination pin, route lines, return warning, planning view, voice.
-import {makeNav, makeLandmarks, parseCommand, config} from './nav.mjs';
+import {makeNav, makeLandmarks, parseCommand, config, hazards} from './nav.mjs';
 
 const INK = '#f4efe6', AMBER = '#ffb454', RED = '#ff3b30';
 const ROUTE = {safe:'#8dff6a', straight:'#ff6a3d', custom:'#c79bff', home:'#ff3b30'};
@@ -17,7 +17,7 @@ const css = `
 #hud .suit{position:absolute;left:20px;bottom:16px}
 #hud .coords{margin:-4px 0 0 4px;font-size:10px;opacity:.85}
 #hud .coords b{font-size:8px;opacity:.7;margin-left:6px;font-weight:600}
-#hud .note{position:absolute;top:92px;left:50%;transform:translateX(-50%);font-size:15px;text-align:center;max-width:60vw;opacity:0;transition:opacity .4s}
+#hud .note{position:absolute;top:92px;left:50%;transform:translateX(-50%);font-size:14px;text-align:center;max-width:62vw;line-height:1.5;opacity:0;transition:opacity .4s}
 #hud .note.on{opacity:1}
 #hud .pin{position:absolute;transform:translate(-50%,-100%);padding-bottom:34px;white-space:nowrap;display:none;font-size:11px;letter-spacing:.14em;text-shadow:0 1px 4px #000,0 0 12px #0009}
 #hud .pin b{font-size:24px;font-weight:700;letter-spacing:0;margin-right:3px}
@@ -291,7 +291,18 @@ export async function initHud(ctx) {
     if (target) beacon.position.set(target.position[0], heightAt(...target.position)+1.2, target.position[1]);
     redraw = true;
   }
-  function replanAll() { plan('safe'); plan('straight'); plan('custom'); refreshLines(); }
+  function replanAll() { plan('safe'); plan('straight'); plan('custom'); refreshLines(); logRoute(); }
+  // Explainability: why the safe route was chosen, layer by layer.
+  function logRoute() {
+    const r = state.routes.safe;
+    if (!r) return;
+    console.info('[route] '+nav.explain(r, state.routes.straight));
+    console.table(Object.fromEntries(Object.entries(r.breakdown.layers).map(([name,l]) => [name, l.hasData ?
+      {weight:l.weight, meanRisk:+l.meanRisk.toFixed(3), maxRisk:+l.maxRisk.toFixed(3), metresAtHighRisk:+l.metresAtHighRisk.toFixed(1), costSeconds:+l.costSeconds.toFixed(1)} : {weight:l.weight, note:'no data'}])));
+  }
+  // External hazard layers (weather, thermal, ...) plug in here; the routes re-plan at once.
+  function setHazardOverlay(name, source) { const info = nav.setOverlay(name, source); replanAll(); return info; }
+  window.marswalk = {setHazardOverlay, hazards, replan:() => { nav.recombine(); replanAll(); }, explain:() => nav.explain(state.routes.safe, state.routes.straight)};
   function setCustom(landmark) {
     state.custom = landmark; state.show.custom = true; state.cleared = false; arrived = null;
     plan('custom'); refreshLines(); buildMenus();
@@ -442,6 +453,7 @@ export async function initHud(ctx) {
     else if (parsed.type==='map') state.mapMode ? exitMap() : enterMap();
     else if (parsed.type==='close') { closeMenus(); if (state.mapMode) exitMap(); }
     else if (parsed.type==='reset') resetAll();
+    else if (parsed.type==='explain') { const r = state.routes[active()]; if (r) { note(nav.explain(r, state.routes.straight)); logRoute(); } }
     else if (parsed.type==='menu') { const button = root.querySelector('[data-menu=hud'+parsed.menu[0].toUpperCase()+parsed.menu.slice(1)+']'); if (document.pointerLockElement) document.exitPointerLock(); if (!$(button.dataset.menu).classList.contains('open')) button.click(); }
     else if (parsed.type==='mute') { state.muted = parsed.on==='toggle' ? !state.muted : parsed.on; if (parsed.on) window.speechSynthesis?.cancel(); buildMenus(); }
     else if (parsed.type==='drain') { state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
@@ -688,6 +700,14 @@ export async function initHud(ctx) {
   }
 
   replanAll(); buildMenus();
-  return {update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill, hear, roxy,
+  // Optional overlay files. A missing or malformed file is skipped and the layer stays out of the cost.
+  for (const name of ['weather','thermal']) {
+    fetch('overlays/'+name+'.json').then(response => response.ok ? response.json() : null).then(grid => {
+      if (!grid) return;
+      const info = setHazardOverlay(name, grid);
+      console.info('[route] '+name+' overlay loaded: '+(info.coverage*100).toFixed(0)+'% of the routing grid has data');
+    }).catch(() => {});
+  }
+  return {setHazardOverlay,update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill, hear, roxy,
     get flying() { return !!flight; }};
 }

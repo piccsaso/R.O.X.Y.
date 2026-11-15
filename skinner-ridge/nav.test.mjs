@@ -56,4 +56,54 @@ test('commands', () => {
   assert.equal(parseCommand('open the map', landmarks).type, 'map');
   assert.equal(parseCommand('take me to olympus mons', landmarks).type, 'unknown');
 });
+test('cost breakdown reports every layer, and missing layers are left out, not guessed', () => {
+  const s = nav.safe(base, summit), b = s.breakdown;
+  assert.ok(b.layers.slope.hasData && b.layers.topography.hasData);
+  assert.equal(b.layers.weather.hasData, false);
+  assert.equal(b.layers.thermal.hasData, false);
+  assert.equal(b.impassableMetres, 0);
+  assert.ok(Math.abs(b.layers.slope.costSeconds+b.layers.topography.costSeconds-b.hazardCostSeconds)<0.5);
+  return nav.explain(s, nav.straight(base, summit));
+});
+test('hard constraint: a severe weather cell across the safe route is never entered', () => {
+  const before = nav.safe(base, summit), mid = before.dense[Math.floor(before.dense.length/2)];
+  const info = nav.setOverlay('weather', {sample:(x,z) => Math.hypot(x-mid[0], z-mid[2])<4 ? 1 : 0.05});
+  const after = nav.safe(base, summit);
+  assert.ok(info.cellsWithData===nav.count);
+  assert.ok(after && !after.forced);
+  assert.equal(after.breakdown.impassableMetres, 0);
+  for (const [x,,z] of after.dense) assert.ok(Math.hypot(x-mid[0], z-mid[2])>=3.7, 'route enters the cell');
+  assert.ok(after.distance>before.distance);
+  nav.setOverlay('weather', null);
+  return 'route grew from '+before.distance.toFixed(1)+' m to '+after.distance.toFixed(1)+' m to go around a 4 m cell';
+});
+test('soft cost: a thermal gradient shifts the route and shows in the breakdown', () => {
+  const before = nav.safe(base, summit);
+  nav.setOverlay('thermal', {sample:(x,z) => Math.max(0, Math.min(0.8, (30-x)/20+0.4))});   // warmer risk toward the east
+  const after = nav.safe(base, summit);
+  assert.ok(after.breakdown.layers.thermal.hasData);
+  assert.ok(after.breakdown.layers.thermal.costSeconds>0);
+  nav.setOverlay('thermal', null);
+  const again = nav.safe(base, summit);
+  assert.ok(Math.abs(again.distance-before.distance)<0.01, 'removing the layer did not restore the route');
+  return 'thermal mean risk '+after.breakdown.layers.thermal.meanRisk.toFixed(2)+', cost '+after.breakdown.layers.thermal.costSeconds.toFixed(0)+' s';
+});
+test('misaligned or broken overlays are ignored without failing', () => {
+  const away = nav.setOverlay('weather', {x0:5000, z0:5000, cell:1, cols:4, rows:4, values:new Array(16).fill(1), min:0, max:1});
+  assert.equal(away.cellsWithData, 0);
+  const broken = nav.setOverlay('thermal', {sample:() => { throw new Error('bad layer'); }});
+  assert.equal(broken.cellsWithData, 0);
+  const partial = nav.setOverlay('weather', {x0:20, z0:10, cell:2, cols:6, rows:6, values:Array.from({length:36}, (_,i) => i%5 ? 0.3 : null), min:0, max:1});
+  assert.ok(partial.cellsWithData>0 && partial.coverage<0.05);
+  assert.ok(nav.safe(base, summit));
+  nav.setOverlay('weather', null); nav.setOverlay('thermal', null);
+  return 'off-map grid gave '+away.cellsWithData+' cells, throwing layer gave '+broken.cellsWithData+', partial grid covered '+(partial.coverage*100).toFixed(1)+'%';
+});
+test('if hard constraints wall off the goal, the route is flagged as forced', () => {
+  nav.setOverlay('weather', {sample:(x,z) => Math.hypot(x-summit[0], z-summit[1])<6 && Math.hypot(x-summit[0], z-summit[1])>2 ? 1 : 0});
+  const r = nav.safe(base, summit);
+  nav.setOverlay('weather', null);
+  assert.ok(r && r.forced && r.breakdown.impassableMetres>0);
+  return nav.explain(r).split(' · ').pop();
+});
 console.log(results.join('\n'));

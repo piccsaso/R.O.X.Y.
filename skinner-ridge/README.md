@@ -80,6 +80,38 @@ The walk opens with a simulated helmet display and a route to the demo goal, the
 - **Options button**: Slope, Ground truth (rover-measured, inferred, or context terrain), Map (planning view), Clear route, Mute.
 - **Return warning**: appears only when the oxygen or power left, after a 20% reserve, is close to what the safe walk back to Home Base needs. It pulses in the centre, then docks at the left with a red route home. Say or type "low oxygen" to trigger it for a demo. **R** resets the suit and position.
 
+### How the safe route is chosen
+
+The safe route minimises walking time multiplied by a hazard factor, per 20 cm grid cell:
+
+`cost = time × (1 + 6 × (w₁·slope + w₂·topography + w₃·weather + w₄·thermal) / (sum of the weights that have data))`
+
+Each layer is a risk from 0 to 1. Weights and limits are in `hazards` in `nav.mjs` (all weights 1 by default).
+
+| Layer | Source | Impassable at |
+|---|---|---|
+| Slope | Terrain, over a 0.8 m baseline | 35° |
+| Topography | Terrain: height change within a 16 cm footprint (ledges, boulders) | 0.45 m |
+| Weather | External overlay | risk 0.9 |
+| Thermal | External overlay | risk 0.9 |
+
+Impassable cells are never entered. If they cut the goal off completely, the planner returns the least-bad crossing and flags it as forced. A layer with no data at a cell is left out there and the other weights are renormalised, so a missing, partial or misaligned overlay cannot break routing.
+
+**Weather and thermal have no data in this repository yet**, so today the route is shaped by slope and topography only, and the breakdown says "no data" for the other two. To plug a layer in, either put a grid file at `overlays/weather.json` or `overlays/thermal.json`:
+
+```json
+{"x0": 0, "z0": 0, "cell": 1, "cols": 56, "rows": 49, "min": 0, "max": 1, "values": [0.1, 0.2, null]}
+```
+
+(local metres, +X west, +Z north, row-major from `z0`; `null` means unknown; values are scaled from `min`..`max` to 0..1), or call it from code or the browser console:
+
+```js
+marswalk.setHazardOverlay('thermal', {sample: (x, z) => riskBetween0and1});
+marswalk.hazards.weights.thermal = 2; marswalk.replan();
+```
+
+The call returns how many grid cells received data. **Why this route:** say "Roxy, explain route" (or type it with T). The same breakdown, per layer (mean and peak risk, metres at high risk, cost in seconds), is logged to the browser console every time the route is planned, and is on `route.breakdown`.
+
 What is real and what is not: terrain shape, colour and the measured or inferred flag come from NASA/JPL-Caltech Navcam products. Slope and routes are computed from that terrain. Oxygen, power, heart rate and temperature are simulated, and the walking time is an assumption (2.6 m/s on the flat, slower on slopes). Landmark names are team labels. Roxy uses the browser's speech recognition; in Chrome the audio goes to an online service for as long as Roxy is switched on.
 
 `npm.cmd test` checks the planner on the real ground data. Add `?hud=0` to the address for the walk without the HUD.
