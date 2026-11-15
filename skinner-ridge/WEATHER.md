@@ -46,3 +46,9 @@ Primary sources:
 - [NASA Trek WMTS documentation](https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=mars)
 
 Validation commands: `node build-weather.mjs`, `node overlays.test.mjs`, `npm test`, `node capture-weather.mjs`. The browser test exercises dust, CME, SEP, Earth GST, flares, clearing and a phone viewport. These are functional checks of a training simulation, not mission safety certification.
+
+## Compact scenario catalog
+
+Each solar category displays at most five archived records. Flares rank by X-ray class, Earth geomagnetic storms by maximum Kp, and CMEs by speed (a severity proxy, not a Mars exposure estimate). SEP records have no measured intensity in this archive, so their five displayed entries rank by the strongest explicitly linked flare class; the UI labels this proxy and does not claim measured SEP severity. Ties sort by event ID. The complete cached archive remains available on disk.
+
+**Clear atmosphere** and **Clear all weather** both clear dust and solar scenarios, remove particles and visual noise, restore normal fog and lighting on the next rendered frame, and restore the overlay that was active before weather selected trafficability (unless the user selected another overlay). Clear solar event alone leaves dust unchanged.

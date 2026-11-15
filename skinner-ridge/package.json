@@ -11,7 +11,7 @@
     "build": "node reconstruct.mjs && node polish-atlas.mjs && node terrain-normals.mjs && node route-check.mjs",
     "capture": "node capture.mjs",
     "verify": "node verify-assets.mjs",
-    "test": "node nav.test.mjs && node overlays.test.mjs && node speech.test.mjs"
+    "test": "node nav.test.mjs && node overlays.test.mjs && node speech.test.mjs && node weather.test.mjs"
   },
   "engines": {
     "node": ">=22.9.0"

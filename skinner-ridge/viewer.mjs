@@ -130,6 +130,7 @@ try {
   if (query.has('qa')) window.hud = hud;
   const weather=createWeather({scene,camera,lighting,hud});
   if(query.has('qa')) window.weather=weather;
+  if(query.has('qa')) window.qaWeatherVisuals=()=>({near:scene.fog.near,far:scene.fog.far,sun:lighting.sunTint.value.toArray(),ambient:lighting.ambientTint.value.toArray(),dust:scene.getObjectByName('weather-dust').visible});
   function resize() {
     camera.aspect = innerWidth/innerHeight;
     camera.updateProjectionMatrix();
@@ -189,7 +190,7 @@ try {
       }
     }
     if (hud?.update(dt,now,yaw)) needsFrame = true;
-    if (needsFrame || sky.playing || weather.active) {
+    if (needsFrame || sky.playing || weather.active || weather.needsRender) {
       const state=sky.update(elapsed);
       slider.value=String(Math.round(state.fraction*1000));
       pause.textContent=state.playing?'Pause sky':'Resume sky';

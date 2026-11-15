@@ -71,7 +71,11 @@ for(const file of [...trainingFiles,'CME','SEP','GST','FLR']) {
 }
 const summary={retrieved:'2026-11-15',window:'May 2024 historical catalog',model,manifest,
   cmes:test.map(row=>({...row,surrogateHours:predict(row)})),
-  sep:sep.map(row=>({id:row.sepID,time:row.eventTime,instruments:row.instruments.map(i=>i.displayName),link:row.link})),
+  sep:sep.map(row=>{
+    const strength=value=>{const m=/^([ABCMX])([\d.]+)$/.exec(value||'');return m ? 10**('ABCMX'.indexOf(m[1]))*Number(m[2]) : 0;};
+    const linked=flares.filter(flare=>row.linkedEvents?.some(event=>event.activityID===flare.flrID)).sort((a,b)=>strength(b.classType)-strength(a.classType))[0];
+    return {id:row.sepID,time:row.eventTime,instruments:row.instruments.map(i=>i.displayName),link:row.link,linkedFlareClass:linked?.classType??null,linkedFlareId:linked?.flrID??null};
+  }),
   gst:gst.map(row=>({id:row.gstID,time:row.startTime,kp:Math.max(...row.allKpIndex.map(i=>i.kpIndex)),link:row.link})),
   flares:flares.map(row=>({id:row.flrID,time:row.peakTime,class:row.classType,link:row.link}))};
 await writeFile('weather-data/summary.json',JSON.stringify(summary,null,2)+'\n');

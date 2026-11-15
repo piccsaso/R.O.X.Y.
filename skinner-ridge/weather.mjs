@@ -1,5 +1,16 @@
 import * as THREE from 'three';
 
+export function flareMagnitude(value='') {
+  const match=/^([ABCMX])(\d+(?:\.\d+)?)$/.exec(value);
+  return match ? ({A:1e-8,B:1e-7,C:1e-6,M:1e-5,X:1e-4}[match[1]])*Number(match[2]) : 0;
+}
+export function severeRecords(data,key) {
+  const records=({cme:data.cmes,sep:data.sep,gst:data.gst,flare:data.flares}[key]||[]);
+  const score=row=>key==='cme' ? row.speed||0 : key==='gst' ? row.kp||0 : flareMagnitude(key==='sep'?row.linkedFlareClass:row.class);
+  return [...records].sort((a,b)=>score(b)-score(a)||a.id.localeCompare(b.id)).slice(0,5);
+}
+const ranking={flare:'Highest flare class',cme:'Fastest CMEs · speed is a proxy',sep:'Highest linked flare class · SEP severity unmeasured',gst:'Highest Earth Kp'};
+
 const css = `
 #hud .weather-menu{position:absolute;bottom:52px;right:0;width:310px;max-height:60dvh;overflow:auto;padding:6px;background:#162c268c;border:1px solid #9aa9bb80;border-radius:18px;backdrop-filter:blur(5px);pointer-events:auto;font:12px/1.5 "Segoe UI",sans-serif;letter-spacing:0;text-transform:none;text-shadow:0 1px 3px #000}
 #hud .weather-menu[hidden]{display:none}
@@ -18,7 +29,7 @@ const css = `
 #hud .weather-alert{top:168px;bottom:auto;max-width:calc(100vw - 520px);background:#392c1640;border-radius:16px;border-color:#ffb45480;text-shadow:0 1px 3px #000,0 0 2px #000}
 #hud .weather-alert:empty{display:none}
 #weather-noise{position:fixed;inset:0;width:100vw;height:100dvh;pointer-events:none;z-index:1}
-@media(max-width:700px){#hud .weather-menu{width:min(310px,calc(100vw - 24px));max-height:40dvh}#hud .weather-alert{top:255px;bottom:auto;width:calc(100vw - 32px);max-width:none;max-height:145px;overflow:auto;font-size:11px}#hud .dock button{padding:12px 6px}}
+@media(max-width:700px){#hud .weather-menu{width:min(310px,calc(100vw - 24px));max-height:40dvh}#hud .weather-alert{top:max(255px,calc(var(--map-stack-bottom,200px) + 12px));bottom:auto;width:calc(100vw - 32px);max-width:none;max-height:145px;overflow:auto;font-size:11px}#hud .dock button{padding:12px 6px}}
 `;
 
 export function createWeather({scene,camera,lighting,hud}) {
@@ -32,7 +43,7 @@ export function createWeather({scene,camera,lighting,hud}) {
   const categories=[['flare','Solar flares'],['cme','Coronal mass ejections'],['sep','Solar energetic particles'],['gst','Geomagnetic storms · Earth']];
   for(const [key,label] of categories) {
     const section=document.createElement('details');
-    section.innerHTML=`<summary>${label}</summary><label for="weather-record-${key}">Historical record · May 2024</label><select id="weather-record-${key}" data-record="${key}" aria-label="${label} record" disabled><option>Loading catalog…</option></select><button data-event="${key}" ${key==='sep'?'':'disabled'}>${key==='sep'?'Activate Mars particle scenario':'Activate scenario'}</button>`;
+    section.innerHTML=`<summary>${label}</summary><label for="weather-record-${key}">Top 5 · ${ranking[key]}</label><select id="weather-record-${key}" data-record="${key}" aria-label="${label} record" disabled><option>Loading catalog…</option></select><button data-event="${key}" ${key==='sep'?'':'disabled'}>${key==='sep'?'Activate Mars particle scenario':'Activate scenario'}</button>`;
     if(key==='sep')section.insertAdjacentHTML('beforeend','<small>Illustrative Mars scenario. The selected DONKI record does not establish Mars exposure.</small>');
     menu.appendChild(section);
   }
@@ -45,6 +56,7 @@ export function createWeather({scene,camera,lighting,hud}) {
   const noise=document.createElement('canvas');noise.id='weather-noise';noise.width=640;noise.height=360;
   document.body.appendChild(noise);const noiseContext=noise.getContext('2d');
   const state={dust:0,event:'none',catalog:null,error:null};
+  let dirty=true,weatherOverlay=false,previousLayer=null;
   let seed=7419;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
   const positions=new Float32Array(1600*3);
@@ -55,7 +67,7 @@ export function createWeather({scene,camera,lighting,hud}) {
     shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',
       '#include <color_fragment>\ndiffuseColor.a *= 1.0 - smoothstep(0.15, 0.5, length(gl_PointCoord - vec2(0.5)));');
   };
-  const particles=new THREE.Points(geometry,material);particles.frustumCulled=false;particles.visible=false;scene.add(particles);
+  const particles=new THREE.Points(geometry,material);particles.name='weather-dust';particles.frustumCulled=false;particles.visible=false;scene.add(particles);
   const fogDefault={near:scene.fog.near,far:scene.fog.far};
   let elapsed=0,lastNoise=0;
   function setOpen(open) {
@@ -78,7 +90,7 @@ export function createWeather({scene,camera,lighting,hud}) {
   document.addEventListener('keydown',event=>{if(event.key==='Escape')setOpen(false);});
   function records(key=state.event) {
     const data=state.catalog;
-    return data ? ({cme:data.cmes,sep:data.sep,gst:data.gst,flare:data.flares}[key]||[]) : [];
+    return data ? severeRecords(data,key) : [];
   }
   function warn() {
     const selector=menu.querySelector(`[data-record="${state.event}"]`);
@@ -95,18 +107,24 @@ export function createWeather({scene,camera,lighting,hud}) {
   }
   function apply() {
     const sep=state.event==='sep';
+    dirty=true;
+    if((state.dust || sep) && !weatherOverlay){previousLayer=hud.activeLayer;weatherOverlay=true;}
     hud.setWeather({dust:state.dust,particles:sep});
     if(state.dust || sep)hud.setLayer('traffic',true);
+    else if(weatherOverlay){if(hud.activeLayer==='traffic')hud.setLayer(previousLayer,!!previousLayer);weatherOverlay=false;previousLayer=null;}
+    particles.visible=state.dust>0;
+    if(!state.dust){scene.fog.near=hud.state.mapMode?140:fogDefault.near;scene.fog.far=hud.state.mapMode?420:fogDefault.far;}
     if(!sep)noiseContext.clearRect(0,0,noise.width,noise.height);
     for(const control of menu.querySelectorAll('[data-dust]'))control.setAttribute('aria-pressed',String(Number(control.dataset.dust)===state.dust));
     for(const control of menu.querySelectorAll('[data-event]'))control.setAttribute('aria-pressed',String(control.dataset.event===state.event));
     warn();
   }
-  for(const control of menu.querySelectorAll('[data-dust]'))control.onclick=()=>{state.dust=Number(control.dataset.dust);apply();setOpen(false);};
+  for(const control of menu.querySelectorAll('[data-dust]'))control.onclick=()=>{const level=Number(control.dataset.dust);if(level===0){clear();return;}state.dust=level;apply();setOpen(false);};
   for(const control of menu.querySelectorAll('[data-event]'))control.onclick=()=>{state.event=control.dataset.event;apply();setOpen(false);};
   for(const selector of menu.querySelectorAll('[data-record]'))selector.onchange=()=>{if(state.event===selector.dataset.record)warn();};
   function clear(){state.dust=0;state.event='none';apply();setOpen(false);}
   menu.querySelector('#weather-clear').onclick=clear;
+  apply();
   fetch('weather-data/summary.json').then(response=>{
     if(!response.ok)throw new Error('Catalog unavailable');
     return response.json();
@@ -115,12 +133,16 @@ export function createWeather({scene,camera,lighting,hud}) {
     for(const [key] of categories) {
       const selector=menu.querySelector(`[data-record="${key}"]`);
       selector.replaceChildren();
-      for(const [index,record] of records(key).entries())selector.add(new Option(record.id+(key==='sep'?' · '+record.instruments.join(', '):''),String(index)));
+      for(const [index,record] of records(key).entries()) {
+        const metric=key==='flare' ? record.class : key==='gst' ? 'Kp '+record.kp : key==='cme' ? record.speed+' km/s' : 'Linked flare '+(record.linkedFlareClass||'unknown');
+        selector.add(new Option(metric+' · '+record.id,String(index)));
+      }
       selector.disabled=selector.options.length===0;
       menu.querySelector(`[data-event="${key}"]`).disabled=key!=='sep' && selector.disabled;
       if(selector.disabled)selector.add(new Option('No archived records',''));
     }
-    apply();
+    // Loading records must not override an overlay selected while the fetch was pending.
+    warn();
   }).catch(()=>{
     state.error='Archive unavailable; solar-event assessment incomplete.';
     for(const selector of menu.querySelectorAll('[data-record]'))selector.replaceChildren(new Option('Archive unavailable',''));
@@ -132,7 +154,9 @@ export function createWeather({scene,camera,lighting,hud}) {
       state.dust=dust;state.event=event;apply();
     },
     get active(){return state.dust>0 || state.event==='sep';},
+    get needsRender(){return dirty;},
     update(dt) {
+      dirty=false;
       elapsed+=dt;
       const dust=state.dust;
       scene.fog.near=dust ? (dust===2?1:7) : hud.state.mapMode?140:fogDefault.near;

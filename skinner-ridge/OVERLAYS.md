@@ -1,14 +1,14 @@
 # Observation overlays
 
-Click the circular Roxy launcher at the bottom to unfold the rounded control strip, then choose **Overlays**. The launcher contains a replaceable ring icon placeholder. Select the active layer again, or Natural terrain, to clear it. Terrain overlays use fixed opacity and a compact HUD legend. Regional mineral and thermal observations occupy the existing map display inside gently rounded rectangular frames. Selecting an overlay opens no information window. Existing Slope and Ground truth remain under Options. Typed/voice commands include “show hazards”, “show minerals”, “show thermal” and “show topography”.
+Click the circular Roxy launcher at the bottom to unfold the rounded control strip, then choose **Overlays**. The launcher contains a replaceable ring icon placeholder. Select the active layer again, or Natural terrain, to clear it. Terrain overlays use fixed opacity and a compact legend directly below the minimap. Thermal observations occupy the regional minimap. Minerals use a uniform regional TES context tint on verified model terrain, with a native-colour legend below the minimap. Selecting an overlay opens no information window. Slope and Ground truth are also available in Overlays. Typed/voice commands include “show hazards”, “show minerals”, “show thermal” and “show topography”.
 
 ## Roxy voice commands
 
 Roxy starts enabled when the page loads. Allow the browser microphone permission prompt to use voice. Turn it off using the microphone control below the minimap or **Options → Roxy voice**. The **V** shortcut enables voice again and arms Roxy. If the browser blocks automatic startup, click the microphone control to retry.
 
-Say **“Roxy”** to unfold the control strip silently. Say **“open the overlay tab”**, then name an overlay; or say **“Roxy, go to trafficability”** to show it directly. Microphone recognition pauses during spoken replies and resumes afterward. Roxy waits up to 12 seconds for a command. Mute suppresses spoken replies. Click the launcher again to collapse it. Reduced-motion preferences disable the expansion animation. Say “Roxy, show topography”, “Roxy, show trafficability”, “Roxy, show minerals”, or “Roxy, show thermals”. You can also say “Roxy, make topography visible”.
+Say **“Roxy”** to unfold the control strip silently. Say **“open the overlay tab”**, then name an overlay; or say **“Roxy, go to trafficability”** to show it directly. Microphone recognition stays active while voice audio is requested, pauses only during playback, and resumes afterward. Slow audio requests fall back to browser speech after three seconds. Roxy captions show recognized instructions and brief replies. There is no inactivity auto-close: the controls and command listening remain active until you close them or turn voice off. Mute suppresses spoken replies. Click the launcher again to collapse it. Reduced-motion preferences disable the expansion animation. Say “Roxy, show topography”, “Roxy, show trafficability”, “Roxy, show minerals”, or “Roxy, show thermals”. You can also say “Roxy, make topography visible”.
 
-Aliases include topo/elevation/topographic, traffic/traversability/hazards, mineral/resources, and thermal/regolith/infrared. Use “hide” or “turn … off” to hide a layer. Saying a layer keyword alone toggles it. One layer is selected at a time. Mineral and thermal commands open their regional observation maps. These phrases also work through the existing typed command input without the Roxy wake word.
+Aliases include topo/elevation/topographic, traffic/traversability/hazards, mineral/resources, and thermal/regolith/infrared. Use “hide” or “turn … off” to hide a layer. Saying a layer keyword alone toggles it. One layer is selected at a time. Mineral commands show the regional context tint on the model; thermal commands show the regional observation map. These phrases also work through the existing typed command input without the Roxy wake word.
 
 On localhost port 8086, hard-refresh after code changes. If voice is unavailable in the embedded viewer, open the same URL in Chrome or Edge. The microphone control shows starting/listening, blocked permission, missing microphone, or service failure; click it to retry after fixing the cause. Press **T** for typed commands.
 
@@ -22,7 +22,7 @@ Topography uses local model heights with 1 m contours, relative to the minimum s
 
 ## Real orbital observations
 
-The two observation layers retain original NASA Trek tile colours and are displayed as regional maps, not draped at unsupported metre-scale resolution. No synthetic mineral or thermal data are generated. A white marker locates the project's documented sol-477 rover reference (18.45889532° N, 77.40616768° E; see SKY.md and sky-data.json). It is not a surveyed alignment of every local mesh vertex.
+Both observation layers retain original NASA Trek tile colours. Minerals sample pixel (220, 203) from the TES tile at the rover reference location and apply that single native colour uniformly to verified terrain. This is regional composition context, not spatially resolved mineral mapping; no abundance scale or local patches are inferred. Unverified terrain remains untinted. Thermal data remains a regional map. No synthetic mineral or thermal data are generated. Its white marker locates the project's documented sol-477 rover reference (18.45889532° N, 77.40616768° E; see SKY.md and sky-data.json). It is not a surveyed alignment of every local mesh vertex.
 
 | Layer | Product | Matrix / row / column | Display scope |
 |---|---|---|---|
@@ -44,3 +44,9 @@ Sources retrieved 2026-11-15:
 Tile URLs follow `<endpoint>/1.0.0/default/default028mm/<matrix>/<row>/<column>.png`. This is an equirectangular matrix, not Web Mercator XYZ. The saved capabilities retain the exact endpoints and bounds.
 
 Validation: `node overlays.test.mjs`, `npm test`, and `node capture-overlays.mjs`. The browser capture checks each layer, regional-image loading, fixed opacity, clearing, and narrow viewport layout.
+
+Roxy executes map and menu commands without spoken prompts; captions remain available. Route and overlay callouts are brief. Recognition requests up to five transcript alternatives, accepts spaced terms such as “traffic ability,” and ignores duplicate final-result callbacks within a recognition session. Unknown commands leave Roxy listening for a correction without a timeout. Press **V** to arm listening without a wake word. These changes improve command handling; live recognition quality depends on the browser, microphone, and environment.
+
+Click the circular launcher or press **V** to arm listening without the wake word. **V** also interrupts a spoken reply. Transient recognition network errors retry up to three times; permission and device errors require user action. Recognition restart does not depend on the browser emitting an end event after cancellation.
+
+Closing the controls exits command mode; Roxy continues listening for its wake word until voice is turned off.

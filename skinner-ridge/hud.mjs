@@ -1,7 +1,7 @@
 import {createSpeech} from './speech.mjs';
 // Helmet HUD for the Skinner Ridge walk: compass, minimap, suit gauge,
 // destination pin, route lines, return warning, planning view, voice.
-import {makeNav, makeLandmarks, parseCommand, config} from './nav.mjs';
+import {makeNav, makeLandmarks, parseCommand, matchRoxyWake, selectVoiceTranscript, config} from './nav.mjs';
 import {overlayLayers, overlayPixel, slopeDegrees, elevationRange} from './overlays.mjs';
 
 const INK = '#f4efe6', AMBER = '#ffb454', RED = '#ff3b30';
@@ -133,21 +133,33 @@ const launcherCss = `
 #hud .note{padding:6px 12px;border-radius:16px;background:#13231d26;text-shadow:0 1px 3px #000}
 #hud .roxy{bottom:132px}
 #hud .roxy .orb{display:none}
+#hud .roxy{max-width:min(440px,calc(100vw - 28px));padding:8px 12px;background:#16272340;border-radius:14px;text-align:center;gap:4px}
+#hud .roxy span{font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 @media(max-width:700px){#hud .dock-items{padding:7px 8px 19px;gap:0}#hud .dock-items>button,#hud .dock-items>.wrap>button{padding:10px 6px;font-size:9px;letter-spacing:.025em}#hud .dock{bottom:12px}#hud .roxy{bottom:155px;left:auto;right:12px;transform:none;width:calc(100vw - 202px);text-align:center}}
 @media(prefers-reduced-motion:reduce){#hud .dock-items,#hud .launcher-mark{transition:none}}
+#hud .map-stack{position:absolute;top:18px;right:20px;width:226px;display:flex;flex-direction:column;gap:8px}
+#hud .map-stack .mini{position:relative;top:auto;right:auto;transform:none;width:100%;box-sizing:border-box}
+#hud .map-stack .mini canvas{width:100%;height:auto}
+#hud .map-stack .orbital-map{width:100%;height:auto;aspect-ratio:1}
+#hud .map-stack .legend{position:static;transform:none;width:auto;max-width:none;padding:8px 10px;text-align:left;line-height:1.4}
+#hud .map-stack .legend .swatches{justify-content:flex-start;gap:5px 8px;margin-top:5px}
+#hud .map-stack .legend span{margin:0}
+#hud .map-stack .ear{position:static;align-self:flex-end;max-width:100%}
+@media(max-width:700px){#hud .map-stack{top:12px;right:10px;width:clamp(146px,42vw,190px)}#hud .map-stack .legend{font-size:10px;padding:7px 8px}#hud .map-stack .legend strong{font-size:11px}#hud .weather-alert{top:max(255px,calc(var(--map-stack-bottom,200px) + 12px))}}
 `;
 
 const html = `
 <div class="vignette"></div><div class="flash" id="hudFlash"></div>
 <div class="compass"><canvas width="640" height="46"></canvas><span class="bearing" id="hudBearing">000</span></div>
-<div class="mini"><canvas width="224" height="204"></canvas></div>
+<div class="map-stack"><div class="mini"><canvas width="224" height="204"></canvas></div>
+<div class="legend" id="hudLegend"></div>
 <button class="ear" id="hudEar" aria-pressed="false">Enable Roxy · V</button>
+</div>
 <div class="suit"><canvas width="250" height="236"></canvas><div class="eva-data"><span>Oxygen<b id="evaO2"></b></span><span>Power<b id="evaPower"></b></span><span>Heart rate<b id="evaHeart"></b></span><span>Suit temp<b id="evaTemp"></b></span></div><div class="coords" id="hudCoords"></div></div>
 <div class="note" id="hudNote"></div>
 <div class="pin" id="hudPin"></div>
 <div class="return" id="hudReturn"></div>
-<div class="legend" id="hudLegend"></div>
-<div class="roxy" id="hudRoxy"><div class="orb"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></div><small>Roxy listening</small><span id="hudHeard"></span></div>
+<div class="roxy" id="hudRoxy" role="status" aria-live="polite"><small id="hudRoxyLabel">Roxy</small><span id="hudHeard"></span></div>
 <div class="type"><input id="hudCmd" placeholder="Type a command, then Enter" autocomplete="off"></div>
 <div class="dock">
   <button id="hudLauncher" class="launcher" aria-label="Open Roxy controls" aria-expanded="false" aria-controls="hudDockItems" title="Roxy controls"><span class="launcher-mark" aria-hidden="true"></span></button>
@@ -193,6 +205,11 @@ export async function initHud(ctx) {
   document.head.appendChild(Object.assign(document.createElement('style'), {textContent:css+launcherCss}));
   const root = Object.assign(document.createElement('div'), {id:'hud', innerHTML:html});
   document.body.appendChild(root);
+  const mapStack=root.querySelector('.map-stack');
+  const placeMapStack=()=>root.style.setProperty('--map-stack-bottom',mapStack.getBoundingClientRect().bottom+'px');
+  const mapObserver=new ResizeObserver(placeMapStack);mapObserver.observe(mapStack);
+  addEventListener('resize',placeMapStack);
+  addEventListener('pagehide',()=>{mapObserver.disconnect();removeEventListener('resize',placeMapStack);});
   const small = document.querySelector('header small'); if (small) small.textContent = 'Jezero Crater · Mars';
   const $ = id => root.querySelector('#'+id);
   const dock = root.querySelector('.dock');
@@ -203,12 +220,13 @@ export async function initHud(ctx) {
     $('hudLauncher').setAttribute('aria-expanded',String(open));
     $('hudLauncher').setAttribute('aria-label',open?'Close Roxy controls':'Open Roxy controls');
     if(!open) {
+      arm(false);
       closeMenus();
       root.dispatchEvent(new Event('dockcollapse'));
       if(returnFocus)$('hudLauncher').focus();
     }
   }
-  $('hudLauncher').onclick=()=>setDockOpen(!dock.classList.contains('expanded'));
+  $('hudLauncher').onclick=()=>{const open=!dock.classList.contains('expanded');if(open && roxy.enabled){cancelReply();arm(true);}else setDockOpen(open);};
   const tape = root.querySelector('.compass canvas').getContext('2d');
   const mini = root.querySelector('.mini canvas').getContext('2d');
   const suit = root.querySelector('.suit canvas').getContext('2d');
@@ -219,6 +237,17 @@ export async function initHud(ctx) {
   const overlayStrength = .8;
   let weatherHazards={dust:0,particles:false};
   const range = elevationRange(nav,support);
+  let mineralSample=null,mineralFailed=false;
+  const mineralImage=new Image();
+  mineralImage.onload=()=>{
+    const sampleCanvas=document.createElement('canvas');sampleCanvas.width=mineralImage.naturalWidth;sampleCanvas.height=mineralImage.naturalHeight;
+    const context=sampleCanvas.getContext('2d');context.drawImage(mineralImage,0,0);
+    const x=Math.floor(77.40616768/90*sampleCanvas.width),y=Math.floor((90-18.45889532)/90*sampleCanvas.height);
+    mineralSample=Array.from(context.getImageData(x,y,1,1).data);
+    if(state.layer==='minerals' && overlayTarget===1)setLayer('minerals',true);
+  };
+  mineralImage.onerror=()=>{mineralFailed=true;if(state.layer==='minerals' && overlayTarget===1)setLayer('minerals',true);};
+  mineralImage.src=overlayLayers.minerals.image;
 
   // ---- data highlight draped on the terrain ----
   const overlayCanvas = Object.assign(document.createElement('canvas'), {width:nav.cols, height:nav.rows});
@@ -250,7 +279,9 @@ export async function initHud(ctx) {
     for (let i=0; i<nav.count; i++) {
       const [x,z] = nav.center(i);
       let c = null;
-      if (overlayLayers[state.layer]) {
+      if(state.layer==='minerals') {
+        c=mineralSample && mineralSample[3]>0 && support(x,z)===0 && Number.isFinite(nav.height[i]) ? [...mineralSample.slice(0,3),150] : null;
+      } else if (overlayLayers[state.layer]) {
         let observed=support(x,z);
         if(state.layer==='traffic' && observed===0) {
           const samples=[[x-.4,z],[x+.4,z],[x,z-.4],[x,z+.4]];
@@ -288,6 +319,10 @@ export async function initHud(ctx) {
       $('hudLegend').innerHTML = definition
         ? `<strong>${definition.name}</strong><span>${definition.regional ? (next==='thermal' ? 'THEMIS night IR · regional · temperature uncalibrated' : 'TES clinopyroxene · regional · local detail unresolved') : definition.status}</span><div class="swatches">${definition.colors.map(([color,label]) => `<span><i style="background:${color}"></i>${label}</span>`).join('')}</div>`
         : legends[next];
+      if(next==='minerals') {
+        const colour=mineralSample ? `rgb(${mineralSample.slice(0,3).join(',')})` : '#9298a6';
+        $('hudLegend').innerHTML=`<strong>Minerals · TES clinopyroxene</strong><span>Regional context tint · local variation unresolved</span><div class="swatches"><span><i style="background:${colour}"></i>${mineralFailed?'Observation unavailable':mineralSample ? (mineralSample[3] ? 'Native TES sample colour' : 'No data at reference location') : 'Loading observation…'}</span><span>Untinted: unverified terrain</span></div>`;
+      }
       if (next === 'traffic' && weatherHazards.particles) {
         $('hudLegend').appendChild(Object.assign(document.createElement('span'), {
           textContent:'Magenta: simulated exposure caution · red: steep terrain · routes terrain-only'
@@ -373,10 +408,11 @@ export async function initHud(ctx) {
   const speech = createSpeech(() => {
     note(window.speechSynthesis ? 'Using browser voice' : 'Voice unavailable');
   });
-  addEventListener('pagehide', () => speech.cancel());
+  addEventListener('pagehide', () => {roxy.enabled=false;clearTimeout(roxy.restart);stopRecogniser();speech.cancel();});
   // ---- notes and speech ----
-  let noteTimer;
+  let noteTimer,voiceCommand=false;
   function note(text, {warn=false, speak=false}={}) {
+    if(voiceCommand || speak){state.lastNote=text;caption('Roxy',text);if(speak)say(text);return;}
     const box = $('hudNote');
     box.textContent = text; box.style.color = warn ? '#ff6b5e' : INK; box.classList.add('on');
     state.lastNote = text;
@@ -415,15 +451,11 @@ export async function initHud(ctx) {
   }
   function replanAll() { plan('safe'); plan('straight'); plan('custom'); refreshLines(); }
   function setCustom(landmark) {
-    state.custom = landmark; state.show.custom = true; state.cleared = false; arrived = null;
+    state.custom = landmark; state.show.custom = true; state.show.safe = false; state.show.straight = false; state.cleared = false; arrived = null;
     plan('custom'); refreshLines(); buildMenus();
     const r = state.routes.custom;
-    if (r) reply([
-      "Sure, let's head to " + landmark.name + ". It's about " + Math.round(r.distance) + " meters from here.",
-      "I've marked a route to " + landmark.name + " for you. About " + Math.round(r.distance) + " meters to go.",
-      "All right, " + landmark.name + " it is. Follow the highlighted route for about " + Math.round(r.distance) + " meters."
-    ], 'navigation');
-    else note("I can't find a walkable route to " + landmark.name + " from here. Let's try another spot.", {speak:true});
+    if (r) note('Route to '+landmark.name+'. '+Math.round(r.distance)+' meters.',{speak:true});
+    else note("No route to " + landmark.name + ".", {speak:true});
   }
   let arrived = null;
   function follow() {
@@ -444,7 +476,7 @@ export async function initHud(ctx) {
     const target = destination();
     if (target && !state.cleared && arrived!==target && Math.hypot(target.position[0]-x, target.position[1]-z)<config.arrive) {
       arrived = target;
-      reply(["Here we are. " + target.name + ". Take a look around.", "We've reached " + target.name + ". Ready when you are for the next stop."]);
+      note('Arrived at '+target.name+'.',{speak:true});
     }
   }
 
@@ -546,7 +578,7 @@ export async function initHud(ctx) {
   }
   const labels = landmarks.map(landmark => {
     const element = Object.assign(document.createElement('div'), {className:'label', innerHTML:landmark.name+'<small></small>'});
-    element.onclick = () => landmark===summit ? (state.show.custom = false, state.cleared = false, refreshLines(), buildMenus()) : setCustom(landmark);
+    element.onclick = () => landmark===summit ? command('go to ridge summit') : setCustom(landmark);
     root.appendChild(element);
     return {element, landmark, point:new THREE.Vector3(landmark.position[0], heightAt(...landmark.position)+0.3, landmark.position[1])};
   });
@@ -564,11 +596,7 @@ export async function initHud(ctx) {
       .replace(/[, ]+please[.!?]*$/i, '').trim();
 
     const phrase = request.toLowerCase().replace(/[!?.,]/g, '').trim();
-    const replies = {
-      greeting: ["Hey! Ready for a little exploring?", "Hi there. Where are we heading?", "Hey, good to hear from you. What's the plan?", "Hi! Take your time. I'm here when you need a hand."],
-      thanks: ["Of course. Happy to help!", "Anytime.", "You've got it.", "You're welcome. Shall we keep going?"],
-      check: ["Yep, I'm here. What's up?", "Right here. Go ahead.", "I'm here! What did you have in mind?"]
-    };
+    const replies = {greeting:['Hello.'],thanks:["You're welcome."],check:['Listening.']};
     let kind;
     if (/^(hi|hello|hey|good morning|good afternoon)$/.test(phrase)) kind = 'greeting';
     if (/^(thanks|thank you|thanks a lot|thank you so much|cheers)$/.test(phrase)) kind = 'thanks';
@@ -578,15 +606,15 @@ export async function initHud(ctx) {
       return 'conversation';
     }
     if (/^(help|help me|what can you do|what can i say)$/.test(phrase)) {
-      reply(["Sure. Tell me where you'd like to go, and I'll look for a route. You can also ask me to show the slopes or open the map.", "Need a hand getting around? Try, take me to the slab. Or ask me to open the map and pick somewhere yourself."]);
+      note('Try show trafficability, open overlays, or go to the slab.',{speak:true});
       return 'conversation';
     }
     if (/^(how are you|how are you doing)$/.test(phrase)) {
-      reply(["Ready for our next stop. Where would you like to head?", "Ready when you are. Pick a spot on the map, or tell me where to go."]);
+      note('Ready.',{speak:true});
       return 'conversation';
     }
     if (/^(repeat|say that again|repeat that|what did you say)$/.test(phrase)) {
-      note(state.lastNote || "I'm here. Where would you like to go?", {speak:true});
+      note(state.lastNote || "Listening.", {speak:true});
       return 'conversation';
     }
     if (/^(how much oxygen.*|oxygen status|check my oxygen)$/.test(phrase)) {
@@ -596,21 +624,21 @@ export async function initHud(ctx) {
     }
     const parsed = parseCommand(request, landmarks);
     if (parsed.type==='goto') {
-      if (parsed.landmark===summit) { state.show.custom = false; state.show.safe = true; state.cleared = false; arrived = null; replanAll(); buildMenus(); note(state.routes.safe ? "Let's head toward Ridge summit. I've highlighted the route for you." : "I can't find a route to Ridge summit from here. Want to try another spot?", {speak:true}); }
+      if (parsed.landmark===summit) { state.show.custom = false; state.show.safe = true; state.show.straight = false; state.cleared = false; arrived = null; replanAll(); buildMenus(); note(state.routes.safe ? "Route to Ridge summit." : "No route to Ridge summit.", {speak:true}); }
       else setCustom(parsed.landmark);
-    } else if (parsed.type==='clear') { state.cleared = true; refreshLines(); reply(["Sure, I've cleared it. We can pick another spot whenever you're ready.", "Done. Where to next?", "All cleared. Take your time choosing our next stop."]); }
+    } else if (parsed.type==='clear') { state.cleared = true; refreshLines(); note('Route cleared'); }
     else if (parsed.type==='layer') { const shown = state.layer===parsed.layer && overlayTarget===1; setLayer(parsed.layer, parsed.on==='toggle' ? !shown : parsed.on); closeMenus(); }
     else if (parsed.type==='route') {
       if (parsed.which==='custom' && !state.custom) note('No voice route yet. Say "take me to the slab".');
       else { const shown = state.show[parsed.which] && !state.cleared; state.show[parsed.which] = parsed.on==='toggle' ? !shown : parsed.on; state.cleared = false; replanAll(); buildMenus(); }
     }
-    else if (parsed.type==='map') { const entering = !state.mapMode; entering ? enterMap() : exitMap(); note(entering ? "Here's the map. Pick a spot, and I'll see how we can get there." : "All right, back to exploring.", {speak:true}); }
+    else if (parsed.type==='map') { const entering = !state.mapMode; entering ? enterMap() : exitMap(); note(entering ? 'Map open' : 'Map closed'); }
     else if (parsed.type==='close') { closeMenus(); if (state.mapMode) exitMap(); }
     else if (parsed.type==='reset') resetAll();
     else if (parsed.type==='menu') { setDockOpen(true); const button = root.querySelector('[data-menu=hud'+parsed.menu[0].toUpperCase()+parsed.menu.slice(1)+']'); if (document.pointerLockElement) document.exitPointerLock(); if (!$(button.dataset.menu).classList.contains('open')) button.click(); }
     else if (parsed.type==='mute') { state.muted = parsed.on==='toggle' ? !state.muted : parsed.on; if (state.muted) speech.cancel(); buildMenus(); }
     else if (parsed.type==='drain') { state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
-    else if (parsed.type==='unknown') reply(["I'm not quite sure what you mean. Try a place name, like the slab, or ask me what I can do.", "Could you put that another way? You can ask me to find a route or open the map.", "I didn't get that one. Where would you like to go?"]);
+    else if (parsed.type==='unknown') note('Not understood. Try again, or press T to type.');
     return parsed.type;
   }
 
@@ -633,8 +661,8 @@ export async function initHud(ctx) {
     item(layers,'Natural terrain',overlayTarget===0,()=>{setLayer(null,false);closeMenus();});
     for(const [key,layer] of Object.entries(overlayLayers)) item(layers,layer.name+(layer.regional?' · regional':''),state.layer===key && overlayTarget===1,()=>{setLayer(key,!(state.layer===key && overlayTarget===1));closeMenus();},{colour:layer.colors[0]?.[0] ?? '#a8e4ff'});
     options.textContent = routes.textContent = '';
-    item(options, 'Slope', state.layer==='slope' && overlayTarget===1, () => setLayer('slope', !(state.layer==='slope' && overlayTarget===1)));
-    item(options, 'Ground truth', state.layer==='truth' && overlayTarget===1, () => setLayer('truth', !(state.layer==='truth' && overlayTarget===1)));
+    item(layers, 'Slope', state.layer==='slope' && overlayTarget===1, () => {setLayer('slope', !(state.layer==='slope' && overlayTarget===1));closeMenus();});
+    item(layers, 'Ground truth', state.layer==='truth' && overlayTarget===1, () => {setLayer('truth', !(state.layer==='truth' && overlayTarget===1));closeMenus();});
     item(options, 'Map', state.mapMode, () => state.mapMode ? exitMap() : enterMap());
     item(options, 'Clear route', state.cleared, () => { state.cleared = !state.cleared; refreshLines(); buildMenus(); });
     item(options, 'Mute', state.muted, () => command(state.muted ? 'unmute' : 'mute'));
@@ -663,64 +691,87 @@ export async function initHud(ctx) {
   // Roxy: wake-word voice control. The recogniser listens continuously for "Roxy", then takes the next phrase
   // as a command. In Chrome the audio goes to an online speech service while Roxy is on, so it is a visible toggle.
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const roxy = {enabled:false, armed:false, running:false, speaking:false, recogniser:null, timer:null, restart:null, speechTimer:null, speechId:0, status:''};
+  const roxy = {enabled:false, armed:false, running:false, speaking:false, pending:false, recogniser:null, restart:null, speechTimer:null, speechId:0, networkFailures:0, status:''};
+  function caption(label,text) {
+    $('hudRoxyLabel').textContent=label;$('hudHeard').textContent=text;
+    $('hudRoxy').classList.add('on');
+  }
+  function stopRecogniser() {
+    const r=roxy.recogniser;roxy.recogniser=null;roxy.running=false;
+    try {r?.abort();} catch {}
+  }
+  function cancelReply() {
+    roxy.speechId++;clearTimeout(roxy.speechTimer);roxy.pending=false;roxy.speaking=false;speech.cancel();
+    if(roxy.enabled)startRecogniser();
+  }
   function say(text) {
+    caption('Roxy',text);
     if (state.muted) return;
     const id=++roxy.speechId;
-    roxy.speaking=true;
+    roxy.speaking=false;
+    roxy.pending=true;
     clearTimeout(roxy.speechTimer);
-    // Pause input so Roxy cannot treat its own spoken reply as a command.
-    roxy.recogniser?.abort();
     const finish=()=>{
       if(id!==roxy.speechId)return;
-      clearTimeout(roxy.speechTimer);roxy.speaking=false;
-      if(roxy.armed)arm(true);
-      clearTimeout(roxy.restart);roxy.restart=setTimeout(startRecogniser,350);
+      clearTimeout(roxy.speechTimer);roxy.speaking=false;roxy.pending=false;
+      clearTimeout(roxy.restart);startRecogniser();
     };
-    roxy.speechTimer=setTimeout(()=>{speech.cancel();finish();},45000);
-    void speech.speak(text,finish);
+    roxy.speechTimer=setTimeout(()=>{speech.cancel();finish();},15000);
+    void speech.speak(text,finish,()=>{
+      if(id!==roxy.speechId)return;
+      roxy.pending=false;roxy.speaking=true;stopRecogniser();
+      roxy.status='Roxy speaking · V to interrupt';refreshRoxy();
+    });
+    startRecogniser();
   }
-  const WAKE = /\b(roxy|roxie|roxi|rocksy|rocksie|rock ?sea|rocky|proxy|foxy|rox)\b[\s,.!?]*/i;
   function arm(on) {
     if(on)setDockOpen(true);
     $('hudLauncher').classList.toggle('listening',on);
     roxy.armed = on;
-    $('hudRoxy').classList.toggle('on', on);
-    if (on) $('hudHeard').textContent = '';
-    clearTimeout(roxy.timer);
-    if (on) roxy.timer = setTimeout(() => arm(false), 12000);
+    if(on)caption('Roxy','Listening…');
+    else if(!roxy.pending && !roxy.speaking)$('hudRoxy').classList.remove('on');
   }
   function hear(text, final) {
-    const wake = WAKE.exec(text);
+    const wake = matchRoxyWake(text);
     let said = text;
-    if (wake) { setDockOpen(true); if (!roxy.armed) arm(true); said = text.slice(wake.index+wake[0].length); }
+    if (wake) { if(roxy.pending)cancelReply();setDockOpen(true); if (!roxy.armed) arm(true); said = text.slice(wake.index+wake[0].length); }
     if (!roxy.armed) return;
     said = said.trim();
-    $('hudHeard').textContent = said;
-    if (said) { clearTimeout(roxy.timer); roxy.timer = setTimeout(() => arm(false), 12000); }
+    if(said)caption(final?'Heard':'Hearing',said);
     if (final && said) {
-      arm(false);
-      const kind=command(said);
+      if(roxy.pending)cancelReply();
+      let kind;voiceCommand=true;
+      try {kind=command(said);} finally {voiceCommand=false;}
       const parsed=parseCommand(said,landmarks);
-      if(kind==='menu')say(parsed.menu==='layers' ? 'Opening overlays. Which overlay would you like?' : 'Opening '+parsed.menu+'.');
-      else if(kind==='layer')say(overlayTarget===1 ? 'Showing '+(overlayLayers[parsed.layer]?.name || parsed.layer)+'.' : 'Overlay hidden.');
-      // A menu request is a conversation: accept the next overlay name without another wake word.
-      if(kind==='menu')arm(true);
+      if(kind==='layer')say(overlayTarget===1 ? 'Showing '+(overlayLayers[parsed.layer]?.name || parsed.layer)+'.' : 'Overlay hidden.');
+      if(kind==='menu')caption('Roxy',parsed.menu==='layers'?'Overlays open':parsed.menu+' open');
+      // Keep listening for follow-up instructions until explicitly closed.
+      if(kind==='close'){arm(false);setDockOpen(false);}
     }
   }
   function startRecogniser() {
     if (!Recognition || roxy.running || !roxy.enabled || roxy.speaking) return;
-    const r = roxy.recogniser = Object.assign(new Recognition(), {lang:'en-US', interimResults:true, continuous:true});
+    const r = roxy.recogniser = Object.assign(new Recognition(), {lang:'en-US', interimResults:true, continuous:true, maxAlternatives:5});
+    const handled=new Set();
     r.onstart=()=>{if(r!==roxy.recogniser)return;roxy.status='Listening · say “Roxy”';refreshRoxy();};
     r.onresult = event => {
       if(r!==roxy.recogniser || !roxy.enabled || roxy.speaking)return;
+      roxy.networkFailures=0;
       for (let i=event.resultIndex; i<event.results.length; i++) {
         const result = event.results[i];
-        hear(result[0].transcript, result.isFinal);
+        if(handled.has(i))continue;
+        if(result.isFinal)handled.add(i);
+        const text=selectVoiceTranscript(Array.from(result,alternative=>alternative.transcript),roxy.armed,landmarks);
+        hear(text, result.isFinal);
+        if(roxy.speaking)break;
       }
     };
     r.onerror = event => {
       if(r!==roxy.recogniser)return;
+      if(event.error==='network' && ++roxy.networkFailures<=3) {
+        stopRecogniser();roxy.status='Reconnecting voice…';refreshRoxy();
+        clearTimeout(roxy.restart);roxy.restart=setTimeout(startRecogniser,500*2**(roxy.networkFailures-1));return;
+      }
       const errors={
         'not-allowed':'Mic blocked · allow microphone for this site, then retry',
         'service-not-allowed':'Voice service unavailable · try Chrome or Edge',
@@ -728,9 +779,9 @@ export async function initHud(ctx) {
         'audio-capture':'No microphone · connect a mic, then retry',
         'language-not-supported':'Voice language unavailable · try Chrome or Edge'
       };
-      if(errors[event.error]){roxy.enabled=false;roxy.status=errors[event.error];note(roxy.status+'. Press T to type commands.');refreshRoxy();}
+      if(errors[event.error]){roxy.enabled=false;roxy.status=errors[event.error];stopRecogniser();note(roxy.status+'. Press T to type commands.');refreshRoxy();}
     };
-    r.onend = () => { if(r!==roxy.recogniser)return;roxy.running = false; if (roxy.enabled && !roxy.speaking) {clearTimeout(roxy.restart);roxy.restart=setTimeout(startRecogniser,350);} };
+    r.onend = () => { if(r!==roxy.recogniser)return;roxy.running = false; if (roxy.enabled && !roxy.speaking) {clearTimeout(roxy.restart);roxy.restart=setTimeout(startRecogniser,150);} };
     try { roxy.running=true;r.start(); } catch { roxy.running=false;roxy.enabled=false;roxy.status='Voice could not start · click to retry';refreshRoxy(); }
   }
   function refreshRoxy() {
@@ -742,8 +793,9 @@ export async function initHud(ctx) {
   function setRoxy(on) {
     clearTimeout(roxy.restart);
     roxy.enabled = on && !!Recognition;
+    roxy.networkFailures=0;
     roxy.status=roxy.enabled ? 'Starting microphone…' : '';
-    if (roxy.enabled) startRecogniser(); else {roxy.recogniser?.abort();roxy.speechId++;clearTimeout(roxy.speechTimer);roxy.speaking=false;speech.cancel();}
+    if (roxy.enabled) startRecogniser(); else {stopRecogniser();cancelReply();}
     refreshRoxy();
   }
   $('hudEar').onclick=()=>setRoxy(!roxy.enabled);
@@ -751,7 +803,7 @@ export async function initHud(ctx) {
   $('hudReset').onclick = resetAll;
   addEventListener('keydown', event => {
     if (event.target===input) return;
-    if (event.code==='KeyV') { if (!event.repeat) { if (!roxy.enabled) setRoxy(true); if(roxy.enabled)arm(true); } return; }
+    if (event.code==='KeyV') { if (!event.repeat) { cancelReply();if (!roxy.enabled) setRoxy(true); if(roxy.enabled)arm(true); } return; }
     if (event.repeat) return;
     if (event.code==='KeyM') state.mapMode ? exitMap() : enterMap();
     else if (event.code==='KeyC') command('clear route');
@@ -797,7 +849,7 @@ export async function initHud(ctx) {
     mini.fillStyle = '#2a211c'; mini.fillRect(0,0,w,hh);
     mini.imageSmoothingEnabled = true;
     mini.drawImage(baseMap, sx(EX+EW), sy(EZ+ED), EW*s, ED*s);
-    if (state.layer && overlayFade>0.02) {
+    if (state.layer && state.layer!=='minerals' && overlayFade>0.02) {
       mini.save(); mini.globalAlpha = 0.7*overlayFade; mini.translate(sx(EX), sy(EZ)); mini.scale(-EW*s/nav.cols, -ED*s/nav.rows);
       mini.drawImage(overlayCanvas, 0, 0); mini.restore();
     }
@@ -914,5 +966,6 @@ export async function initHud(ctx) {
     if(state.layer==='traffic' && overlayTarget===1) setLayer('traffic',true);
   }
   return {update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill, hear, roxy,setWeather,setDockOpen,
+    get activeLayer(){return overlayTarget===1 ? state.layer : null;},
     get flying() { return !!flight; }};
 }

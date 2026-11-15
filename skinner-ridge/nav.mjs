@@ -190,8 +190,23 @@ export function findLandmark(text, landmarks) {
   return {matches:scored.map(entry => entry.landmark)};
 }
 
+export function matchRoxyWake(text) {
+  return /^\s*(?:(?:hey|hi|okay|ok)[\s,.!?]+)?(roxy|roxie|roxi|rocksy|rocksie|rock\s*(?:sea|see)|rox\s*y|rocky|rox)\b[\s,.!?]*/i.exec(text);
+}
+
+export function selectVoiceTranscript(alternatives, armed, landmarks) {
+  const eligible=alternatives.filter(text=>armed || matchRoxyWake(text));
+  return eligible.find(text=>{
+    const wake=matchRoxyWake(text);
+    const command=wake ? text.slice(wake[0].length) : text;
+    return !['unknown','none'].includes(parseCommand(command,landmarks).type);
+  }) ?? eligible[0] ?? alternatives[0] ?? '';
+}
+
 export function parseCommand(text, landmarks) {
-  const t = normal(text);
+  const t = normal(text).replace(/^(?:(?:please|can you|could you|would you)\s+)+/, '')
+    .replace(/\btraffic ability\b/g,'trafficability').replace(/\bover lays?\b/g,'overlays')
+    .replace(/\btopo graphy\b/g,'topography');
   if (!t) return {type:'none'};
   if (/\b(clear|cancel|remove)\b.*\b(route|path|navigation)\b|^cancel$|^clear$/.test(t)) return {type:'clear'};
   if (/\b(low|drain|simulate)\b.*\b(oxygen|o2|power|fuel)\b/.test(t)) return {type:'drain'};
