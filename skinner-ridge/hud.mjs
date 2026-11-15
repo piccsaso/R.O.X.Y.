@@ -300,7 +300,12 @@ export async function initHud(ctx) {
     state.custom = landmark; state.show.custom = true; state.cleared = false; arrived = null;
     plan('custom'); refreshLines(); buildMenus();
     const r = state.routes.custom;
-    note(r ? 'Got it. I have a route to '+landmark.name+'. It is about '+Math.round(r.distance)+' meters.' : 'I could not find a walkable route to '+landmark.name+'. Try another destination.', {speak:true});
+    if (r) reply([
+      "Sure, let's head to " + landmark.name + ". It's about " + Math.round(r.distance) + " meters from here.",
+      "I've marked a route to " + landmark.name + " for you. About " + Math.round(r.distance) + " meters to go.",
+      "All right, " + landmark.name + " it is. Follow the highlighted route for about " + Math.round(r.distance) + " meters."
+    ], 'navigation');
+    else note("I can't find a walkable route to " + landmark.name + " from here. Let's try another spot.", {speak:true});
   }
   let arrived = null;
   function follow() {
@@ -321,7 +326,7 @@ export async function initHud(ctx) {
     const target = destination();
     if (target && !state.cleared && arrived!==target && Math.hypot(target.position[0]-x, target.position[1]-z)<config.arrive) {
       arrived = target;
-      note('Here we are. You have reached '+target.name+'.', {speak:true});
+      reply(["Here we are. " + target.name + ". Take a look around.", "We've reached " + target.name + ". Ready when you are for the next stop."]);
     }
   }
 
@@ -433,33 +438,35 @@ export async function initHud(ctx) {
 
   // ---- commands: typing, menus and speech share this ----
   const replyCounts = {};
+  function reply(options, key = options[0]) {
+    const index = replyCounts[key] || 0;
+    replyCounts[key] = index + 1;
+    note(options[index % options.length], {speak:true});
+  }
   function command(text) {
     const request = text.replace(/^(?:(?:hey|hi)[, ]+)?(?:please\s+|(?:can|could|would) you\s+|i(?:'d| would) like (?:you )?to\s+)/i, '')
       .replace(/[, ]+please[.!?]*$/i, '').trim();
 
     const phrase = request.toLowerCase().replace(/[!?.,]/g, '').trim();
     const replies = {
-      greeting: ["Hey, I'm here. Where would you like to go?", "Hi there. Ready when you are.", "Hey. What can I help you with?"],
-      thanks: ["You're welcome.", "Anytime. Let me know what you need.", "Happy to help."],
-      check: ["I'm here. Go ahead.", "I'm here. What do you need?", "Right here. What's next?"]
+      greeting: ["Hey! Ready for a little exploring?", "Hi there. Where are we heading?", "Hey, good to hear from you. What's the plan?", "Hi! Take your time. I'm here when you need a hand."],
+      thanks: ["Of course. Happy to help!", "Anytime.", "You've got it.", "You're welcome. Shall we keep going?"],
+      check: ["Yep, I'm here. What's up?", "Right here. Go ahead.", "I'm here! What did you have in mind?"]
     };
     let kind;
     if (/^(hi|hello|hey|good morning|good afternoon)$/.test(phrase)) kind = 'greeting';
     if (/^(thanks|thank you|thanks a lot|thank you so much|cheers)$/.test(phrase)) kind = 'thanks';
-    if (/^(are you there|can you hear me|you there)$/.test(phrase)) kind = 'check';
+    if (/^(are you there|can you hear me|hear me|you there)$/.test(phrase)) kind = 'check';
     if (kind) {
-      const lines = replies[kind];
-      const index = replyCounts[kind] || 0;
-      replyCounts[kind] = index + 1;
-      note(lines[index % lines.length], {speak:true});
+      reply(replies[kind]);
       return 'conversation';
     }
     if (/^(help|help me|what can you do|what can i say)$/.test(phrase)) {
-      note('I can find a route, show the slopes, or open the map. Try asking me to take you to the slab.', {speak:true});
+      reply(["Sure. Tell me where you'd like to go, and I'll look for a route. You can also ask me to show the slopes or open the map.", "Need a hand getting around? Try, take me to the slab. Or ask me to open the map and pick somewhere yourself."]);
       return 'conversation';
     }
     if (/^(how are you|how are you doing)$/.test(phrase)) {
-      note("Ready to help you explore. What would you like to do next?", {speak:true});
+      reply(["Ready for our next stop. Where would you like to head?", "Ready when you are. Pick a spot on the map, or tell me where to go."]);
       return 'conversation';
     }
     if (/^(repeat|say that again|repeat that|what did you say)$/.test(phrase)) {
@@ -473,21 +480,21 @@ export async function initHud(ctx) {
     }
     const parsed = parseCommand(request, landmarks);
     if (parsed.type==='goto') {
-      if (parsed.landmark===summit) { state.show.custom = false; state.show.safe = true; state.cleared = false; arrived = null; replanAll(); buildMenus(); note(state.routes.safe ? 'All right. Follow the highlighted route toward Ridge summit.' : 'I could not find a route to Ridge summit from here.', {speak:true}); }
+      if (parsed.landmark===summit) { state.show.custom = false; state.show.safe = true; state.cleared = false; arrived = null; replanAll(); buildMenus(); note(state.routes.safe ? "Let's head toward Ridge summit. I've highlighted the route for you." : "I can't find a route to Ridge summit from here. Want to try another spot?", {speak:true}); }
       else setCustom(parsed.landmark);
-    } else if (parsed.type==='clear') { state.cleared = true; refreshLines(); note('All right, I cleared the route. Where would you like to go next?', {speak:true}); }
+    } else if (parsed.type==='clear') { state.cleared = true; refreshLines(); reply(["Sure, I've cleared it. We can pick another spot whenever you're ready.", "Done. Where to next?", "All cleared. Take your time choosing our next stop."]); }
     else if (parsed.type==='layer') { const shown = state.layer===parsed.layer && overlayTarget===1; setLayer(parsed.layer, parsed.on==='toggle' ? !shown : parsed.on); }
     else if (parsed.type==='route') {
       if (parsed.which==='custom' && !state.custom) note('No voice route yet. Say "take me to the slab".');
       else { const shown = state.show[parsed.which] && !state.cleared; state.show[parsed.which] = parsed.on==='toggle' ? !shown : parsed.on; state.cleared = false; replanAll(); buildMenus(); }
     }
-    else if (parsed.type==='map') { const entering = !state.mapMode; entering ? enterMap() : exitMap(); note(entering ? 'Here is the map. Pick a spot and I will look for a route.' : 'Back to the terrain.', {speak:true}); }
+    else if (parsed.type==='map') { const entering = !state.mapMode; entering ? enterMap() : exitMap(); note(entering ? "Here's the map. Pick a spot, and I'll see how we can get there." : "All right, back to exploring.", {speak:true}); }
     else if (parsed.type==='close') { closeMenus(); if (state.mapMode) exitMap(); }
     else if (parsed.type==='reset') resetAll();
     else if (parsed.type==='menu') { const button = root.querySelector('[data-menu=hud'+parsed.menu[0].toUpperCase()+parsed.menu.slice(1)+']'); if (document.pointerLockElement) document.exitPointerLock(); if (!$(button.dataset.menu).classList.contains('open')) button.click(); }
     else if (parsed.type==='mute') { state.muted = parsed.on==='toggle' ? !state.muted : parsed.on; if (state.muted) speech.cancel(); buildMenus(); }
     else if (parsed.type==='drain') { state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
-    else if (parsed.type==='unknown') note('I did not catch a destination or command there. You can say, take me to the slab, or ask me for help.', {speak:true});
+    else if (parsed.type==='unknown') reply(["I'm not quite sure what you mean. Try a place name, like the slab, or ask me what I can do.", "Could you put that another way? You can ask me to find a route or open the map.", "I didn't get that one. Where would you like to go?"]);
     return parsed.type;
   }
 
