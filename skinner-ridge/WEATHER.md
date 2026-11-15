@@ -1,6 +1,6 @@
 # Mars weather simulation
 
-Open the circular Roxy launcher, then choose **Weather** in the rounded control strip. Expand the subsection for dust storms, solar flares, CMEs, solar energetic particles or Earth geomagnetic storms, then activate a scenario. The menu closes after activation. Each solar subsection includes its own historical-record selector. **Clear all weather** restores clear conditions and underlying trafficability colors. Persistent HUD warnings distinguish simulated EVA danger, exposure assessment cautions and Earth-context alerts. No source records measure astronaut suit damage or certify shielding at Jezero. Controls use local files, so the demo works offline after dependencies are installed.
+Open the circular Roxy launcher, then choose **Weather** in the rounded control strip. Expand the subsection for dust storms, solar flares, CMEs, solar energetic particles or Earth geomagnetic storms, then activate a scenario. The menu closes after activation. Each solar subsection includes its own historical-record selector. **Clear all weather** restores clear conditions and underlying trafficability colors. Persistent HUD warnings distinguish simulated EVA danger, exposure assessment cautions and Earth-context alerts. No source records measure astronaut suit damage or certify shielding at Jezero. Weather controls and visuals use local files and work offline after dependencies are installed; voice services may require a network connection.
 
 ## Visible effects and hazard interpretation
 

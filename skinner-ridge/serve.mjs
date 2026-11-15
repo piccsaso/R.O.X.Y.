@@ -1,3 +1,4 @@
+import {handleTts} from './tts.mjs';
 import { createServer } from 'node:http';
 import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
@@ -5,7 +6,7 @@ import { resolve, sep, extname } from 'node:path';
 
 const directory = process.cwd();
 const port = Number(process.argv[2] || 8080);
-const appFiles=new Set(['/','/index.html','/viewer.mjs','/ground.mjs','/landscape.mjs','/terrain-0.glb','/terrain-1.glb','/terrain-2.glb','/terrain-3.glb','/sky.mjs','/lighting.mjs','/apron.mjs','/sky-data.json','/stars.png','/ground.bin','/terrain.json','/route.json','/hud.mjs','/nav.mjs','/terrain-coverage.png']);
+const appFiles=new Set(['/','/index.html','/viewer.mjs','/ground.mjs','/landscape.mjs','/terrain-0.glb','/terrain-1.glb','/terrain-2.glb','/terrain-3.glb','/sky.mjs','/lighting.mjs','/apron.mjs','/sky-data.json','/stars.png','/ground.bin','/terrain.json','/route.json','/speech.mjs','/hud.mjs','/nav.mjs','/terrain-coverage.png']);
 const mime = {
   '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.mjs':'text/javascript',
   '.json':'application/json', '.png':'image/png', '.glb':'model/gltf-binary'
@@ -15,6 +16,7 @@ for (const path of ['/weather.mjs','/weather-data/summary.json']) appFiles.add(p
 createServer(async (request,response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url,'http://localhost').pathname);
+    if (pathname === '/api/tts') return await handleTts(request, response);
     const file = resolve(directory,'.'+(pathname==='/'?'/index.html':pathname));
     if (!file.startsWith(directory+sep)) throw new Error('Outside server directory');
     if (!appFiles.has(pathname) && !['/node_modules/three/build/','/node_modules/three/examples/jsm/'].some(prefix=>pathname.startsWith(prefix) && !pathname.includes('..') && !pathname.includes(String.fromCharCode(92)))) {

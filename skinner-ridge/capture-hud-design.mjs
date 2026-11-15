@@ -81,6 +81,8 @@ try {
   await call('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
   await call('Page.addScriptToEvaluateOnNewDocument',{source:`
     window.voiceLog=[];window.voiceStarts=0;window.voiceFail=false;
+    const realFetch=window.fetch.bind(window);
+    window.fetch=(url,options)=>url==='/api/tts' ? Promise.resolve(new Response('',{status:503})) : realFetch(url,options);
     window.SpeechRecognition=class {
       start(){if(window.voiceFail)throw new Error('test start failure');window.voiceStarts++;this.onstart?.();}
       abort(){this.onend?.();}
