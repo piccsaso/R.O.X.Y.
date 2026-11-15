@@ -39,6 +39,36 @@ function feather(at, stride) {
 }
 for (let y=0;y<height;y++) for (let x=scale;x<width-1;x+=scale) feather((y*width+x)*4,4);
 for (let y=scale;y<height-1;y+=scale) for (let x=0;x<width;x++) feather((y*width+x)*4,width*4);
+// Gentle geometry-derived contact shading. Remove the local tangent plane
+// so a uniformly sloping sand sheet is not darkened like a crevice.
+const ground=readFileSync('ground.bin');
+const heights=new Float32Array(ground.buffer,ground.byteOffset,meta.width*meta.depth);
+const occlusion=new Float32Array(meta.width*meta.depth);
+const directions=[[1,0],[-1,0],[0,1],[0,-1],[0.707,0.707],[-0.707,0.707],[0.707,-0.707],[-0.707,-0.707]];
+for(let z=2;z<meta.depth-2;z++) for(let x=2;x<meta.width-2;x++) {
+  const i=z*meta.width+x,h=heights[i];
+  const dx=(heights[i+2]-heights[i-2])/4,dz=(heights[i+2*meta.width]-heights[i-2*meta.width])/4;
+  let occ=0;
+  for(const [u,v] of directions) {
+    let horizon=0;
+    for(const radius of [3,6,12,24]) {
+      const xx=Math.max(0,Math.min(meta.width-1,Math.round(x+u*radius)));
+      const zz=Math.max(0,Math.min(meta.depth-1,Math.round(z+v*radius)));
+      const rise=heights[zz*meta.width+xx]-h-dx*(xx-x)-dz*(zz-z);
+      horizon=Math.max(horizon,rise/(radius*meta.step));
+    }
+    occ+=Math.min(0.8,horizon);
+  }
+  occlusion[i]=Math.min(0.12,occ/directions.length*0.24);
+}
+for(let y=0;y<height;y++) for(let x=0;x<width;x++) {
+  const gx=x/scale,gz=y/scale,col=Math.floor(gx),row=Math.floor(gz),u=gx-col,v=gz-row;
+  const i=row*meta.width+col;
+  const amount=(occlusion[i]*(1-u)+occlusion[i+1]*u)*(1-v)+
+    (occlusion[i+meta.width]*(1-u)+occlusion[i+meta.width+1]*u)*v;
+  const p=(y*width+x)*4;
+  for(let c=0;c<3;c++) data[p+c]=Math.round(data[p+c]*(1-amount));
+}
 const polished=jpeg.encode(photo,96).data;
 const pad=Buffer.alloc((4-polished.length%4)%4);
 const before=binary.subarray(0,imageView.byteOffset);
@@ -49,7 +79,7 @@ for (const view of document.bufferViews) {
 }
 imageView.byteLength=polished.length;
 document.buffers[0].byteLength+=delta;
-document.extras={...document.extras,photoSeamsPolished:true};
+document.extras={...document.extras,photoSeamsPolished:true,contactShading:'Tangent-plane-corrected local occlusion, maximum 12%'};
 const json=JSON.stringify(document);
 const padded=Buffer.from(json.padEnd(json.length+(4-json.length%4)%4,' '));
 const header=Buffer.from(original.subarray(0,20));

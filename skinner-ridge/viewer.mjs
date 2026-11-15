@@ -89,7 +89,10 @@ try {
     camera.rotation.set(pitch,yaw,0);
     needsFrame = true;
   }
-  pose(mode==='expanded' ? route.expansion.end : mode==='return' ? route.return : route.spawn);
+  const lower={x:14+meta.origin[1]-2.51,z:22+77.49-meta.origin[0],
+    targetX:14.6+meta.origin[1]-2.51,targetZ:17+77.49-meta.origin[0]};
+  pose(mode==='lower-path' ? route.lowerPath.start : mode==='lower-extension' ? route.lowerPath.end :
+    mode==='lower' ? lower : mode==='expanded' ? route.expansion.end : mode==='return' ? route.return : route.spawn);
   const sky=mode==='survey' ? null : addLandscape(scene,camera,mesh.scene,ground,meta);
   if (mode==='survey') {
     camera.position.set(meta.boundsMeters[0]/2,Math.max(...meta.boundsMeters)*1.2,meta.boundsMeters[1]/2);

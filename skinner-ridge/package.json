@@ -8,6 +8,7 @@
     "start": "node serve.mjs",
     "download": "node download.mjs",
     "build": "node reconstruct.mjs && node polish-atlas.mjs && node route-check.mjs",
-    "capture": "node capture.mjs"
+    "capture": "node capture.mjs",
+    "verify": "node verify-assets.mjs"
   }
 }

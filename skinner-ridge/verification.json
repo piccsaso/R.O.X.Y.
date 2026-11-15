@@ -1,0 +1,10 @@
+{
+  "vertices": 1122803,
+  "triangles": 2241360,
+  "areaSquareMeters": 1372.8330000000003,
+  "connectedWalkableSquareMeters": 1275,
+  "stereoSupportedFraction": 0.5415346039904344,
+  "matchedRenderAndCollision": true,
+  "continuousCollision": true,
+  "glbBytes": 69802172
+}

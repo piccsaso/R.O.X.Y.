@@ -6,9 +6,10 @@ import { PNG } from 'pngjs';
 
 const sources = JSON.parse(fs.readFileSync('sources.json'));
 const step = 0.035;
-const origin = [77.49, 2.51, -14];
-const width = 801;
-const depth = 701;
+const origin = [72.45, 8.32, -14];
+const width = 1133;
+const depth = 991;
+const shiftX=origin[1]-2.51, shiftZ=77.49-origin[0];
 const count = width * depth;
 const index = (x, z) => z * width + x;
 const edgeLimit = 0.32;
@@ -119,7 +120,7 @@ function supported(indices) {
 for (let z=0;z<rows;z++) for (let x=0;x<cols;x++) {
   const a=index(x,z), b=a+1, c=a+width, d=c+1;
   // Reject the surveyed spike from the original small crop.
-  if (x*step>12.73 && x*step<13.60 && z*step>6.5 && z*step<7.91 &&
+  if (x*step>12.73+shiftX && x*step<13.60+shiftX && z*step>6.5+shiftZ && z*step<7.91+shiftZ &&
       [a,b,c,d].some(i=>fused[i]>0.33)) continue;
   measuredFaces[z*cols+x]=Number(supported([a,c,b]))+2*Number(supported([b,c,d]));
 }
@@ -143,8 +144,10 @@ const surveyedFaces=measuredFaces.reduce((sum,bits)=>sum+Number(Boolean(bits&1))
 if (!surveyedFaces) throw new Error('No supported triangles in crop');
 
 const completed=completeHeights(fused,measuredFaces,width,depth,step);
-const limited=softenStitchSteps(completed,width,depth,step,{x0:7.7,x1:9.3,z0:9.8,z1:11.3});
+const limited=softenStitchSteps(completed,width,depth,step,{x0:7.7+shiftX,x1:9.3+shiftX,z0:9.8+shiftZ,z1:11.3+shiftZ});
 const filled=polishSurface(limited,fused,width,depth);
+// Joint photo/relief completion modifies inferred heights before either export.
+const {image,counts,coverage} = bakeAtlas({sources,layers,width,depth,fused,filled,mask:measuredFaces,agreement});
 let softenedSamples=0;
 for (let i=0;i<filled.length;i++) {
   if (Math.abs(filled[i]-completed[i])>0.04) softenedSamples++;
@@ -193,7 +196,6 @@ function accessor(data, n) {
   return id;
 }
 
-const {image,counts,coverage} = bakeAtlas({sources,layers,width,depth,fused,filled,mask:measuredFaces,agreement});
 const indexAccessor=gltf.accessors.length;
 gltf.accessors.push({bufferView:view(Buffer.from(triangles.buffer),34963),componentType:5125,
   type:"SCALAR",count:triangles.length,min:[0],max:[count-1]});
@@ -217,7 +219,10 @@ binary.writeUInt32LE(offset); binary.write('BIN\0',4);
 fs.writeFileSync('terrain.glb',Buffer.concat([header,doc,binary,...chunks]));
 fs.writeFileSync('ground.bin', Buffer.concat([Buffer.from(filled.buffer),Buffer.from(ground)]));
 const metadata = {step,width,depth,origin,boundsMeters:[(width-1)*step,(depth-1)*step],
-  faces,surveyedFaces,inferredFaces:faces-surveyedFaces,softenedSamples,covered,overlap,crossDrive,disagreements,coverage,sources:used};
+  faces,surveyedFaces,inferredFaces:faces-surveyedFaces,softenedSamples,covered,overlap,crossDrive,disagreements,coverage,sources:used,
+  completion:{method:'Joint Navcam photo and detrended relief quilting; inferred, not new stereo measurements',seed:671167,
+    reference:'https://science.nasa.gov/resource/perseverance-workspace-at-skinner-ridge/',
+    baselineAreaSquareMeters:686,areaSquareMeters:(width-1)*(depth-1)*step*step}};
 fs.writeFileSync('terrain.json',JSON.stringify(metadata,null,2)+'\n');
 const provenance=new PNG({width:cols,height:rows});
 for (let i=0;i<measuredFaces.length;i++) {

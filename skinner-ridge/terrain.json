@@ -1,28 +1,1671 @@
 {
   "step": 0.035,
-  "width": 801,
-  "depth": 701,
+  "width": 1133,
+  "depth": 991,
   "origin": [
-    77.49,
-    2.51,
+    72.45,
+    8.32,
     -14
   ],
   "boundsMeters": [
-    28.000000000000004,
-    24.500000000000004
+    39.620000000000005,
+    34.650000000000006
   ],
-  "faces": 1120000,
-  "surveyedFaces": 708134,
-  "inferredFaces": 411866,
-  "softenedSamples": 96519,
-  "covered": 377075,
-  "overlap": 319769,
-  "crossDrive": 271226,
-  "disagreements": 103048,
+  "faces": 2241360,
+  "surveyedFaces": 1213774,
+  "inferredFaces": 1027586,
+  "softenedSamples": 125664,
+  "covered": 644883,
+  "overlap": 524027,
+  "crossDrive": 449081,
+  "disagreements": 130713,
   "coverage": {
-    "measuredPixels": 16648135,
-    "inferredPixels": 10791865,
-    "textureSwatches": 1478
+    "measuredPixels": 28233261,
+    "inferredPixels": 26680059,
+    "textureSwatches": 410,
+    "patchMeters": 1.4000000000000001,
+    "donorCells": [
+      [
+        526,
+        76
+      ],
+      [
+        535,
+        76
+      ],
+      [
+        544,
+        76
+      ],
+      [
+        526,
+        85
+      ],
+      [
+        535,
+        85
+      ],
+      [
+        544,
+        85
+      ],
+      [
+        526,
+        94
+      ],
+      [
+        535,
+        94
+      ],
+      [
+        544,
+        94
+      ],
+      [
+        391,
+        103
+      ],
+      [
+        526,
+        103
+      ],
+      [
+        391,
+        112
+      ],
+      [
+        400,
+        112
+      ],
+      [
+        409,
+        112
+      ],
+      [
+        418,
+        112
+      ],
+      [
+        427,
+        112
+      ],
+      [
+        436,
+        112
+      ],
+      [
+        445,
+        112
+      ],
+      [
+        526,
+        112
+      ],
+      [
+        382,
+        121
+      ],
+      [
+        391,
+        121
+      ],
+      [
+        400,
+        121
+      ],
+      [
+        409,
+        121
+      ],
+      [
+        418,
+        121
+      ],
+      [
+        427,
+        121
+      ],
+      [
+        436,
+        121
+      ],
+      [
+        445,
+        121
+      ],
+      [
+        454,
+        121
+      ],
+      [
+        463,
+        121
+      ],
+      [
+        517,
+        121
+      ],
+      [
+        526,
+        121
+      ],
+      [
+        382,
+        130
+      ],
+      [
+        391,
+        130
+      ],
+      [
+        400,
+        130
+      ],
+      [
+        409,
+        130
+      ],
+      [
+        418,
+        130
+      ],
+      [
+        427,
+        130
+      ],
+      [
+        436,
+        130
+      ],
+      [
+        445,
+        130
+      ],
+      [
+        454,
+        130
+      ],
+      [
+        463,
+        130
+      ],
+      [
+        472,
+        130
+      ],
+      [
+        481,
+        130
+      ],
+      [
+        490,
+        130
+      ],
+      [
+        499,
+        130
+      ],
+      [
+        508,
+        130
+      ],
+      [
+        517,
+        130
+      ],
+      [
+        526,
+        130
+      ],
+      [
+        382,
+        139
+      ],
+      [
+        391,
+        139
+      ],
+      [
+        400,
+        139
+      ],
+      [
+        409,
+        139
+      ],
+      [
+        418,
+        139
+      ],
+      [
+        427,
+        139
+      ],
+      [
+        436,
+        139
+      ],
+      [
+        445,
+        139
+      ],
+      [
+        454,
+        139
+      ],
+      [
+        463,
+        139
+      ],
+      [
+        472,
+        139
+      ],
+      [
+        481,
+        139
+      ],
+      [
+        490,
+        139
+      ],
+      [
+        499,
+        139
+      ],
+      [
+        508,
+        139
+      ],
+      [
+        517,
+        139
+      ],
+      [
+        526,
+        139
+      ],
+      [
+        535,
+        139
+      ],
+      [
+        544,
+        139
+      ],
+      [
+        553,
+        139
+      ],
+      [
+        562,
+        139
+      ],
+      [
+        571,
+        139
+      ],
+      [
+        580,
+        139
+      ],
+      [
+        589,
+        139
+      ],
+      [
+        382,
+        148
+      ],
+      [
+        391,
+        148
+      ],
+      [
+        400,
+        148
+      ],
+      [
+        409,
+        148
+      ],
+      [
+        418,
+        148
+      ],
+      [
+        427,
+        148
+      ],
+      [
+        436,
+        148
+      ],
+      [
+        445,
+        148
+      ],
+      [
+        454,
+        148
+      ],
+      [
+        463,
+        148
+      ],
+      [
+        472,
+        148
+      ],
+      [
+        481,
+        148
+      ],
+      [
+        490,
+        148
+      ],
+      [
+        499,
+        148
+      ],
+      [
+        508,
+        148
+      ],
+      [
+        517,
+        148
+      ],
+      [
+        526,
+        148
+      ],
+      [
+        535,
+        148
+      ],
+      [
+        544,
+        148
+      ],
+      [
+        553,
+        148
+      ],
+      [
+        562,
+        148
+      ],
+      [
+        571,
+        148
+      ],
+      [
+        580,
+        148
+      ],
+      [
+        337,
+        157
+      ],
+      [
+        346,
+        157
+      ],
+      [
+        355,
+        157
+      ],
+      [
+        364,
+        157
+      ],
+      [
+        373,
+        157
+      ],
+      [
+        382,
+        157
+      ],
+      [
+        391,
+        157
+      ],
+      [
+        400,
+        157
+      ],
+      [
+        409,
+        157
+      ],
+      [
+        418,
+        157
+      ],
+      [
+        427,
+        157
+      ],
+      [
+        436,
+        157
+      ],
+      [
+        445,
+        157
+      ],
+      [
+        454,
+        157
+      ],
+      [
+        463,
+        157
+      ],
+      [
+        472,
+        157
+      ],
+      [
+        481,
+        157
+      ],
+      [
+        490,
+        157
+      ],
+      [
+        499,
+        157
+      ],
+      [
+        508,
+        157
+      ],
+      [
+        517,
+        157
+      ],
+      [
+        526,
+        157
+      ],
+      [
+        535,
+        157
+      ],
+      [
+        544,
+        157
+      ],
+      [
+        553,
+        157
+      ],
+      [
+        337,
+        166
+      ],
+      [
+        346,
+        166
+      ],
+      [
+        355,
+        166
+      ],
+      [
+        364,
+        166
+      ],
+      [
+        409,
+        166
+      ],
+      [
+        418,
+        166
+      ],
+      [
+        427,
+        166
+      ],
+      [
+        436,
+        166
+      ],
+      [
+        445,
+        166
+      ],
+      [
+        454,
+        166
+      ],
+      [
+        463,
+        166
+      ],
+      [
+        472,
+        166
+      ],
+      [
+        481,
+        166
+      ],
+      [
+        490,
+        166
+      ],
+      [
+        499,
+        166
+      ],
+      [
+        508,
+        166
+      ],
+      [
+        517,
+        166
+      ],
+      [
+        409,
+        175
+      ],
+      [
+        418,
+        175
+      ],
+      [
+        427,
+        175
+      ],
+      [
+        436,
+        175
+      ],
+      [
+        445,
+        175
+      ],
+      [
+        454,
+        175
+      ],
+      [
+        463,
+        175
+      ],
+      [
+        472,
+        175
+      ],
+      [
+        481,
+        175
+      ],
+      [
+        490,
+        175
+      ],
+      [
+        418,
+        184
+      ],
+      [
+        427,
+        184
+      ],
+      [
+        436,
+        184
+      ],
+      [
+        445,
+        184
+      ],
+      [
+        454,
+        184
+      ],
+      [
+        463,
+        184
+      ],
+      [
+        472,
+        184
+      ],
+      [
+        481,
+        184
+      ],
+      [
+        490,
+        184
+      ],
+      [
+        427,
+        193
+      ],
+      [
+        436,
+        193
+      ],
+      [
+        445,
+        193
+      ],
+      [
+        454,
+        193
+      ],
+      [
+        463,
+        193
+      ],
+      [
+        472,
+        193
+      ],
+      [
+        481,
+        193
+      ],
+      [
+        427,
+        202
+      ],
+      [
+        436,
+        202
+      ],
+      [
+        445,
+        202
+      ],
+      [
+        454,
+        202
+      ],
+      [
+        463,
+        202
+      ],
+      [
+        472,
+        202
+      ],
+      [
+        481,
+        202
+      ],
+      [
+        661,
+        202
+      ],
+      [
+        427,
+        211
+      ],
+      [
+        436,
+        211
+      ],
+      [
+        445,
+        211
+      ],
+      [
+        454,
+        211
+      ],
+      [
+        463,
+        211
+      ],
+      [
+        472,
+        211
+      ],
+      [
+        481,
+        211
+      ],
+      [
+        661,
+        211
+      ],
+      [
+        337,
+        220
+      ],
+      [
+        427,
+        220
+      ],
+      [
+        436,
+        220
+      ],
+      [
+        445,
+        220
+      ],
+      [
+        454,
+        220
+      ],
+      [
+        463,
+        220
+      ],
+      [
+        472,
+        220
+      ],
+      [
+        481,
+        220
+      ],
+      [
+        490,
+        220
+      ],
+      [
+        652,
+        220
+      ],
+      [
+        661,
+        220
+      ],
+      [
+        319,
+        229
+      ],
+      [
+        328,
+        229
+      ],
+      [
+        337,
+        229
+      ],
+      [
+        346,
+        229
+      ],
+      [
+        355,
+        229
+      ],
+      [
+        364,
+        229
+      ],
+      [
+        373,
+        229
+      ],
+      [
+        382,
+        229
+      ],
+      [
+        391,
+        229
+      ],
+      [
+        400,
+        229
+      ],
+      [
+        409,
+        229
+      ],
+      [
+        418,
+        229
+      ],
+      [
+        427,
+        229
+      ],
+      [
+        436,
+        229
+      ],
+      [
+        445,
+        229
+      ],
+      [
+        454,
+        229
+      ],
+      [
+        463,
+        229
+      ],
+      [
+        472,
+        229
+      ],
+      [
+        481,
+        229
+      ],
+      [
+        490,
+        229
+      ],
+      [
+        634,
+        229
+      ],
+      [
+        643,
+        229
+      ],
+      [
+        652,
+        229
+      ],
+      [
+        661,
+        229
+      ],
+      [
+        319,
+        238
+      ],
+      [
+        328,
+        238
+      ],
+      [
+        337,
+        238
+      ],
+      [
+        346,
+        238
+      ],
+      [
+        355,
+        238
+      ],
+      [
+        364,
+        238
+      ],
+      [
+        373,
+        238
+      ],
+      [
+        382,
+        238
+      ],
+      [
+        391,
+        238
+      ],
+      [
+        400,
+        238
+      ],
+      [
+        409,
+        238
+      ],
+      [
+        418,
+        238
+      ],
+      [
+        427,
+        238
+      ],
+      [
+        436,
+        238
+      ],
+      [
+        445,
+        238
+      ],
+      [
+        454,
+        238
+      ],
+      [
+        463,
+        238
+      ],
+      [
+        472,
+        238
+      ],
+      [
+        481,
+        238
+      ],
+      [
+        490,
+        238
+      ],
+      [
+        652,
+        238
+      ],
+      [
+        661,
+        238
+      ],
+      [
+        319,
+        247
+      ],
+      [
+        328,
+        247
+      ],
+      [
+        337,
+        247
+      ],
+      [
+        346,
+        247
+      ],
+      [
+        355,
+        247
+      ],
+      [
+        364,
+        247
+      ],
+      [
+        373,
+        247
+      ],
+      [
+        382,
+        247
+      ],
+      [
+        391,
+        247
+      ],
+      [
+        400,
+        247
+      ],
+      [
+        409,
+        247
+      ],
+      [
+        418,
+        247
+      ],
+      [
+        427,
+        247
+      ],
+      [
+        436,
+        247
+      ],
+      [
+        445,
+        247
+      ],
+      [
+        454,
+        247
+      ],
+      [
+        463,
+        247
+      ],
+      [
+        472,
+        247
+      ],
+      [
+        481,
+        247
+      ],
+      [
+        490,
+        247
+      ],
+      [
+        652,
+        247
+      ],
+      [
+        661,
+        247
+      ],
+      [
+        670,
+        247
+      ],
+      [
+        679,
+        247
+      ],
+      [
+        688,
+        247
+      ],
+      [
+        697,
+        247
+      ],
+      [
+        319,
+        256
+      ],
+      [
+        328,
+        256
+      ],
+      [
+        337,
+        256
+      ],
+      [
+        346,
+        256
+      ],
+      [
+        355,
+        256
+      ],
+      [
+        364,
+        256
+      ],
+      [
+        373,
+        256
+      ],
+      [
+        382,
+        256
+      ],
+      [
+        391,
+        256
+      ],
+      [
+        400,
+        256
+      ],
+      [
+        409,
+        256
+      ],
+      [
+        418,
+        256
+      ],
+      [
+        427,
+        256
+      ],
+      [
+        436,
+        256
+      ],
+      [
+        445,
+        256
+      ],
+      [
+        454,
+        256
+      ],
+      [
+        679,
+        256
+      ],
+      [
+        688,
+        256
+      ],
+      [
+        697,
+        256
+      ],
+      [
+        706,
+        256
+      ],
+      [
+        715,
+        256
+      ],
+      [
+        310,
+        265
+      ],
+      [
+        319,
+        265
+      ],
+      [
+        328,
+        265
+      ],
+      [
+        337,
+        265
+      ],
+      [
+        346,
+        265
+      ],
+      [
+        355,
+        265
+      ],
+      [
+        364,
+        265
+      ],
+      [
+        373,
+        265
+      ],
+      [
+        382,
+        265
+      ],
+      [
+        391,
+        265
+      ],
+      [
+        400,
+        265
+      ],
+      [
+        409,
+        265
+      ],
+      [
+        418,
+        265
+      ],
+      [
+        427,
+        265
+      ],
+      [
+        436,
+        265
+      ],
+      [
+        445,
+        265
+      ],
+      [
+        454,
+        265
+      ],
+      [
+        679,
+        265
+      ],
+      [
+        688,
+        265
+      ],
+      [
+        697,
+        265
+      ],
+      [
+        328,
+        274
+      ],
+      [
+        337,
+        274
+      ],
+      [
+        346,
+        274
+      ],
+      [
+        355,
+        274
+      ],
+      [
+        364,
+        274
+      ],
+      [
+        373,
+        274
+      ],
+      [
+        382,
+        274
+      ],
+      [
+        391,
+        274
+      ],
+      [
+        400,
+        274
+      ],
+      [
+        409,
+        274
+      ],
+      [
+        418,
+        274
+      ],
+      [
+        427,
+        274
+      ],
+      [
+        436,
+        274
+      ],
+      [
+        697,
+        274
+      ],
+      [
+        328,
+        283
+      ],
+      [
+        337,
+        283
+      ],
+      [
+        346,
+        283
+      ],
+      [
+        355,
+        283
+      ],
+      [
+        364,
+        283
+      ],
+      [
+        373,
+        283
+      ],
+      [
+        382,
+        283
+      ],
+      [
+        391,
+        283
+      ],
+      [
+        400,
+        283
+      ],
+      [
+        409,
+        283
+      ],
+      [
+        418,
+        283
+      ],
+      [
+        427,
+        283
+      ],
+      [
+        436,
+        283
+      ],
+      [
+        328,
+        292
+      ],
+      [
+        337,
+        292
+      ],
+      [
+        346,
+        292
+      ],
+      [
+        355,
+        292
+      ],
+      [
+        364,
+        292
+      ],
+      [
+        373,
+        292
+      ],
+      [
+        382,
+        292
+      ],
+      [
+        391,
+        292
+      ],
+      [
+        400,
+        292
+      ],
+      [
+        409,
+        292
+      ],
+      [
+        328,
+        301
+      ],
+      [
+        337,
+        301
+      ],
+      [
+        346,
+        301
+      ],
+      [
+        355,
+        301
+      ],
+      [
+        364,
+        301
+      ],
+      [
+        373,
+        301
+      ],
+      [
+        382,
+        301
+      ],
+      [
+        391,
+        301
+      ],
+      [
+        400,
+        301
+      ],
+      [
+        355,
+        310
+      ],
+      [
+        364,
+        310
+      ],
+      [
+        373,
+        310
+      ],
+      [
+        382,
+        310
+      ],
+      [
+        391,
+        310
+      ],
+      [
+        355,
+        319
+      ],
+      [
+        364,
+        319
+      ],
+      [
+        373,
+        319
+      ],
+      [
+        382,
+        319
+      ],
+      [
+        391,
+        319
+      ],
+      [
+        382,
+        328
+      ],
+      [
+        391,
+        328
+      ],
+      [
+        319,
+        355
+      ],
+      [
+        427,
+        391
+      ],
+      [
+        481,
+        391
+      ],
+      [
+        418,
+        400
+      ],
+      [
+        427,
+        400
+      ],
+      [
+        481,
+        400
+      ],
+      [
+        643,
+        400
+      ],
+      [
+        652,
+        400
+      ],
+      [
+        661,
+        400
+      ],
+      [
+        670,
+        400
+      ],
+      [
+        418,
+        409
+      ],
+      [
+        427,
+        409
+      ],
+      [
+        436,
+        409
+      ],
+      [
+        445,
+        409
+      ],
+      [
+        454,
+        409
+      ],
+      [
+        463,
+        409
+      ],
+      [
+        472,
+        409
+      ],
+      [
+        481,
+        409
+      ],
+      [
+        616,
+        409
+      ],
+      [
+        625,
+        409
+      ],
+      [
+        634,
+        409
+      ],
+      [
+        643,
+        409
+      ],
+      [
+        652,
+        409
+      ],
+      [
+        661,
+        409
+      ],
+      [
+        670,
+        409
+      ],
+      [
+        418,
+        418
+      ],
+      [
+        427,
+        418
+      ],
+      [
+        436,
+        418
+      ],
+      [
+        445,
+        418
+      ],
+      [
+        454,
+        418
+      ],
+      [
+        463,
+        418
+      ],
+      [
+        472,
+        418
+      ],
+      [
+        616,
+        418
+      ],
+      [
+        625,
+        418
+      ],
+      [
+        634,
+        418
+      ],
+      [
+        643,
+        418
+      ],
+      [
+        652,
+        418
+      ],
+      [
+        661,
+        418
+      ],
+      [
+        670,
+        418
+      ],
+      [
+        427,
+        427
+      ],
+      [
+        436,
+        427
+      ],
+      [
+        445,
+        427
+      ],
+      [
+        454,
+        427
+      ],
+      [
+        463,
+        427
+      ],
+      [
+        472,
+        427
+      ],
+      [
+        634,
+        427
+      ],
+      [
+        643,
+        427
+      ],
+      [
+        436,
+        436
+      ],
+      [
+        418,
+        490
+      ]
+    ]
   },
   "sources": [
     {
@@ -78,7 +1721,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297328M366RAS_N0261004NCAM03477_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297328M366RAS_N0261004NCAM03477_0A0195J02.mtl"
       },
-      "rejected": 2665,
+      "rejected": 5094,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297328m366ras_n0261004ncam03477_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297328_366xym_n0261004ncam03477_0a0195j::2.0"
@@ -100,8 +1743,8 @@
         "obj.xml": "dbc354bdf48e7c2df4e3c4ef283a035298e3e66ffaadfa34e691ea2f4b3f0b38",
         "png": "8db4bcdb1547185b658216a6718809dc3c8dca1c335cdca9fbb4c7cd811c3674"
       },
-      "fusedSamples": 50911,
-      "atlasTriangles": 93644
+      "fusedSamples": 55037,
+      "atlasTriangles": 97517
     },
     {
       "id": "NLF_0477_0709297503M102RAS_N0261004NCAM03477_0A0195J02",
@@ -117,7 +1760,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297503M102RAS_N0261004NCAM03477_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297503M102RAS_N0261004NCAM03477_0A0195J02.mtl"
       },
-      "rejected": 578,
+      "rejected": 2568,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297503m102ras_n0261004ncam03477_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297503_102xym_n0261004ncam03477_0a0195j::2.0"
@@ -139,8 +1782,8 @@
         "obj.xml": "a25a39afb0382f746d3cd45430d705afd20e443a89429125f565516527bb1c67",
         "png": "af1d2d3b0d23c9c301df30316b44f7f3ce3fd859e6a78e0664da17d142ea3a2b"
       },
-      "fusedSamples": 68067,
-      "atlasTriangles": 130790
+      "fusedSamples": 128441,
+      "atlasTriangles": 234825
     },
     {
       "id": "NLF_0477_0709297668M065RAS_N0261004NCAM03477_0A0195J02",
@@ -156,7 +1799,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297668M065RAS_N0261004NCAM03477_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297668M065RAS_N0261004NCAM03477_0A0195J02.mtl"
       },
-      "rejected": 24,
+      "rejected": 343,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297668m065ras_n0261004ncam03477_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297668_065xym_n0261004ncam03477_0a0195j::2.0"
@@ -178,8 +1821,8 @@
         "obj.xml": "dcc9a001ef1ea43e8fe4854766f91d0c0b91ae66f64d00d7857318f04cc3c553",
         "png": "f35ff57e5690592f469019a9761bdb948ac5befb6019650fb051ab7a819811de"
       },
-      "fusedSamples": 37015,
-      "atlasTriangles": 72622
+      "fusedSamples": 106883,
+      "atlasTriangles": 207184
     },
     {
       "id": "NLF_0477_0709297838M897RAS_N0261004NCAM02477_0A0195J02",
@@ -195,7 +1838,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297838M897RAS_N0261004NCAM02477_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709297838M897RAS_N0261004NCAM02477_0A0195J02.mtl"
       },
-      "rejected": 652,
+      "rejected": 3747,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297838m897ras_n0261004ncam02477_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709297838_897xym_n0261004ncam02477_0a0195j::2.0"
@@ -217,8 +1860,8 @@
         "obj.xml": "1825ee87eb06ff9ed2ede0b2c5e4ae777b6dc225ff2439c2d56ee5311bc895bb",
         "png": "4d20900c5370c602937ab1cb515890c86bd49fd4d9d3c638864c14e6c8deee5c"
       },
-      "fusedSamples": 37049,
-      "atlasTriangles": 57375
+      "fusedSamples": 98210,
+      "atlasTriangles": 128407
     },
     {
       "id": "NLF_0477_0709298005M099RAS_N0261004NCAM02477_0A0195J02",
@@ -234,7 +1877,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298005M099RAS_N0261004NCAM02477_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298005M099RAS_N0261004NCAM02477_0A0195J02.mtl"
       },
-      "rejected": 1808,
+      "rejected": 2584,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298005m099ras_n0261004ncam02477_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298005_099xym_n0261004ncam02477_0a0195j::2.0"
@@ -256,8 +1899,8 @@
         "obj.xml": "cb4e5c7bf442d3d1017a3903cc01e4c7216d4618f715a9d94e444181e507e425",
         "png": "a8fe170b92425cfa90adfc589fc7faca17bef15101d31f4c59e8e69d61d4884c"
       },
-      "fusedSamples": 36616,
-      "atlasTriangles": 64887
+      "fusedSamples": 41195,
+      "atlasTriangles": 69863
     },
     {
       "id": "NLF_0474_0709025891M862RAS_N0260850NCAM00708_0A1095J02",
@@ -312,7 +1955,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026308M550RAS_N0260850NCAM03474_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026308M550RAS_N0260850NCAM03474_0A0195J02.mtl"
       },
-      "rejected": 3676,
+      "rejected": 4964,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026308m550ras_n0260850ncam03474_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026308_550xym_n0260850ncam03474_0a0195j::2.0"
@@ -334,8 +1977,8 @@
         "obj.xml": "17fa98ffb3bfbc0977b61a6653e2d1ef64ebd7e9375e59ac17ab044e92483871",
         "png": "34960a391f504de99492defd562211c24c4f5c6c239d0ea4e6ebb2b324331fec"
       },
-      "fusedSamples": 62580,
-      "atlasTriangles": 113022
+      "fusedSamples": 63623,
+      "atlasTriangles": 113585
     },
     {
       "id": "NLF_0474_0709026492M481RAS_N0260850NCAM03474_0A0195J02",
@@ -351,7 +1994,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026492M481RAS_N0260850NCAM03474_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026492M481RAS_N0260850NCAM03474_0A0195J02.mtl"
       },
-      "rejected": 1031,
+      "rejected": 2714,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026492m481ras_n0260850ncam03474_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026492_481xym_n0260850ncam03474_0a0195j::3.0"
@@ -373,8 +2016,8 @@
         "obj.xml": "0877e5675d0ead7f335e74034c0b3599632c9c9ba3d90473ea2835802124522a",
         "png": "04f87ce7d85b91f6c8d1335dafac22f587b742503c9edd33a3f58ec7bc2f759f"
       },
-      "fusedSamples": 86252,
-      "atlasTriangles": 164103
+      "fusedSamples": 158541,
+      "atlasTriangles": 283512
     },
     {
       "id": "NLF_0474_0709026657M743RAS_N0260850NCAM03474_0A0195J02",
@@ -390,7 +2033,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026657M743RAS_N0260850NCAM03474_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026657M743RAS_N0260850NCAM03474_0A0195J02.mtl"
       },
-      "rejected": 0,
+      "rejected": 127,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026657m743ras_n0260850ncam03474_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026657_743xym_n0260850ncam03474_0a0195j::2.0"
@@ -412,8 +2055,8 @@
         "obj.xml": "c402203c055ff942cf666cef6ffc969385bc60de6a6fd6eeaca40772ba4d9741",
         "png": "80b427813790c9835c59442146fc425e7d7d5e5629175e2087cd77755eff624a"
       },
-      "fusedSamples": 16446,
-      "atlasTriangles": 32054
+      "fusedSamples": 86949,
+      "atlasTriangles": 168801
     },
     {
       "id": "NLF_0474_0709026896M746RAS_N0260850NCAM02474_0A0195J02",
@@ -429,7 +2072,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026896M746RAS_N0260850NCAM02474_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709026896M746RAS_N0260850NCAM02474_0A0195J02.mtl"
       },
-      "rejected": 1159,
+      "rejected": 5337,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026896m746ras_n0260850ncam02474_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709026896_746xym_n0260850ncam02474_0a0195j::2.0"
@@ -451,8 +2094,8 @@
         "obj.xml": "45ab048e3938c7058f4e829f7fb535099f53e544c330b76fc3f8a3e52fa040a9",
         "png": "1215f615202f9c3f40f5877812f04611d33f90eb113e23974fd22d054c9def36"
       },
-      "fusedSamples": 14525,
-      "atlasTriangles": 25427
+      "fusedSamples": 49996,
+      "atlasTriangles": 89024
     },
     {
       "id": "NLF_0501_0711420522M006RAS_N0261110NCAM00301_0A0295J02",
@@ -468,7 +2111,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711420522M006RAS_N0261110NCAM00301_0A0295J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711420522M006RAS_N0261110NCAM00301_0A0295J02.mtl"
       },
-      "rejected": 0,
+      "rejected": 492,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711420522m006ras_n0261110ncam00301_0a0295j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711420522_006xym_n0261110ncam00301_0a0295j::2.0"
@@ -490,8 +2133,8 @@
         "obj.xml": "32abcb8a8ae6c1abc908916b0c7a788f8e20f9a875a7854af2343b7353cda286",
         "png": "e3066c9e40503770cdfed55054c7a6fab64c9303df27da90e7610c82f801633c"
       },
-      "fusedSamples": 0,
-      "atlasTriangles": 0
+      "fusedSamples": 17281,
+      "atlasTriangles": 27476
     },
     {
       "id": "NLF_0474_0709027043M288RAS_N0260850NCAM02474_0A1195J02",
@@ -507,7 +2150,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027043M288RAS_N0260850NCAM02474_0A1195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027043M288RAS_N0260850NCAM02474_0A1195J02.mtl"
       },
-      "rejected": 1527,
+      "rejected": 2470,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027043m288ras_n0260850ncam02474_0a1195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027043_288xym_n0260850ncam02474_0a1195j::2.0"
@@ -529,8 +2172,8 @@
         "obj.xml": "be6d97fe75139b4809cc48a7eda1a630b03de4daee0d2da68bc227378fcd9af5",
         "png": "74465082628f1ce307f0cd3c867a535e3c7539e58783aac856d8554a854435e4"
       },
-      "fusedSamples": 46879,
-      "atlasTriangles": 80654
+      "fusedSamples": 69831,
+      "atlasTriangles": 107809
     },
     {
       "id": "NLF_0474_0709027186M885RAS_N0260850NCAM13474_0A1195J02",
@@ -546,7 +2189,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027186M885RAS_N0260850NCAM13474_0A1195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027186M885RAS_N0260850NCAM13474_0A1195J02.mtl"
       },
-      "rejected": 3593,
+      "rejected": 5122,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027186m885ras_n0260850ncam13474_0a1195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027186_885xym_n0260850ncam13474_0a1195j::2.0"
@@ -568,8 +2211,8 @@
         "obj.xml": "401245fc8baf53f70915134fc5b8521a582a5f8669a7a3b5dca5aa8854e1641a",
         "png": "b4df31ea60071d95208aa652048e2b71ad50bb1ed804569d0c6a19f91792003a"
       },
-      "fusedSamples": 58417,
-      "atlasTriangles": 91160
+      "fusedSamples": 95425,
+      "atlasTriangles": 132614
     },
     {
       "id": "NLF_0474_0709027279M633RAS_N0260850NCAM13474_0A0195J02",
@@ -585,7 +2228,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027279M633RAS_N0260850NCAM13474_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00474/ids/rdr/mesh/NLF_0474_0709027279M633RAS_N0260850NCAM13474_0A0195J02.mtl"
       },
-      "rejected": 5459,
+      "rejected": 7388,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027279m633ras_n0260850ncam13474_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0474_0709027279_633xym_n0260850ncam13474_0a0195j::2.0"
@@ -607,8 +2250,8 @@
         "obj.xml": "527601a314b7370f0e1e4c39317e0e23e31e71709f90d56de86174c3d36baf96",
         "png": "d5285927c0b0211590ca2aa607ba09ea67a37d077dbc7375bf3156e5a4013ef9"
       },
-      "fusedSamples": 86794,
-      "atlasTriangles": 142685
+      "fusedSamples": 90910,
+      "atlasTriangles": 144208
     },
     {
       "id": "NLF_0474_0709027389M491RAS_N0260850NCAM13474_0A0195J02",
@@ -663,7 +2306,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298187M680RAS_N0261004NCAM13477_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298187M680RAS_N0261004NCAM13477_0A0195J02.mtl"
       },
-      "rejected": 3210,
+      "rejected": 3873,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298187m680ras_n0261004ncam13477_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298187_680xym_n0261004ncam13477_0a0195j::2.0"
@@ -685,8 +2328,8 @@
         "obj.xml": "1f56bb0a75a449e719864a3bdd2c5c45015bfdf54013fc4a58380ceb1f7ae5bf",
         "png": "3d648c801caacc516fd72cec2b3bb357d61675d1b17bd2ce4cce2adad7e4fa84"
       },
-      "fusedSamples": 61369,
-      "atlasTriangles": 101167
+      "fusedSamples": 67264,
+      "atlasTriangles": 104681
     },
     {
       "id": "NLF_0477_0709298299M678RAS_N0261004NCAM13477_0A0195J02",
@@ -702,7 +2345,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298299M678RAS_N0261004NCAM13477_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00477/ids/rdr/mesh/NLF_0477_0709298299M678RAS_N0261004NCAM13477_0A0195J02.mtl"
       },
-      "rejected": 3567,
+      "rejected": 5783,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298299m678ras_n0261004ncam13477_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0477_0709298299_678xym_n0261004ncam13477_0a0195j::2.0"
@@ -724,8 +2367,8 @@
         "obj.xml": "264ee03fcc485ca4060fc8cbaeef29cddb77e0f8376fdcc34a13495d39493834",
         "png": "fd0689f39d8d3feec8e7c25dda672c8ae67d214ec6e4326260e0b1565614cecf"
       },
-      "fusedSamples": 60129,
-      "atlasTriangles": 99231
+      "fusedSamples": 70228,
+      "atlasTriangles": 109677
     },
     {
       "id": "NLF_0477_0709298393M010RAS_N0261004NCAM13477_0A0195J02",
@@ -780,7 +2423,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424234M539RAS_N0261154NCAM02501_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424234M539RAS_N0261154NCAM02501_0A0195J02.mtl"
       },
-      "rejected": 1702,
+      "rejected": 2399,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424234m539ras_n0261154ncam02501_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424234_539xym_n0261154ncam02501_0a0195j::2.0"
@@ -802,8 +2445,8 @@
         "obj.xml": "a7fd793686eefad526aaecdb1d012596da364ce29739eb5a2297fb95e91ec164",
         "png": "bf81d1a49f777ac07a50739cb0e06fef0b6b9673b011355cce227ef939919737"
       },
-      "fusedSamples": 27727,
-      "atlasTriangles": 48964
+      "fusedSamples": 97354,
+      "atlasTriangles": 177700
     },
     {
       "id": "NLF_0501_0711424443M278RAS_N0261154NCAM02501_0A0195J02",
@@ -819,7 +2462,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424443M278RAS_N0261154NCAM02501_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424443M278RAS_N0261154NCAM02501_0A0195J02.mtl"
       },
-      "rejected": 10148,
+      "rejected": 14610,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424443m278ras_n0261154ncam02501_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424443_278xym_n0261154ncam02501_0a0195j::2.0"
@@ -841,8 +2484,8 @@
         "obj.xml": "6d24a6f9f26e95b97c5b0f87baa7516feb613f14b6d12734d8a6a7a7498cbb97",
         "png": "ba40b0ed8a7489ceb7e9e892e2713699c4d3f0da90db262460a0ff6aa5ed3337"
       },
-      "fusedSamples": 163767,
-      "atlasTriangles": 193929
+      "fusedSamples": 232321,
+      "atlasTriangles": 288555
     },
     {
       "id": "NLF_0501_0711424685M635RAS_N0261154NCAM04501_0A0195J02",
@@ -897,7 +2540,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424795M821RAS_N0261154NCAM04501_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424795M821RAS_N0261154NCAM04501_0A0195J02.mtl"
       },
-      "rejected": 2929,
+      "rejected": 5245,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424795m821ras_n0261154ncam04501_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424795_821xym_n0261154ncam04501_0a0195j::2.0"
@@ -919,8 +2562,8 @@
         "obj.xml": "db926e74bc57655ebbf18b035f372aac68cb96fc25f78102ae542e784a00ac9e",
         "png": "de6d51384738b6a09156f686f817f27430f6c13273224a4f5255971ee1427df9"
       },
-      "fusedSamples": 79707,
-      "atlasTriangles": 132822
+      "fusedSamples": 143087,
+      "atlasTriangles": 233091
     },
     {
       "id": "NLF_0501_0711424926M072RAS_N0261154NCAM04501_0A0195J02",
@@ -936,7 +2579,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424926M072RAS_N0261154NCAM04501_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424926M072RAS_N0261154NCAM04501_0A0195J02.mtl"
       },
-      "rejected": 10949,
+      "rejected": 14765,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424926m072ras_n0261154ncam04501_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424926_072xym_n0261154ncam04501_0a0195j::2.0"
@@ -958,8 +2601,8 @@
         "obj.xml": "372c4dd0c476b1fabff1302a8e28dfcdbe7be2624a5c1653bd6736e88c3c53bf",
         "png": "7619dfd169fad1d747fe35499c26e696e04985f449829286a0f12d0dcbc52fbf"
       },
-      "fusedSamples": 160724,
-      "atlasTriangles": 191452
+      "fusedSamples": 211701,
+      "atlasTriangles": 232463
     },
     {
       "id": "NLF_0470_0708675355M290RAS_N0260756NCAM00700_0A00LLJ03",
@@ -1092,7 +2735,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423715M491RAS_N0261154NCAM03501_0A1195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711423715M491RAS_N0261154NCAM03501_0A1195J02.mtl"
       },
-      "rejected": 0,
+      "rejected": 1492,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711423715m491ras_n0261154ncam03501_0a1195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711423715_491xym_n0261154ncam03501_0a1195j::2.0"
@@ -1114,8 +2757,8 @@
         "obj.xml": "92739378d3bc5285c06ec454b4f10d3fa1509ee20116e8046bc8f35f931b97bf",
         "png": "db1f51457cfd95b10f401bdd2479566b7efe316dcf7c4c7dcac5b03faed2c0b7"
       },
-      "fusedSamples": 0,
-      "atlasTriangles": 0
+      "fusedSamples": 28240,
+      "atlasTriangles": 41150
     },
     {
       "id": "NLF_0501_0711423861M851RAS_N0261154NCAM03501_0A0195J02",
@@ -1170,7 +2813,7 @@
         "png": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424026M495RAS_N0261154NCAM03501_0A0195J02.png",
         "mtl": "https://planetarydata.jpl.nasa.gov/img/data/mars2020/mars2020_navcam_ops_mesh/data/sol/00501/ids/rdr/mesh/NLF_0501_0711424026M495RAS_N0261154NCAM03501_0A0195J02.mtl"
       },
-      "rejected": 0,
+      "rejected": 219,
       "references": [
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424026m495ras_n0261154ncam03501_0a0195j::2.0",
         "urn:nasa:pds:mars2020_navcam_ops_mesh:data:nlf_0501_0711424026_495xym_n0261154ncam03501_0a0195j::2.0"
@@ -1192,8 +2835,15 @@
         "obj.xml": "fc63b3da915f484ba59e127562bd3dcb411f3c14421756db60db2b241a217d7a",
         "png": "540caae8c23d2ac5fe8d6a5097e53a28414859a8c06f3c1b05091b44edb6552d"
       },
-      "fusedSamples": 0,
-      "atlasTriangles": 0
+      "fusedSamples": 15317,
+      "atlasTriangles": 28308
     }
-  ]
+  ],
+  "completion": {
+    "method": "Joint Navcam photo and detrended relief quilting; inferred, not new stereo measurements",
+    "seed": 671167,
+    "reference": "https://science.nasa.gov/resource/perseverance-workspace-at-skinner-ridge/",
+    "baselineAreaSquareMeters": 686,
+    "areaSquareMeters": 1372.8330000000003
+  }
 }

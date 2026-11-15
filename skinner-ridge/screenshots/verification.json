@@ -1,0 +1,12 @@
+{
+  "slabWalk": 3.483480000000003,
+  "expandedWalk": 21.523260000000178,
+  "filledWalk": 8.286959999999983,
+  "filledFrames": 30,
+  "lowerWalk": 6.398809999999919,
+  "pointerLock": true,
+  "boundaryCollision": true,
+  "reset": true,
+  "groundContact": true,
+  "browserErrors": []
+}

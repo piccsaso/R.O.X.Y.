@@ -26,7 +26,7 @@ let expansion;
 for (let angle=0;angle<Math.PI*2;angle+=Math.PI/120) {
   const dx=Math.cos(angle), dz=Math.sin(angle);
   let distance=0;
-  for (let d=0.035;d<=16;d+=0.035) {
+  for (let d=0.035;d<=26;d+=0.035) {
     const x=start.x+dx*d, z=start.z+dz*d;
     if (![0,-0.10,0.10].every(off=>Number.isFinite(ground.foot(x-dz*off,z+dx*off)))) break;
     distance=d;
@@ -34,7 +34,8 @@ for (let angle=0;angle<Math.PI*2;angle+=Math.PI/120) {
   // Leave room to turn and avoid framing the crop edge at the endpoint.
   distance-=0.55;
   const x=start.x+dx*distance, z=start.z+dz*distance;
-  const inOldCrop=x>3.5 && x<23.1 && z>3.5 && z<21;
+  const ox=meta.origin[1]-2.51, oz=77.49-meta.origin[0];
+  const inOldCrop=x>ox && x<ox+28 && z>oz && z<oz+24.5;
   if (!inOldCrop && distance>7 && (!expansion || distance>expansion.length)) {
     expansion={length:distance,end:{x,z,targetX:start.x,targetZ:start.z}};
   }
@@ -59,6 +60,23 @@ for (let heading=0;heading<Math.PI*2;heading+=Math.PI/120) {
 }
 if (!infill) throw new Error('No walkable route across the inferred sections');
 best.infill=infill;
+
+// Exercise the lower apron specifically, including the newly added margin.
+const lowerStartZ=depth-8, lowerEndZ=depth-1.5;
+let lowerPath;
+for(let x=1;x<width-1;x+=0.14) {
+  let clear=true;
+  for(let z=lowerStartZ;z<=lowerEndZ;z+=meta.step) {
+    if(![-0.12,0,0.12].every(off=>Number.isFinite(ground.foot(x+off,z)))) {clear=false;break;}
+  }
+  if(clear && (!lowerPath || Math.abs(x-width/2)<Math.abs(lowerPath.start.x-width/2))) {
+    lowerPath={length:lowerEndZ-lowerStartZ,
+      start:{x,z:lowerStartZ,targetX:x,targetZ:lowerEndZ},
+      end:{x,z:lowerEndZ,targetX:x,targetZ:lowerStartZ}};
+  }
+}
+if(!lowerPath) throw new Error('No continuous route through the lower expansion');
+best.lowerPath=lowerPath;
 
 // Estimate connected walkable area by tracing neighborhood links on a 14 cm grid.
 const spacing=4*meta.step;

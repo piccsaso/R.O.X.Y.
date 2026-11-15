@@ -16,6 +16,7 @@ try {
   await mkdir('screenshots',{recursive:true});
   browser = spawn(chrome,[
     '--headless=new','--no-first-run','--use-angle=swiftshader','--enable-unsafe-swiftshader',
+    ...(process.env.CHROME_NO_SANDBOX==='1' ? ['--no-sandbox','--disable-crash-reporter','--disable-breakpad'] : []),
     '--remote-debugging-port='+debugging,'--user-data-dir='+resolve('.qa-chrome-'+process.pid),
     'about:blank'
   ],{windowsHide:true,stdio:'ignore'});
@@ -76,12 +77,16 @@ try {
   await call('Emulation.setDeviceMetricsOverride',{width:1280,height:850,deviceScaleFactor:1,mobile:false});
   await loaded('survey');
   await capture('survey');
+  await loaded('lower');
+  await capture('lower');
   await loaded('return');
   await capture('return');
   await loaded('expanded');
   await capture('expanded');
   await loaded('spawn');
   await capture('spawn');
+  if(process.env.CAPTURE_STILLS_ONLY==='1') process.exitCode=0;
+  else {
 
   const mouse=(type,x,y,props={})=>call('Input.dispatchMouseEvent',{type,x,y,...props});
   const key=(type,letter)=>call('Input.dispatchKeyEvent',{type,code:'Key'+letter,key:letter.toLowerCase()});
@@ -194,7 +199,31 @@ try {
   await turn(Math.atan2(Math.cos(direction),Math.sin(direction)), -0.52);
   await wait(250);
   await capture('walked-infill');
-  console.log('Pointer lock, slab route, expansion walk, ground boundary, reset and inferred-ground crossing passed');
+  await loaded('lower-path');
+  await evaluate('document.querySelector("canvas").requestPointerLock()');
+  if(!(await evaluate('walkPose()')).locked) throw new Error('Pointer lock failed on lower path');
+  await turn(Math.PI,-0.42);
+  await capture('lower-path-start');
+  await key('keyDown','W');
+  let lowerWalk=0;
+  for(let tries=0;tries<400;tries++) {
+    await wait(100);
+    const [x,y,z]=(await evaluate('walkPose()')).position;
+    if(Math.abs(y-ground.foot(x,z)-1.65)>0.001 || !Number.isFinite(ground.foot(x,z))) throw new Error('Lost ground on lower path');
+    lowerWalk=z-route.lowerPath.start.z;
+    if(lowerWalk>=route.lowerPath.length-0.2) break;
+  }
+  await key('keyUp','W');
+  if(lowerWalk<route.lowerPath.length-0.3) throw new Error('Lower path stopped early');
+  await turn(0,-0.32);
+  await wait(300);
+  await capture('walked-lower');
+  const report={slabWalk:progress,expandedWalk,filledWalk,filledFrames,lowerWalk,
+    pointerLock:true,boundaryCollision:true,reset:true,groundContact:true,browserErrors};
+  await writeFile('screenshots/verification.json',JSON.stringify(report,null,2)+'\n');
+  console.log(report);
+  console.log('Pointer lock, slab route, expansion, boundary, reset, inferred ground and lower-path walks passed');
+  }
 } finally {
   ws?.close();
   browser?.kill();

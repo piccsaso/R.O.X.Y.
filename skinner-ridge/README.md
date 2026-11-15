@@ -1,47 +1,72 @@
-# Skinner Ridge walk
+﻿# Skinner Ridge walk
 
-Explore a **28 × 24.5 m** patch of Perseverance’s Skinner Ridge workspace at Hawksbill Gap, Jezero crater. This doubles the previous terrain footprint to 686 m². The original walk past the pale layered slab is still the starting route.
+Explore a **39.62 × 34.65 m** patch of Perseverance's Skinner Ridge workspace at Hawksbill Gap, Jezero crater. Its **1,372.833 m²** footprint is twice the previous 686 m². The original pale-slab approach is preserved, with photo-based ground completion across the lower apron and new margins.
 
-## Run the demo on Windows
+## Run
 
-From this directory with Node.js 24 installed (the version used for verification):
+From this directory in PowerShell:
 
 ```powershell
 npm.cmd ci
 npm.cmd start
 ```
 
-Open [the local demo](http://127.0.0.1:8080/) in desktop Chrome or Edge. Click **Enter terrain**, then walk with **WASD** and look with the mouse. Press **R** to reset or **Esc** to release the mouse. From the starting view, aim just right of the pale slab and walk uphill with the slab on your left. The surrounding ground continues past the original route.
+Open [the slab approach](http://127.0.0.1:8080/) or [the lower path](http://127.0.0.1:8080/?view=lower-path) in desktop Chrome or Edge. Click **Enter terrain**, walk with **WASD**, and look with the mouse. **R** resets to the slab; **Esc** releases the mouse. Eye height is 1.65 m. Export units are metres, Y up.
 
-[Start at the slab](screenshots/spawn.png) · [Look back at the slab](screenshots/walked-return.png) · [Explore beyond the old boundary](screenshots/walked-expanded.png) · [Crossing inferred ground](screenshots/walked-infill.png) · [Overhead view](screenshots/survey.png)
+[Slab look-back](screenshots/walked-return.png) · [Lower comparison pose](screenshots/lower.png) · [Lower extension](screenshots/walked-lower.png) · [Expansion](screenshots/walked-expanded.png) · [Survey](screenshots/survey.png)
 
-## What was measured and what was filled
+## What changed
 
-NASA/JPL-Caltech Navcam mesh and image products from sols 470, 471, 474, 477, 499, and 501 provide the ground measurements and color. This expansion evaluated six additional views. Twenty-three of the thirty tested inputs contributed. The manifest records every input and its actual contribution. **63%** of the export’s horizontal footprint had sufficient stereo samples to anchor the mesh. Gaps and the remaining margins use estimated heights and texture sampled from sharp rover-covered surfaces. The viewer extends the horizon with decorative terrain beyond the playable mesh. The infill and horizon are approximate.
+- Expanded each dimension by approximately √2, preserving 3.5 cm vertex spacing and 5 mm atlas texel spacing.
+- Replaced small averaged texture swatches with **joint photo/relief quilting**. 410 intact 1.4 m patches from supported Navcam surfaces supply colors and detrended stereo relief together. Minimum-error seams preserve gravel and surface features.
+- Faded inferred relief to zero at measured triangle vertices. Rendered ground and collision use the same completed heightfield.
+- Made camera preferences continuous across shared triangle vertices to reduce grid seams while favoring sharper projections.
+- Added restrained baked contact shading, capped at 12% darkening, and a dedicated lower-path walking test.
 
-[Coverage map](terrain-coverage.png) shows measured support in light tan and inferred support in dark brown, with intermediate tan where only one triangle in a cell had support. The top of the map is the low-Z edge. This map reflects the original stereo anchors. The steepest stitch transitions receive additional slope smoothing, including some triangles anchored by stereo.
+The user selected subtle sand, gravel, and layered rocks matching NASA photographs, then confirmed that treatment after viewing the lower-path before/after previews.
 
-- `terrain.glb` is the complete textured terrain, including inferred surfaces.
-- `ground.bin` has little-endian Float32 heights followed by one Uint8 triangle mask per cell. Both triangles are present in every cell. Collision samples those same planes and checks step height across a 16 cm clearance radius.
-- `terrain.json` holds product IDs and URLs, PDS motion counters and XYZ references, input checksums, and coverage counts.
-- `route.json` holds the slab and expanded route in metres, plus the estimated walkable area connected to spawn on a 14 cm test grid.
-- `sources.json` is the input list. [Original site comparison](SITE_SELECTION.md)
+## Evidence and inference
 
-## Rebuild and verify
+Twenty-six of thirty archived Navcam observations contribute, from sols 470, 471, 474, 477, 499, and 501. **54.15%** of the horizontal triangle area has stereo support. Remaining areas use surrounding heights and example patches: plausible completions, **not measurements recovered from unseen terrain**. The Mastcam-Z [Skinner Ridge mosaic](https://science.nasa.gov/resource/perseverance-workspace-at-skinner-ridge/) was inspected as a visual reference, not used as calibrated geometry or directly projected onto the model.
+
+The [coverage map](terrain-coverage.png) marks full stereo support in light tan, partial support in intermediate tan, and inference in dark brown. Its top is the low-Z edge. Slope refinement can also affect supported surfaces. Scenery beyond the collision boundary is decorative.
+
+Close-up detail remains softer on some steep and occluded faces. A heightfield cannot represent overhangs, and donor patches may repeat. This is an improved image-based walkable reconstruction, not a claim of uniform photographic fidelity or a fully observed scan.
+
+## Export and checks
+
+| Item | Current export |
+| --- | --- |
+| Footprint | 39.62 × 34.65 m / 1,372.833 m² |
+| Connected walkable area | About 1,275 m² on a 14 cm sampling grid; previously 613 m² |
+| Grid | 1,133 × 991 vertices at 3.5 cm spacing |
+| Triangles | 2,241,360 |
+| Texture | 7,924 × 6,930 embedded JPEG |
+| Site-frame origin | North 72.45 m, east 8.32 m, down −14 m |
+| Axes | X west, Y up, Z north |
+
+`terrain.glb`, `ground.bin`, `terrain.json`, `route.json`, and `terrain-coverage.png` are a matched set. Collision consists of little-endian Float32 heights followed by a Uint8 triangle mask, with both triangles present in every cell. `sources.json` and `terrain.json` preserve URLs, hashes, coordinate metadata, and actual source contributions. Metadata also records donor cells and the inference method.
+
+`verification.json` records valid GLB lengths/buffer views, finite heights, exact render/collision height agreement, continuous collision, doubled area, and valid route endpoints. `screenshots/verification.json` records Chrome tests: 3.48 m past the slab, 21.52 m farther into the expansion, 8.29 m across inferred ground, and 6.40 m through the lower extension. Pointer lock, boundary collision, reset, and ground contact passed with no browser errors.
+
+Tested with Node.js 25.6.1 and Chrome on Windows. Dependencies remain pinned to Three.js 0.180.0, pngjs 7.0.0, and jpeg-js 0.4.4. Captures use SwiftShader and verify correctness, not a hardware GPU frame-rate target. No target GPU was specified.
+
+## Rebuild
 
 ```powershell
 npm.cmd ci
 npm.cmd run download
 npm.cmd run build
+npm.cmd run verify
 npm.cmd run capture
 ```
 
-The download step retrieves the original OBJ, PNG and XML files and checks existing bytes against the manifest. The build reads archived stereo meshes in SITE_FRAME 26, rejects long triangles and small disconnected fragments, and weights compatible measurements by density. It solves for missing heights at several scales using measured heights as anchors, adds small ripples farther from the anchors, and softens sharp stitch steps. The texture bake rejects degenerate and discontinuous projections, favors well-resolved camera views, feathers photo boundaries and grid-aligned projection jumps in image space, and substitutes overlapping Navcam texture swatches where projection quality is low. The viewer uses anisotropic texture filtering at grazing angles.
+Downloads run four at a time, with checksums and bounded retries. Network access is required; the large source cache is ignored by Git. Builds use several gigabytes of memory. If needed, set `$env:NODE_OPTIONS='--max-old-space-size=6144'` before building.
 
-The mesh uses a 3.5 cm grid with 1,120,000 indexed triangles. World X is west, Y is up and Z is north. One world unit is one metre. The crop origin in the site frame is (77.49 m north, 2.51 m east, −14 m down). Soft detail can still be visible on steep or occluded surfaces. The terrain is a heightfield, so overhangs and unobserved vertical rock faces remain approximate.
+Supply a non-default Chrome executable after `npm.cmd run capture --`. The restricted test environment needed the explicit opt-in `$env:CHROME_NO_SANDBOX='1'`; ordinary interactive browsing does not need it. `CAPTURE_STILLS_ONLY=1` captures fixed views without movement tests.
 
-The capture command uses Chrome at its default Windows path. Pass a different executable after `npm.cmd run capture --`. It checks pointer lock, the slab and expansion walks, boundary collision, reset, and ground contact over inferred surfaces, then writes screenshots. The route generator estimates 613 m² of walkable ground connected to spawn and finds a 14.47 m continuation beyond the 3.55 m slab route. Chrome verified a 17.71 m walk past the slab and into the expansion, then a separate 7.10 m route across inferred terrain. Boundary collision and reset passed.
+Start implementation work in `reconstruct.mjs`, `infill.mjs`, `atlas.mjs`, `texture-infill.mjs`, and `terrain-synthesis.mjs`. `polish-atlas.mjs` bakes seam refinement and contact shading. `route-check.mjs`, `verify-assets.mjs`, and `capture.mjs` verify the result. The viewer culls terrain tiles outside the camera view.
 
-Rover imagery and stereo products are credited to NASA/JPL-Caltech. [JPL image use policy](https://www.jpl.nasa.gov/jpl-image-use-policy/).
+Rover imagery and stereo geometry: NASA/JPL-Caltech. Mastcam-Z reference: NASA/JPL-Caltech/ASU/MSSS. [JPL image use policy](https://www.jpl.nasa.gov/jpl-image-use-policy/).
 
-[Full project history and prompts](PROJECT_HISTORY.md) · [Start here in a new chat](HANDOFF.md)
+[Project history](PROJECT_HISTORY.md) · [Handoff](HANDOFF.md) · [Original site selection](SITE_SELECTION.md)
