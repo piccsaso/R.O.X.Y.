@@ -40,6 +40,8 @@ test('routes exist between all landmarks, both ways', () => {
   for (const a of landmarks) for (const b of landmarks) if (a!==b) assert.ok(nav.safe(a.position, b.position), a.name+' to '+b.name);
 });
 test('commands', () => {
+  for (const phrase of ['open the overlay tab','show overlays','bring up the overlays panel']) assert.deepEqual(parseCommand(phrase, landmarks), {type:'menu',menu:'layers'});
+  for (const phrase of ['go to trafficability','switch to trafficability','take me to trafficability']) assert.deepEqual(parseCommand(phrase, landmarks), {type:'layer',layer:'traffic',on:true});
   assert.equal(parseCommand('Take me to the summit please', landmarks).landmark.id, 'summit');
   assert.equal(parseCommand('go to the layerd slab', landmarks).landmark.id, 'slab');
   assert.equal(parseCommand('return to base', landmarks).landmark.id, 'base');

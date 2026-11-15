@@ -10,6 +10,8 @@ const mime = {
   '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.mjs':'text/javascript',
   '.json':'application/json', '.png':'image/png', '.glb':'model/gltf-binary'
 };
+for (const path of ['/overlays.mjs','/observations/minerals.png','/observations/thermal.png']) appFiles.add(path);
+for (const path of ['/weather.mjs','/weather-data/summary.json']) appFiles.add(path);
 createServer(async (request,response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url,'http://localhost').pathname);

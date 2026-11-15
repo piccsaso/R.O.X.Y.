@@ -1,6 +1,7 @@
 // Helmet HUD for the Skinner Ridge walk: compass, minimap, suit gauge,
 // destination pin, route lines, return warning, planning view, voice.
 import {makeNav, makeLandmarks, parseCommand, config} from './nav.mjs';
+import {overlayLayers, overlayPixel, slopeDegrees, elevationRange} from './overlays.mjs';
 
 const INK = '#f4efe6', AMBER = '#ffb454', RED = '#ff3b30';
 const ROUTE = {safe:'#8dff6a', straight:'#ff6a3d', custom:'#c79bff', home:'#ff3b30'};
@@ -86,14 +87,61 @@ footer{display:none!important}
 .sky-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;margin-top:-5px;background:${AMBER};border:0;transform:rotate(45deg);box-shadow:0 0 0 3px #ffb45433}
 .sky-controls input[type=range]::-moz-range-thumb{width:10px;height:10px;background:${AMBER};border:0;border-radius:0;transform:rotate(45deg)}
 #reticle{background:#fff!important;opacity:.7}
+#hud .legend{top:82px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 520px);padding:6px 10px;white-space:normal;letter-spacing:.02em;text-transform:none;font-size:11px;line-height:1.5;pointer-events:none;text-align:center;background:#151c25b8;border:0;border-radius:0;z-index:4}
+#hud .legend strong{display:block;font-size:13px}
+#hud .legend span{display:inline-block;margin:0 4px}
+#hud .legend .swatches{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+#hud .legend i{margin:0 4px 0 0}
+#hud .mini canvas[hidden]{display:none}
+#hud .mini .orbital-map{position:relative;width:224px;height:224px;background:#090e16}
+#hud .mini .orbital-map img{display:block;width:100%;height:100%;image-rendering:pixelated}
+#hud .mini .orbital-map b{position:absolute;width:10px;height:10px;transform:translate(-50%,-50%);border:2px solid white;border-radius:50%;box-shadow:0 1px 3px #000}
+#hud .menu{max-height:65dvh;overflow-y:auto}
+#hud .menu [role=button]:focus-visible{outline:2px solid #ffb454;outline-offset:-2px}
+#hud .dock button:focus-visible{outline:2px solid #ffb454}
+@media(max-width:700px){body:has(#hudLegend[style*="block"]) .sky-controls{display:none}}
+@media(max-width:700px){#hud .legend{top:165px;max-width:calc(100vw - 24px);width:calc(100vw - 24px);font-size:10px}#hud .mini{top:12px;right:10px;transform:scale(.65);transform-origin:top right}#hud .compass{display:none}#hud .dock{bottom:10px;max-width:calc(100vw - 12px)}#hud .dock button{padding:12px 8px;font-size:9px;letter-spacing:.04em}#hud .menu{min-width:245px;white-space:normal}#hud .suit{transform:scale(.7);transform-origin:bottom left;bottom:62px}#hud .credit{display:none}}
+`;
+
+const launcherCss = `
+#hud .dock,body.locked #hud .dock{display:block;bottom:18px;width:60px;height:60px;padding:0;border:0;background:none;backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:none;z-index:6}
+#hud .dock .launcher{display:grid;place-items:center;position:absolute;inset:0;width:60px;height:60px;padding:0;border:1px solid #d5f4edb3;border-radius:50%;background:#18302b66;backdrop-filter:blur(3px);pointer-events:auto;box-shadow:0 5px 18px #0003;z-index:2;transition:background .25s,border-color .25s}
+#hud .dock .launcher::after{display:none}
+#hud .launcher-mark{display:block;width:22px;height:22px;border:1.5px solid #d5f4ed;border-radius:50%;position:relative;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+#hud .launcher-mark::after{content:"";position:absolute;inset:7px;border:1px solid #d5f4ed;border-radius:50%}
+#hud .expanded .launcher-mark{transform:rotate(90deg) scale(.8)}
+#hud .dock .launcher:hover,#hud .dock .launcher.listening{background:#73c9ba55;border-color:#defff9}
+#hud .dock-items{position:absolute;bottom:43px;left:50%;display:flex;align-items:center;gap:2px;width:max-content;max-width:calc(100vw - 24px);padding:9px 12px 19px;border:1px solid #c9e9df70;border-radius:34px;background:#13272366;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);box-shadow:0 6px 20px #0002;transform:translate(-50%,35px) scale(.12,.45);transform-origin:50% 100%;opacity:0;visibility:hidden;pointer-events:none;transition:transform .48s cubic-bezier(.16,1,.3,1),opacity .2s,visibility 0s .48s}
+#hud .dock.expanded .dock-items{transform:translate(-50%,0) scale(1);opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}
+#hud .dock-items>button,#hud .dock-items>.wrap>button{border-radius:22px;padding:11px 18px;white-space:nowrap}
+#hud .dock-items .menu{border-radius:16px;background:#162c268c;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#hud .dock-items .menu div{border-radius:12px}
+#hud .mini,#hud .mini.regional{border-radius:14px;border-color:#c5f2eb99;box-shadow:0 5px 20px #0003}
+#hud .mini.regional .orbital-map{border-radius:13px;overflow:hidden;background:#090e1633}
+#hud .suit{width:194px;padding:10px 12px;background:#16272330;border-radius:18px}
+#hud .suit canvas{width:150px;height:auto;margin:0 auto;display:block}
+#hud .eva-data{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin:3px 2px 12px;text-transform:none;letter-spacing:.03em}
+#hud .eva-data span{display:flex;flex-direction:column;gap:3px;font-size:9px;color:#d6e7df}
+#hud .eva-data b{font-size:13px;font-weight:600;color:#f4efe6;font-variant-numeric:tabular-nums}
+#hud .suit .coords{font-size:8px;letter-spacing:.04em;line-height:1.7}
+#hud .ear{display:block;pointer-events:auto;top:252px;padding:6px 10px;border-radius:12px;background:#16272340;font-size:10px;letter-spacing:.05em;max-width:224px;white-space:normal;text-align:right}
+#hud .ear::before{display:none}#hud .ear.on::before{display:inline-block}
+@media(max-width:700px){#hud .suit{width:156px;padding:8px 10px;transform:none;left:12px;bottom:145px}#hud .suit canvas{width:112px}#hud .eva-data{gap:8px 18px;margin-bottom:8px}#hud .eva-data b{font-size:12px}#hud .ear{top:162px;right:12px;max-width:180px;font-size:9px}#hud .legend{top:200px}}
+#hud .legend{background:#13231d38;border-radius:16px;text-shadow:0 1px 3px #000,0 0 2px #000}
+#hud .return{background:#9c20145c;border-radius:16px;text-shadow:0 1px 3px #000}
+#hud .note{padding:6px 12px;border-radius:16px;background:#13231d26;text-shadow:0 1px 3px #000}
+#hud .roxy{bottom:132px}
+#hud .roxy .orb{display:none}
+@media(max-width:700px){#hud .dock-items{padding:7px 8px 19px;gap:0}#hud .dock-items>button,#hud .dock-items>.wrap>button{padding:10px 6px;font-size:9px;letter-spacing:.025em}#hud .dock{bottom:12px}#hud .roxy{bottom:155px;left:auto;right:12px;transform:none;width:calc(100vw - 202px);text-align:center}}
+@media(prefers-reduced-motion:reduce){#hud .dock-items,#hud .launcher-mark{transition:none}}
 `;
 
 const html = `
 <div class="vignette"></div><div class="flash" id="hudFlash"></div>
 <div class="compass"><canvas width="640" height="46"></canvas><span class="bearing" id="hudBearing">000</span></div>
 <div class="mini"><canvas width="224" height="204"></canvas></div>
-<div class="ear" id="hudEar">Say “Roxy”</div>
-<div class="suit"><canvas width="250" height="236"></canvas><div class="coords" id="hudCoords"></div></div>
+<button class="ear" id="hudEar" aria-pressed="false">Enable Roxy · V</button>
+<div class="suit"><canvas width="250" height="236"></canvas><div class="eva-data"><span>Oxygen<b id="evaO2"></b></span><span>Power<b id="evaPower"></b></span><span>Heart rate<b id="evaHeart"></b></span><span>Suit temp<b id="evaTemp"></b></span></div><div class="coords" id="hudCoords"></div></div>
 <div class="note" id="hudNote"></div>
 <div class="pin" id="hudPin"></div>
 <div class="return" id="hudReturn"></div>
@@ -101,15 +149,19 @@ const html = `
 <div class="roxy" id="hudRoxy"><div class="orb"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></div><small>Roxy listening</small><span id="hudHeard"></span></div>
 <div class="type"><input id="hudCmd" placeholder="Type a command, then Enter" autocomplete="off"></div>
 <div class="dock">
+  <button id="hudLauncher" class="launcher" aria-label="Open Roxy controls" aria-expanded="false" aria-controls="hudDockItems" title="Roxy controls"><span class="launcher-mark" aria-hidden="true"></span></button>
+  <div class="dock-items" id="hudDockItems" inert>
+  <div class="wrap"><div class="menu" id="hudLayers"></div><button data-menu="hudLayers" aria-expanded="false">Overlays</button></div>
   <div class="wrap"><div class="menu" id="hudOptions"></div><button data-menu="hudOptions">Options</button></div>
   <div class="wrap"><div class="menu" id="hudRoutes"></div><button data-menu="hudRoutes">Routes</button></div>
   <button id="hudReset">Reset position</button>
+  </div>
 </div>
 <div class="credit">Terrain NASA/JPL-Caltech Navcam · includes inferred terrain · suit telemetry simulated</div>`;
 
 const legends = {
   slope:'<i style="background:#ffe14d"></i>15–25° <i style="background:#ff9f0a"></i>25–35° <i style="background:#ff3b30"></i>over 35° · slope over 0.8 m, derived from the terrain',
-  truth:'<i style="background:#7ddc6f"></i>rover-measured <i style="background:#ff9628"></i>inferred fill <i style="background:#9a98a8"></i>context terrain (not measured)'
+  truth:'<i style="background:#7ddc6f"></i>rover-measured <i style="background:#ff9628"></i>inferred / partial support <i style="background:#9a98a8"></i>context terrain (not measured)'
 };
 
 export async function initHud(ctx) {
@@ -133,14 +185,29 @@ export async function initHud(ctx) {
   const support = (x,z) => {
     if (x<0 || z<0 || x>=W || z>=D || !coverage) return 2;
     const col = Math.min(coverage.width-1, Math.floor(x/meta.step)), row = Math.min(coverage.height-1, Math.floor(z/meta.step));
-    return coverage.data[(row*coverage.width+col)*4]===103 ? 1 : 0;
+    // Only 235 marks both triangles supported; 169 is partial support.
+    return coverage.data[(row*coverage.width+col)*4]===235 ? 0 : 1;
   };
 
-  document.head.appendChild(Object.assign(document.createElement('style'), {textContent:css}));
+  document.head.appendChild(Object.assign(document.createElement('style'), {textContent:css+launcherCss}));
   const root = Object.assign(document.createElement('div'), {id:'hud', innerHTML:html});
   document.body.appendChild(root);
   const small = document.querySelector('header small'); if (small) small.textContent = 'Jezero Crater · Mars';
   const $ = id => root.querySelector('#'+id);
+  const dock = root.querySelector('.dock');
+  function setDockOpen(open) {
+    const returnFocus=!open && $('hudDockItems').contains(document.activeElement);
+    dock.classList.toggle('expanded',open);
+    $('hudDockItems').inert=!open;
+    $('hudLauncher').setAttribute('aria-expanded',String(open));
+    $('hudLauncher').setAttribute('aria-label',open?'Close Roxy controls':'Open Roxy controls');
+    if(!open) {
+      closeMenus();
+      root.dispatchEvent(new Event('dockcollapse'));
+      if(returnFocus)$('hudLauncher').focus();
+    }
+  }
+  $('hudLauncher').onclick=()=>setDockOpen(!dock.classList.contains('expanded'));
   const tape = root.querySelector('.compass canvas').getContext('2d');
   const mini = root.querySelector('.mini canvas').getContext('2d');
   const suit = root.querySelector('.suit canvas').getContext('2d');
@@ -148,6 +215,9 @@ export async function initHud(ctx) {
   const state = {layer:null, mapMode:false, muted:false, show:{straight:true, safe:true, custom:false}, cleared:false,
     goal:summit, custom:null, routes:{}, o2:1, power:1, heart:74, temp:21.4, eva:0, warning:false, lastNote:''};
   let redraw = true, overlayFade = 0, overlayTarget = 0, overlayDirty = false, pendingClear = false;
+  const overlayStrength = .8;
+  let weatherHazards={dust:0,particles:false};
+  const range = elevationRange(nav,support);
 
   // ---- data highlight draped on the terrain ----
   const overlayCanvas = Object.assign(document.createElement('canvas'), {width:nav.cols, height:nav.rows});
@@ -164,9 +234,11 @@ export async function initHud(ctx) {
         '#include <begin_vertex>\nvOverlayXZ=(modelMatrix*vec4(position,1.0)).xz;');
       shader.fragmentShader = 'uniform sampler2D overlayMap;uniform vec4 overlayBox;uniform float overlayOpacity;varying vec2 vOverlayXZ;\n'+
         shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
-          vec4 ov=texture2D(overlayMap,(vOverlayXZ-overlayBox.xy)/overlayBox.zw);
+          vec2 overlayUV=(vOverlayXZ-overlayBox.xy)/overlayBox.zw;
+          vec4 ov=texture2D(overlayMap,overlayUV);
+          ov.a*=step(0.0,overlayUV.x)*step(0.0,overlayUV.y)*step(overlayUV.x,1.0)*step(overlayUV.y,1.0);
           float lum=dot(diffuseColor.rgb,vec3(0.3333));
-          diffuseColor.rgb=mix(diffuseColor.rgb*mix(1.0,0.7,overlayOpacity),ov.rgb*(0.22+1.25*lum),ov.a*overlayOpacity);`);
+          diffuseColor.rgb=mix(diffuseColor.rgb,ov.rgb*(0.22+1.25*lum),ov.a*overlayOpacity);`);
     };
     material.customProgramCacheKey = () => 'mars-light-hud';
     material.needsUpdate = true;
@@ -177,7 +249,19 @@ export async function initHud(ctx) {
     for (let i=0; i<nav.count; i++) {
       const [x,z] = nav.center(i);
       let c = null;
-      if (state.layer==='slope') {
+      if (overlayLayers[state.layer]) {
+        let observed=support(x,z);
+        if(state.layer==='traffic' && observed===0) {
+          const samples=[[x-.4,z],[x+.4,z],[x,z-.4],[x,z+.4]];
+          for(let a=0;a<8;a++) samples.push([x+.16*Math.cos(a*Math.PI/4),z+.16*Math.sin(a*Math.PI/4)]);
+          if(samples.some(p=>support(...p)!==0 || !Number.isFinite(ground.sample(...p)?.height))) observed=1;
+        }
+        c=overlayPixel(state.layer,{x,z,height:nav.height[i],slope:state.layer==='traffic' ? slopeDegrees(ground,x,z) : 0,unsafe:nav.unsafe[i],support:observed,range});
+        if(state.layer==='traffic' && observed===0 && c[3]>0) {
+          if(weatherHazards.particles && c[0]!==239) c=[225,101,180,195];
+          else if(weatherHazards.dust && c[0]===69) c=[241,206,82,200];
+        }
+      } else if (state.layer==='slope') {
         // Slope over a 0.8 m walking baseline, so centimetre-scale texture does not read as cliffs.
         const gx = (heightAt(x+0.4,z)-heightAt(x-0.4,z))/0.8, gz = (heightAt(x,z+0.4)-heightAt(x,z-0.4))/0.8;
         const deg = Math.atan(Math.hypot(gx,gz))*180/Math.PI;
@@ -189,11 +273,46 @@ export async function initHud(ctx) {
     overlayTexture.needsUpdate = true; redraw = true;
   }
   function setLayer(layer, on) {
+    if(layer!==null && !overlayLayers[layer] && !legends[layer]) return;
     const next = on ? layer : (state.layer===layer || layer===null ? null : state.layer);
     if (next) { state.layer = next; overlayDirty = true; overlayTarget = 1; pendingClear = false; }
     else { overlayTarget = 0; pendingClear = true; }
     $('hudLegend').style.display = next ? 'block' : 'none';
-    if (next) $('hudLegend').innerHTML = legends[next];
+    const minimap = root.querySelector('.mini');
+    minimap.classList.toggle('regional',!!overlayLayers[next]?.regional);
+    minimap.querySelector('.orbital-map')?.remove();
+    minimap.querySelector('canvas').hidden = false;
+    if (next) {
+      const definition = overlayLayers[next];
+      $('hudLegend').innerHTML = definition
+        ? `<strong>${definition.name}</strong><span>${definition.regional ? (next==='thermal' ? 'THEMIS night IR · regional · temperature uncalibrated' : 'TES clinopyroxene · regional · local detail unresolved') : definition.status}</span><div class="swatches">${definition.colors.map(([color,label]) => `<span><i style="background:${color}"></i>${label}</span>`).join('')}</div>`
+        : legends[next];
+      if (next === 'traffic' && weatherHazards.particles) {
+        $('hudLegend').appendChild(Object.assign(document.createElement('span'), {
+          textContent:'Magenta: simulated exposure caution · red: steep terrain · routes terrain-only'
+        }));
+      } else if (next === 'traffic' && weatherHazards.dust) {
+        $('hudLegend').appendChild(Object.assign(document.createElement('span'), {
+          textContent:'Yellow includes simulated dust visibility caution · routes terrain-only'
+        }));
+      }
+      if (definition?.regional) {
+        const span = 180 / 2 ** definition.zoom;
+        const map = document.createElement('div');
+        map.className = 'orbital-map';
+        const image = Object.assign(document.createElement('img'), {
+          src:definition.image, alt:definition.status + '; north is up'
+        });
+        image.onerror = () => { map.textContent = 'Observation unavailable'; };
+        const marker = document.createElement('b');
+        marker.style.left = (((77.40616768 + 180) / span - definition.col) * 100) + '%';
+        marker.style.top = (((90 - 18.45889532) / span - definition.row) * 100) + '%';
+        marker.title = 'Rover reference location';
+        map.append(image,marker);
+        minimap.querySelector('canvas').hidden = true;
+        minimap.appendChild(map);
+      }
+    }
     buildMenus();
   }
 
@@ -257,9 +376,7 @@ export async function initHud(ctx) {
     box.textContent = text; box.style.color = warn ? '#ff6b5e' : INK; box.classList.add('on');
     state.lastNote = text;
     clearTimeout(noteTimer); noteTimer = setTimeout(() => box.classList.remove('on'), 5000);
-    if (speak && !state.muted && 'speechSynthesis' in window) {
-      speechSynthesis.cancel(); speechSynthesis.speak(Object.assign(new SpeechSynthesisUtterance(text), {rate:1.05}));
-    }
+    if (speak) say(text);
   }
 
   // ---- routing ----
@@ -349,7 +466,7 @@ export async function initHud(ctx) {
       if (!state.warning) {
         state.warning = true;
         box.classList.remove('docked'); box.style.display = 'block'; $('hudFlash').classList.add('on');
-        note('', {}); if (!state.muted && 'speechSynthesis' in window) { speechSynthesis.cancel(); speechSynthesis.speak(new SpeechSynthesisUtterance('Warning. Return to Home Base now.')); }
+        note('', {}); say('Warning. Return to Home Base now.');
         clearTimeout(returnTimer);
         returnTimer = setTimeout(() => { box.classList.add('docked'); $('hudFlash').classList.remove('on'); }, 3200);
       }
@@ -408,9 +525,7 @@ export async function initHud(ctx) {
     const pose = orbitPose(); camera.position.copy(pose.position); camera.quaternion.copy(pose.quaternion); redraw = true;
   }, {passive:true});
   canvas.addEventListener('click', () => { if (!state.mapMode && !isLocked()) { closeMenus(); enterButton.click(); } });
-  // Roxy starts with the first click, because browsers only allow the microphone after a user action.
-  let roxyAsked = false;
-  addEventListener('pointerdown', () => { if (!roxyAsked) { roxyAsked = true; setRoxy(true); } });
+  // Roxy starts enabled; browser microphone permission remains required.
   function pick(clientX, clientY) {
     const direction = new THREE.Vector3(clientX/innerWidth*2-1, -(clientY/innerHeight)*2+1, 0.5).unproject(camera).sub(camera.position).normalize();
     for (let t=0; t<220; t+=0.1) {
@@ -434,7 +549,7 @@ export async function initHud(ctx) {
       if (parsed.landmark===summit) { state.show.custom = false; state.show.safe = true; state.cleared = false; arrived = null; replanAll(); buildMenus(); note('Safe route to Ridge summit', {speak:true}); }
       else setCustom(parsed.landmark);
     } else if (parsed.type==='clear') { state.cleared = true; refreshLines(); note('Route cleared'); }
-    else if (parsed.type==='layer') { const shown = state.layer===parsed.layer && overlayTarget===1; setLayer(parsed.layer, parsed.on==='toggle' ? !shown : parsed.on); }
+    else if (parsed.type==='layer') { const shown = state.layer===parsed.layer && overlayTarget===1; setLayer(parsed.layer, parsed.on==='toggle' ? !shown : parsed.on); closeMenus(); }
     else if (parsed.type==='route') {
       if (parsed.which==='custom' && !state.custom) note('No voice route yet. Say "take me to the slab".');
       else { const shown = state.show[parsed.which] && !state.cleared; state.show[parsed.which] = parsed.on==='toggle' ? !shown : parsed.on; state.cleared = false; replanAll(); buildMenus(); }
@@ -442,7 +557,7 @@ export async function initHud(ctx) {
     else if (parsed.type==='map') state.mapMode ? exitMap() : enterMap();
     else if (parsed.type==='close') { closeMenus(); if (state.mapMode) exitMap(); }
     else if (parsed.type==='reset') resetAll();
-    else if (parsed.type==='menu') { const button = root.querySelector('[data-menu=hud'+parsed.menu[0].toUpperCase()+parsed.menu.slice(1)+']'); if (document.pointerLockElement) document.exitPointerLock(); if (!$(button.dataset.menu).classList.contains('open')) button.click(); }
+    else if (parsed.type==='menu') { setDockOpen(true); const button = root.querySelector('[data-menu=hud'+parsed.menu[0].toUpperCase()+parsed.menu.slice(1)+']'); if (document.pointerLockElement) document.exitPointerLock(); if (!$(button.dataset.menu).classList.contains('open')) button.click(); }
     else if (parsed.type==='mute') { state.muted = parsed.on==='toggle' ? !state.muted : parsed.on; if (parsed.on) window.speechSynthesis?.cancel(); buildMenus(); }
     else if (parsed.type==='drain') { state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
     else if (parsed.type==='unknown') note(parsed.message);
@@ -450,17 +565,23 @@ export async function initHud(ctx) {
   }
 
   // ---- the two menus ----
-  function closeMenus() { for (const m of root.querySelectorAll('.menu')) m.classList.remove('open'); for (const b of root.querySelectorAll('[data-menu]')) b.classList.remove('open'); }
+  function closeMenus() { for (const m of root.querySelectorAll('.menu')) m.classList.remove('open'); for (const b of root.querySelectorAll('[data-menu]')) {b.classList.remove('open');b.setAttribute('aria-expanded','false');} }
   function item(menu, text, on, action, {colour, disabled}={}) {
     const row = Object.assign(document.createElement('div'), {innerHTML:'<i></i>'+text});
     if (on) row.classList.add('on');
     if (disabled) row.classList.add('off');
     if (colour) row.style.setProperty('--tone', colour);
+    row.tabIndex=disabled ? -1 : 0;row.setAttribute('role','button');row.setAttribute('aria-pressed',String(!!on));
+    if(disabled)row.setAttribute('aria-disabled','true');
+    row.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();row.click();}};
     row.onclick = event => { event.stopPropagation(); if (!disabled) action(); };
     menu.appendChild(row);
   }
   function buildMenus() {
     const options = $('hudOptions'), routes = $('hudRoutes');
+    const layers=$('hudLayers'); layers.textContent='';
+    item(layers,'Natural terrain',overlayTarget===0,()=>{setLayer(null,false);closeMenus();});
+    for(const [key,layer] of Object.entries(overlayLayers)) item(layers,layer.name+(layer.regional?' · regional':''),state.layer===key && overlayTarget===1,()=>{setLayer(key,!(state.layer===key && overlayTarget===1));closeMenus();},{colour:layer.colors[0]?.[0] ?? '#a8e4ff'});
     options.textContent = routes.textContent = '';
     item(options, 'Slope', state.layer==='slope' && overlayTarget===1, () => setLayer('slope', !(state.layer==='slope' && overlayTarget===1)));
     item(options, 'Ground truth', state.layer==='truth' && overlayTarget===1, () => setLayer('truth', !(state.layer==='truth' && overlayTarget===1)));
@@ -477,6 +598,7 @@ export async function initHud(ctx) {
     event.stopPropagation();
     const menu = $(button.dataset.menu), open = !menu.classList.contains('open');
     closeMenus(); menu.classList.toggle('open', open); button.classList.toggle('open', open);
+    button.setAttribute('aria-expanded',String(open));
   };
 
   const input = $('hudCmd'), typeBox = root.querySelector('.type');
@@ -491,52 +613,98 @@ export async function initHud(ctx) {
   // Roxy: wake-word voice control. The recogniser listens continuously for "Roxy", then takes the next phrase
   // as a command. In Chrome the audio goes to an online speech service while Roxy is on, so it is a visible toggle.
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const roxy = {enabled:false, armed:false, running:false, recogniser:null, timer:null, handled:-1};
+  const roxy = {enabled:false, armed:false, running:false, speaking:false, recogniser:null, timer:null, restart:null, speechTimer:null, speechId:0, status:''};
+  function say(text) {
+    if (state.muted || !window.speechSynthesis) return;
+    const id=++roxy.speechId;
+    roxy.speaking=true;
+    clearTimeout(roxy.speechTimer);
+    // Pause input so Roxy cannot treat its own spoken reply as a command.
+    roxy.recogniser?.abort();
+    speechSynthesis.cancel();
+    const finish=()=>{
+      if(id!==roxy.speechId)return;
+      clearTimeout(roxy.speechTimer);roxy.speaking=false;
+      if(roxy.armed)arm(true);
+      clearTimeout(roxy.restart);roxy.restart=setTimeout(startRecogniser,350);
+    };
+    const utterance=Object.assign(new SpeechSynthesisUtterance(text),{rate:1.03,onend:finish,onerror:finish});
+    roxy.speechTimer=setTimeout(finish,12000);
+    try { speechSynthesis.speak(utterance); } catch { finish(); }
+  }
   const WAKE = /\b(roxy|roxie|roxi|rocksy|rocksie|rock ?sea|rocky|proxy|foxy|rox)\b[\s,.!?]*/i;
   function arm(on) {
+    if(on)setDockOpen(true);
+    $('hudLauncher').classList.toggle('listening',on);
     roxy.armed = on;
     $('hudRoxy').classList.toggle('on', on);
     if (on) $('hudHeard').textContent = '';
     clearTimeout(roxy.timer);
-    if (on) roxy.timer = setTimeout(() => arm(false), 7000);
+    if (on) roxy.timer = setTimeout(() => arm(false), 12000);
   }
   function hear(text, final) {
     const wake = WAKE.exec(text);
     let said = text;
-    if (wake) { if (!roxy.armed) arm(true); said = text.slice(wake.index+wake[0].length); }
+    if (wake) { setDockOpen(true); if (!roxy.armed) arm(true); said = text.slice(wake.index+wake[0].length); }
     if (!roxy.armed) return;
     said = said.trim();
     $('hudHeard').textContent = said;
-    if (said) { clearTimeout(roxy.timer); roxy.timer = setTimeout(() => arm(false), 7000); }
-    if (final && said) { arm(false); command(said); }
+    if (said) { clearTimeout(roxy.timer); roxy.timer = setTimeout(() => arm(false), 12000); }
+    if (final && said) {
+      arm(false);
+      const kind=command(said);
+      const parsed=parseCommand(said,landmarks);
+      if(kind==='menu')say(parsed.menu==='layers' ? 'Opening overlays. Which overlay would you like?' : 'Opening '+parsed.menu+'.');
+      else if(kind==='layer')say(overlayTarget===1 ? 'Showing '+(overlayLayers[parsed.layer]?.name || parsed.layer)+'.' : 'Overlay hidden.');
+      else if(kind==='unknown')say('Try open overlays, show trafficability, or show topography.');
+      // A menu request is a conversation: accept the next overlay name without another wake word.
+      if(kind==='menu')arm(true);
+    }
   }
   function startRecogniser() {
-    if (!Recognition || roxy.running || !roxy.enabled) return;
+    if (!Recognition || roxy.running || !roxy.enabled || roxy.speaking) return;
     const r = roxy.recogniser = Object.assign(new Recognition(), {lang:'en-US', interimResults:true, continuous:true});
+    r.onstart=()=>{if(r!==roxy.recogniser)return;roxy.status='Listening · say “Roxy”';refreshRoxy();};
     r.onresult = event => {
+      if(r!==roxy.recogniser || !roxy.enabled || roxy.speaking)return;
       for (let i=event.resultIndex; i<event.results.length; i++) {
         const result = event.results[i];
         hear(result[0].transcript, result.isFinal);
       }
     };
     r.onerror = event => {
-      if (event.error==='not-allowed' || event.error==='service-not-allowed') { roxy.enabled = false; note('Microphone permission denied. Press T to type commands.'); refreshRoxy(); }
-      else if (event.error==='network') { roxy.enabled = false; note('Roxy needs a network connection in this browser. Press T to type commands.'); refreshRoxy(); }
+      if(r!==roxy.recogniser)return;
+      const errors={
+        'not-allowed':'Mic blocked · allow microphone for this site, then retry',
+        'service-not-allowed':'Voice service unavailable · try Chrome or Edge',
+        'network':'Voice network error · check connection, then retry',
+        'audio-capture':'No microphone · connect a mic, then retry',
+        'language-not-supported':'Voice language unavailable · try Chrome or Edge'
+      };
+      if(errors[event.error]){roxy.enabled=false;roxy.status=errors[event.error];note(roxy.status+'. Press T to type commands.');refreshRoxy();}
     };
-    r.onend = () => { roxy.running = false; if (roxy.enabled) setTimeout(startRecogniser, 250); };   // Chrome stops after silence; keep listening
-    try { r.start(); roxy.running = true; } catch {}
+    r.onend = () => { if(r!==roxy.recogniser)return;roxy.running = false; if (roxy.enabled && !roxy.speaking) {clearTimeout(roxy.restart);roxy.restart=setTimeout(startRecogniser,350);} };
+    try { roxy.running=true;r.start(); } catch { roxy.running=false;roxy.enabled=false;roxy.status='Voice could not start · click to retry';refreshRoxy(); }
   }
-  function refreshRoxy() { $('hudEar').classList.toggle('on', roxy.enabled); if (!roxy.enabled) arm(false); buildMenus(); }
+  function refreshRoxy() {
+    const ear=$('hudEar');ear.classList.toggle('on',roxy.enabled);ear.setAttribute('aria-pressed',String(roxy.enabled));
+    ear.textContent=Recognition ? roxy.status || 'Enable Roxy · V' : 'Voice unavailable · use Chrome/Edge or T';
+    ear.title=roxy.enabled ? 'Turn off Roxy microphone' : 'Enable voice recognition (may use an online speech service)';
+    if (!roxy.enabled) arm(false); buildMenus();
+  }
   function setRoxy(on) {
+    clearTimeout(roxy.restart);
     roxy.enabled = on && !!Recognition;
-    if (roxy.enabled) startRecogniser(); else roxy.recogniser?.stop();
+    roxy.status=roxy.enabled ? 'Starting microphone…' : '';
+    if (roxy.enabled) startRecogniser(); else {roxy.recogniser?.abort();roxy.speechId++;clearTimeout(roxy.speechTimer);roxy.speaking=false;window.speechSynthesis?.cancel();}
     refreshRoxy();
   }
+  $('hudEar').onclick=()=>setRoxy(!roxy.enabled);
   function resetAll() { resetButton?.click(); refill(); closeMenus(); note('Position reset'); }
   $('hudReset').onclick = resetAll;
   addEventListener('keydown', event => {
     if (event.target===input) return;
-    if (event.code==='KeyV') { if (!event.repeat) { if (!roxy.enabled) setRoxy(true); arm(true); } return; }
+    if (event.code==='KeyV') { if (!event.repeat) { if (!roxy.enabled) setRoxy(true); if(roxy.enabled)arm(true); } return; }
     if (event.repeat) return;
     if (event.code==='KeyM') state.mapMode ? exitMap() : enterMap();
     else if (event.code==='KeyC') command('clear route');
@@ -607,7 +775,8 @@ export async function initHud(ctx) {
     mini.fillStyle = '#fff'; mini.strokeStyle = '#111'; mini.lineWidth = 2; mini.lineJoin = 'round'; mini.stroke(); mini.fill(); mini.restore();
   }
 
-  const figure = new Path2D('M-5-22 L5-22 L27-12 L25-4 L8-10 L8 8 L11 36 L3 36 L0 15 L-3 36 L-11 36 L-8 8 L-8-10 L-25-4 L-27-12Z');
+  // Pressurized suit outline: integrated helmet, padded shoulders, gloves and boots.
+  const figure = new Path2D('M-7-29 Q-13-33-11-42 Q-9-49 0-49 Q9-49 11-42 Q13-33 7-29 L13-26 L17-17 L23-14 L28-4 L35 4 Q39 10 34 13 L28 9 L23 5 L14-1 L12 14 L16 22 L13 25 L13 44 Q9 48 4 45 L3 24 L-3 24 L-4 45 Q-9 48-13 44 L-13 25 L-16 22 L-12 14 L-14-1 L-23 5 L-28 9 L-34 13 Q-39 10-35 4 L-28-4 L-23-14 L-17-17 L-13-26Z');
   function drawSuit() {
     const g = suit, {width:w, height:h} = g.canvas, cx = 118, cy = 116, R = 88, rad = d => d*Math.PI/180;
     g.clearRect(0,0,w,h);
@@ -621,20 +790,24 @@ export async function initHud(ctx) {
         g.beginPath(); g.moveTo(cx+Math.cos(a)*r0, cy+Math.sin(a)*r0); g.lineTo(cx+Math.cos(a)*r1, cy+Math.sin(a)*r1); g.stroke(); }
     };
     const low = v => v<0.25;
-    arc(170, 280, state.o2, low(state.o2) ? RED : INK);        // oxygen, upper left
-    arc(-35, 75, state.power, low(state.power) ? RED : AMBER); // suit power, right
+    arc(170, 280, state.o2, low(state.o2) ? RED : '#bdf5f1');  // oxygen, upper left
+    arc(-35, 75, state.power, low(state.power) ? RED : '#e8efc9'); // suit power, right
     g.textAlign = 'center'; g.fillStyle = INK;
-    g.font = '700 13px Bahnschrift,"Segoe UI",sans-serif'; g.fillText('O₂', cx-48, cy-42);
-    g.font = '600 11px Bahnschrift,"Segoe UI",sans-serif'; g.fillText(Math.round(state.o2*100)+'%', cx-48, cy-28);
-    g.font = '700 13px Bahnschrift,"Segoe UI",sans-serif'; g.fillText('PWR', cx+54, cy+16);
-    g.font = '600 11px Bahnschrift,"Segoe UI",sans-serif'; g.fillText(Math.round(state.power*100)+'%', cx+54, cy+30);
-    const strain = state.heart>150 || low(state.o2) ? RED : state.heart>125 ? AMBER : '#8dff6a';
+    $('evaO2').textContent=Math.round(state.o2*100)+'%';
+    $('evaPower').textContent=Math.round(state.power*100)+'%';
+    $('evaO2').style.color=low(state.o2) ? RED : '#bdf5f1';
+    $('evaPower').style.color=low(state.power) ? RED : '#e8efc9';
+    const strain = state.heart>150 || low(state.o2) ? RED : state.heart>125 ? AMBER : '#d8fff8';
     g.save(); g.translate(cx, cy-4); g.scale(1.15,1.15);
-    g.fillStyle = strain; g.globalAlpha = 0.85; g.fill(figure); g.beginPath(); g.arc(0,-31,7,0,7); g.fill();
-    g.globalAlpha = 1; g.strokeStyle = '#fff'; g.lineWidth = 1.4; g.stroke(figure); g.beginPath(); g.arc(0,-31,7,0,7); g.stroke(); g.restore();
+    g.fillStyle = strain; g.globalAlpha = 0.07; g.fill(figure);
+    g.globalAlpha = 1; g.strokeStyle = strain; g.lineWidth = 1.5; g.lineJoin='round';g.stroke(figure);
+    g.globalAlpha=.65;g.lineWidth=.8;
+    g.beginPath();g.roundRect(-8,-43,16,10,4);g.stroke();
+    g.beginPath();g.roundRect(-5,-18,10,9,2);g.stroke();
+    g.beginPath();g.moveTo(-12,15);g.lineTo(12,15);g.moveTo(-12,38);g.lineTo(-4,38);g.moveTo(4,38);g.lineTo(12,38);g.stroke();g.restore();
     g.fillStyle = INK; g.font = '600 12px Bahnschrift,"Segoe UI",sans-serif';
-    g.textAlign = 'right'; g.fillText('♥ '+Math.round(state.heart), cx-8, cy+64);
-    g.textAlign = 'left'; g.fillText(state.temp.toFixed(1)+'°C', cx+8, cy+64);
+    $('evaHeart').textContent=Math.round(state.heart)+' bpm';
+    $('evaTemp').textContent=state.temp.toFixed(1)+' °C';
     const [x,z] = player();
     $('hudCoords').innerHTML = 'N '+(meta.origin[0]+z).toFixed(1)+' · E '+(meta.origin[1]-x).toFixed(1)+' m<b>Site 26 frame</b>';
   }
@@ -674,7 +847,7 @@ export async function initHud(ctx) {
     }
     if (overlayFade!==overlayTarget) {
       overlayFade += Math.sign(overlayTarget-overlayFade)*Math.min(Math.abs(overlayTarget-overlayFade), dt/0.5);
-      uniforms.overlayOpacity.value = overlayFade; redraw = true;
+      uniforms.overlayOpacity.value = overlayFade*overlayStrength; redraw = true;
       if (overlayFade===0 && pendingClear) { pendingClear = false; state.layer = null; }
     }
     if (overlayDirty && state.layer) paintOverlay();
@@ -687,7 +860,12 @@ export async function initHud(ctx) {
     return result;
   }
 
-  replanAll(); buildMenus();
-  return {update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill, hear, roxy,
+  replanAll(); setRoxy(true);
+  function setWeather(value) {
+    weatherHazards=value;
+    overlayDirty=true;redraw=true;
+    if(state.layer==='traffic' && overlayTarget===1) setLayer('traffic',true);
+  }
+  return {update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill, hear, roxy,setWeather,setDockOpen,
     get flying() { return !!flight; }};
 }

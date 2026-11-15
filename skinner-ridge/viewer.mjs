@@ -5,6 +5,7 @@ import {addLandscape} from './landscape.mjs';
 import {createSky} from './sky.mjs';
 import {lightTerrain,lighting} from './lighting.mjs';
 import {initHud} from './hud.mjs';
+import {createWeather} from './weather.mjs';
 
 const status = document.getElementById('status');
 const enter = document.getElementById('enter');
@@ -127,6 +128,8 @@ try {
     terrains:meshes.map(mesh=>mesh.scene), isLocked:lock, enterButton:enter, resetButton:reset, lighting
   });
   if (query.has('qa')) window.hud = hud;
+  const weather=createWeather({scene,camera,lighting,hud});
+  if(query.has('qa')) window.weather=weather;
   function resize() {
     camera.aspect = innerWidth/innerHeight;
     camera.updateProjectionMatrix();
@@ -186,13 +189,14 @@ try {
       }
     }
     if (hud?.update(dt,now,yaw)) needsFrame = true;
-    if (needsFrame || sky.playing) {
+    if (needsFrame || sky.playing || weather.active) {
       const state=sky.update(elapsed);
       slider.value=String(Math.round(state.fraction*1000));
       pause.textContent=state.playing?'Pause sky':'Resume sky';
       lamp.textContent=state.lamp?'Light on':'Light off';
       lamp.setAttribute('aria-pressed',String(state.lamp));
       clock.textContent=(state.sunElevation>0?'Day':state.sunElevation> -12?'Twilight':'Night')+' · Sol 477 replay · '+state.utc.slice(11,16)+' UTC';
+      weather.update(dt);
       renderer.render(scene,camera);
       needsFrame = false;
     }

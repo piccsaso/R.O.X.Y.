@@ -200,10 +200,14 @@ export function parseCommand(text, landmarks) {
   if (/\b(mute|quiet|silence)\b/.test(t)) return {type:'mute', on:true};
   if (/^(close|exit|back|go back|close map|close the map|close menu|never ?mind)$/.test(t)) return {type:'close'};
   if (/\breset\b/.test(t)) return {type:'reset'};
-  const menu = /^(?:open |show )?(?:the )?(options|routes)(?: menu)?$/.exec(t);
-  if (menu) return {type:'menu', menu:menu[1]};
+  const menu = /^(?:please )?(?:open |show |bring up )?(?:the )?(options|routes|overlays?|layers?)(?: menu| tab| panel)?(?: please)?$/.exec(t);
+  if (menu) return {type:'menu', menu:/^(overlay|layer)/.test(menu[1]) ? 'layers' : menu[1]};
   // Saying just the name toggles; "show" or "hide" sets it.
-  const on = /\b(hide|off|disable|remove)\b/.test(t) ? false : /\b(show|on|enable|display)\b/.test(t) ? true : 'toggle';
+  const on = /\b(hide|off|disable|remove|close|deactivate|invisible)\b|\bnot visible\b/.test(t) ? false : /\b(show|on|enable|display|open|activate|visible)\b|\b(go|switch|take me) to\b/.test(t) ? true : 'toggle';
+  if (/\btrafficability\b|\btraffic\b|\btraversability\b|\bhazards?\b/.test(t)) return {type:'layer', layer:'traffic', on};
+  if (/\bminerals?\b|\bresources?\b/.test(t)) return {type:'layer', layer:'minerals', on};
+  if (/\bthermals?\b|\bregolith\b|\binfrared\b/.test(t)) return {type:'layer', layer:'thermal', on};
+  if (/\btopograph(?:y|ic)\b|\btopo\b|\belevation\b/.test(t)) return {type:'layer', layer:'topo', on};
   if (/\bslopes?\b|\bsteep\b/.test(t)) return {type:'layer', layer:'slope', on};
   if (/\bground truth\b|\bprovenance\b|\bmeasured\b/.test(t)) return {type:'layer', layer:'truth', on};
   if (/\b(straight|direct)\b/.test(t)) return {type:'route', which:'straight', on};
