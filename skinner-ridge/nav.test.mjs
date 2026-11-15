@@ -1,99 +1,51 @@
-// Run with: node nav.test.mjs   (uses the real ground.bin)
+// Run with: node nav.test.mjs   (uses the real ground.bin and the same context apron as the viewer)
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {makeGround} from './ground.mjs';
-import {makeNav, makePriorGround, makeLandmarks, parseCommand, config} from './nav.mjs';
+import {buildApron} from './apron.mjs';
+import {makeNav, makeLandmarks, parseCommand} from './nav.mjs';
 
 const meta = JSON.parse(readFileSync('terrain.json'));
 const route = JSON.parse(readFileSync('route.json'));
-const data = Uint8Array.from(readFileSync('ground.bin')).buffer;
-const truth = makeGround(meta, data), prior = makePriorGround(meta, data);
+const core = makeGround(meta, Uint8Array.from(readFileSync('ground.bin')).buffer);
+const apron = buildApron(core, meta);
+const ground = {sample:(x,z) => core.sample(x,z) || apron.sample(x,z)};
+const t0 = Date.now(), nav = makeNav(meta, ground), built = Date.now()-t0;
 const landmarks = makeLandmarks(route);
+const base = landmarks.find(l => l.id==='base').position, summit = landmarks.find(l => l.id==='summit').position;
 const results = [];
 const test = (name, fn) => { try { const note = fn(); results.push('PASS  '+name+(note ? '  ['+note+']' : '')); }
   catch (error) { results.push('FAIL  '+name+'  '+error.message); process.exitCode = 1; } };
 
-// The same movement rule as viewer.mjs: 2.5 cm steps, footing required, 15 cm step limit.
-function walk(ground, dense) {
-  let [x,y,z] = dense[0]; y = ground.foot(x,z);
-  for (let i=1; i<dense.length; i++) {
-    const [tx,,tz] = dense[i], length = Math.hypot(tx-x,tz-z), steps = Math.max(1,Math.ceil(length/0.025));
-    const sx = (tx-x)/steps, sz = (tz-z)/steps;
-    for (let s=0; s<steps; s++) {
-      const ny = ground.foot(x+sx, z+sz);
-      if (!Number.isFinite(ny)) return 'no footing at '+(x+sx).toFixed(2)+','+(z+sz).toFixed(2);
-      if (Math.abs(ny-y)>=0.15) return 'step too high at '+(x+sx).toFixed(2)+','+(z+sz).toFixed(2);
-      x += sx; z += sz; y = ny;
-    }
+test('every landmark is on the routing grid and has ground under it', () => {
+  for (const l of landmarks) assert.ok(ground.sample(...l.position) && nav.index(...l.position)>=0, l.name);
+  return 'grid '+nav.cols+'x'+nav.rows+' built in '+built+' ms; summit height '+ground.sample(...summit).height.toFixed(1)+' m, base '+ground.sample(...base).height.toFixed(1)+' m';
+});
+test('safe route from Home Base to the summit exists and crosses less unsafe footing than the straight line', () => {
+  const t = Date.now(), s = nav.safe(base, summit), d = nav.straight(base, summit);
+  assert.ok(s, 'no safe route');
+  assert.ok(s.unsafeDistance<d.unsafeDistance, 'safe '+s.unsafeDistance+' vs straight '+d.unsafeDistance);
+  assert.ok(s.distance>=d.distance-0.5);
+  return 'straight '+d.distance.toFixed(1)+' m with '+d.unsafeDistance.toFixed(1)+' m unsafe; safe '+s.distance.toFixed(1)+' m with '+
+    s.unsafeDistance.toFixed(1)+' m unsafe, '+s.time.toFixed(0)+' s, climb '+s.gain.toFixed(1)+' m; planned in '+(Date.now()-t)+' ms';
+});
+test('safe route is continuous and stays on ground', () => {
+  const s = nav.safe(base, summit);
+  for (let i=1; i<s.dense.length; i++) {
+    assert.ok(Math.hypot(s.dense[i][0]-s.dense[i-1][0], s.dense[i][2]-s.dense[i-1][2])<0.45, 'gap at '+i);
+    assert.ok(ground.sample(s.dense[i][0], s.dense[i][2]), 'no ground at '+i);
   }
-  return null;
-}
-const spawn = [route.spawn.x, route.spawn.z];
-const far = [route.expansion.end.x, route.expansion.end.z];
-
-test('truth route from start to the far corner exists and every segment is clear', () => {
-  const nav = makeNav(meta, truth, null), r = nav.plan(spawn, far);
-  assert.ok(r.points, r.error);
-  assert.equal(nav.firstBlock(r.dense), null);
-  return r.distance.toFixed(1)+' m, '+r.time.toFixed(0)+' s, max slope '+r.maxSlope.toFixed(0)+' deg; '+r.reason;
 });
-test('a scripted walker using the viewer movement rule completes that route', () => {
-  const nav = makeNav(meta, truth, null), r = nav.plan(spawn, far);
-  assert.equal(walk(truth, r.dense), null);
+test('routes exist between all landmarks, both ways', () => {
+  for (const a of landmarks) for (const b of landmarks) if (a!==b) assert.ok(nav.safe(a.position, b.position), a.name+' to '+b.name);
 });
-test('routes to every landmark are walkable end to end', () => {
-  const nav = makeNav(meta, truth, null);
-  return landmarks.map(l => { const r = nav.plan(spawn, (l.viewing ?? [l.position])[0]);
-    assert.ok(r.points, l.name+': '+r.error); assert.equal(walk(truth, r.dense), null, l.name);
-    return l.id+' '+r.distance.toFixed(1)+'m'; }).join(', ');
-});
-test('a detour names a real blocker and is longer than the straight line', () => {
-  const nav = makeNav(meta, truth, null);
-  const found = nav.plan(spawn, landmarks.find(l => l.id==='bench').position);
-  assert.ok(found.points, found.error);
-  assert.match(found.reason, /Detours/);
-  assert.ok(found.distance>found.straight+1);
-  assert.equal(walk(truth, found.dense), null);
-  return found.distance.toFixed(1)+' m vs '+found.straight.toFixed(1)+' m straight. '+found.reason;
-});
-test('the prior misses hazards: scanning forces a re-route that is then clear on the truth', () => {
-  const goal = landmarks.find(l => l.id==='bench').position;
-  const nav = makeNav(meta, truth, prior), first = nav.plan(spawn, goal);
-  assert.ok(first.points, first.error);
-  assert.ok(first.usesPrior);
-  nav.scanAll();
-  const block = nav.firstBlock(first.dense);
-  assert.ok(block, 'the prior route was not blocked on the real surface');
-  const second = nav.plan(spawn, goal);
-  assert.ok(second.points, second.error);
-  assert.equal(nav.firstBlock(second.dense), null);
-  assert.equal(walk(truth, second.dense), null);
-  return 'prior route '+first.distance.toFixed(1)+' m is blocked by '+block.what+'; re-route '+second.distance.toFixed(1)+' m';
-});
-test('a blocked landmark is not walkable itself but its viewing points are', () => {
-  const o = landmarks.find(l => l.id==='outcrop');
-  assert.ok(!Number.isFinite(truth.foot(...o.position)), 'outcrop position is walkable');
-  for (const v of o.viewing) assert.ok(Number.isFinite(truth.foot(...v)), 'viewing point '+v+' not walkable');
-});
-test('scanner reveals ground near the walker and not the whole patch', () => {
-  const nav = makeNav(meta, truth, prior);
-  const fresh = nav.scan(spawn[0], spawn[1], truth.foot(...spawn)+1.65);
-  const share = fresh/(nav.cols*nav.rows);
-  assert.ok(fresh>500 && share<0.5);
-  return fresh+' cells, '+(share*100).toFixed(0)+'% of the patch';
-});
-test('a destination on blocked ground reports no route or snaps to walkable ground nearby', () => {
-  const nav = makeNav(meta, truth, null), r = nav.plan(spawn, [-5,-5]);
-  assert.ok(r.error);
-  return r.error;
-});
-test('commands: goto, fuzzy name, layers, clear, unknown', () => {
-  assert.equal(parseCommand('Take me to the slab please', landmarks).landmark.id, 'slab');
-  assert.equal(parseCommand('uh go to the layerd slab', landmarks).landmark.id, 'slab');
-  assert.equal(parseCommand('return to start', landmarks).landmark.id, 'start');
-  assert.deepEqual(parseCommand('show hazards', landmarks), {type:'layer', layer:'hazard', on:true});
-  assert.deepEqual(parseCommand('hide slopes', landmarks), {type:'layer', layer:'slope', on:false});
-  assert.equal(parseCommand('show ground truth', landmarks).layer, 'truth');
+test('commands', () => {
+  assert.equal(parseCommand('Take me to the summit please', landmarks).landmark.id, 'summit');
+  assert.equal(parseCommand('go to the layerd slab', landmarks).landmark.id, 'slab');
+  assert.equal(parseCommand('return to base', landmarks).landmark.id, 'base');
+  assert.deepEqual(parseCommand('show slope', landmarks), {type:'layer', layer:'slope', on:true});
+  assert.deepEqual(parseCommand('hide ground truth', landmarks), {type:'layer', layer:'truth', on:false});
+  assert.equal(parseCommand('show the straight line', landmarks).which, 'straight');
   assert.equal(parseCommand('clear route', landmarks).type, 'clear');
   assert.equal(parseCommand('open the map', landmarks).type, 'map');
   assert.equal(parseCommand('take me to olympus mons', landmarks).type, 'unknown');

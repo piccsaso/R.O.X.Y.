@@ -1,0 +1,55 @@
+{
+  "slabWalk": 3.9868399999999955,
+  "expandedWalk": 40.38683999999975,
+  "filledWalk": 8.66658000000007,
+  "filledFrames": 24,
+  "lowerWalk": 6.5865799999997705,
+  "pointerLock": true,
+  "boundaryCollision": true,
+  "coreBoundaryCrossing": true,
+  "automaticSky": true,
+  "skies": [
+    {
+      "preset": "day",
+      "fraction": 0.7097222222222221,
+      "playing": false,
+      "lamp": false,
+      "utc": "2022-06-24T16:23:35.247Z",
+      "sunElevation": 23.44596900900238,
+      "sun": [
+        -0.7248283313792794,
+        0.39788408696186495,
+        -0.5624163434435853
+      ]
+    },
+    {
+      "preset": "sunset",
+      "fraction": 0.07916666666666661,
+      "playing": false,
+      "lamp": false,
+      "utc": "2022-06-24T00:50:37.523Z",
+      "sunElevation": 0.7556486152890416,
+      "sun": [
+        0.9012685701215473,
+        0.013188173996363729,
+        -0.43306008425818204
+      ]
+    },
+    {
+      "preset": "night",
+      "fraction": 0.24583333333333335,
+      "playing": false,
+      "lamp": false,
+      "utc": "2022-06-24T04:59:16.696Z",
+      "sunElevation": -52.92670006617007,
+      "sun": [
+        0.580499719754211,
+        -0.7978649395879086,
+        -0.16257802293565318
+      ]
+    }
+  ],
+  "reset": true,
+  "groundContact": true,
+  "browserErrors": []
+}
