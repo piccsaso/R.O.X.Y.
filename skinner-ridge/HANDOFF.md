@@ -2,7 +2,7 @@
 
 ## Current work
 
-Work is on `expand-mars-sky-cycle`, based on local commit `73e3846`. Check Git and remote state before assuming publication. Read [README.md](README.md), [SKY.md](SKY.md), and [PROJECT_HISTORY.md](PROJECT_HISTORY.md). Keep repo-root planning documents intact.
+Work is on `updated-map`, descending from `73e3846` and `0c210b4`. Start with [UPDATED_MAP_HANDOFF.md](UPDATED_MAP_HANDOFF.md) for the consolidated chat handoff, new opening pose, publication status, and teammate-branch integration notes. Check Git and remote state before assuming publication. Read [README.md](README.md), [SKY.md](SKY.md), and [PROJECT_HISTORY.md](PROJECT_HISTORY.md). Keep repo-root planning documents intact.
 
 The latest user request was to double the rendered map area again, allow walking anywhere including steep rocks, speed up walking, and improve the atmosphere, Sun, and NASA-based night sky. Clarifications: automatic eight-minute day/night cycle; grounded climbing, not flight; a documented Skinner Ridge observation date; naturally dark ground with an optional exploration light. Preserve the previously selected subtle photo-matched terrain style.
 

@@ -180,7 +180,8 @@ try {
   await key('keyDown','R');
   await key('keyUp','R');
   const reset=await evaluate('walkPose()');
-  if (Math.hypot(reset.position[0]-origin.x,reset.position[2]-origin.z)>0.001) throw new Error('Reset failed');
+  if (Math.hypot(reset.position[0]-route.start.x,reset.position[2]-route.start.z)>0.001) throw new Error('Reset failed');
+  await evaluate('qaPosition('+origin.x+','+origin.z+')');
   const coverage=PNG.sync.read(await readFile('terrain-coverage.png'));
   // This cross-slope walk passes through several fully inferred regions.
   const filledTarget=route.infill.end;

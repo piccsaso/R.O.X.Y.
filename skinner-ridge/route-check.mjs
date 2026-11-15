@@ -15,6 +15,10 @@ const targetX=xOffset+1.992710848690013, targetZ=zOffset+4.099211867188213;
 const spawn={x:xOffset+0.90,z:zOffset+2.82,targetX,targetZ};
 const end={x:spawn.x+Math.cos(angle)*length,z:spawn.z+Math.sin(angle)*length,targetX,targetZ};
 const best={length,spawn,return:end};
+// Screenshot-matched opening view, anchored in the rover site frame.
+// Keep spawn as the original slab-route regression anchor.
+best.start={x:meta.origin[1]+13.49,z:63.24-meta.origin[0],
+  targetX:meta.origin[1]+13.49,targetZ:83.24-meta.origin[0],yaw:Math.PI,pitch:0.025};
 for (let t=0;t<=1;t+=0.005) {
   if (!Number.isFinite(ground.foot(spawn.x+(end.x-spawn.x)*t,spawn.z+(end.z-spawn.z)*t))) {
     throw new Error('The original slab route has lost walkable clearance');

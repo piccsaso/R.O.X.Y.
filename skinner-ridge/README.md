@@ -64,3 +64,6 @@ Sky regeneration requires Python with `spiceypy` and `numpy`: run `python build-
 [History](PROJECT_HISTORY.md) · [Handoff](HANDOFF.md) · [NASA source selection](SITE_SELECTION.md)
 
 Terrain imagery and meshes: NASA/JPL-Caltech. Star-map visualization: NASA/Goddard Space Flight Center Scientific Visualization Studio, Ernie Wright; Hipparcos-2, Tycho-2 and Gaia DR2 catalogs. [JPL image use policy](https://www.jpl.nasa.gov/jpl-image-use-policy/).
+## Latest delivery
+
+See [UPDATED_MAP_HANDOFF.md](UPDATED_MAP_HANDOFF.md) for the complete chat handoff. The default view and both reset controls now open on the northern ground facing the ridge, matched to the user's screenshot. `route.start` defines this pose; `?view=spawn` retains the old slab test viewpoint. Run `node capture-start.mjs` to check the new start and resets.

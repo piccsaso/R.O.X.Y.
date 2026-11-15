@@ -85,20 +85,20 @@ try {
   const lock = () => document.pointerLockElement === canvas;
   let yaw = 0, pitch = 0;
   let needsFrame = true;
-  function pose({x,z,targetX,targetZ}) {
+  function pose({x,z,targetX,targetZ,yaw:heading,pitch:tilt}) {
     const y = ground.foot(x,z);
     if (!Number.isFinite(y)) throw new Error('Route viewpoint is outside walkable ground');
     camera.position.set(x,y+eyeHeight,z);
-    yaw = Math.atan2(x-targetX,z-targetZ);
+    yaw = heading ?? Math.atan2(x-targetX,z-targetZ);
     const targetY = ground.sample(targetX,targetZ)?.height ?? y;
-    pitch = Math.atan2(targetY-y-eyeHeight,Math.hypot(x-targetX,z-targetZ));
+    pitch = tilt ?? Math.atan2(targetY-y-eyeHeight,Math.hypot(x-targetX,z-targetZ));
     camera.rotation.set(pitch,yaw,0);
     needsFrame = true;
   }
   const lower={x:14+meta.origin[1]-2.51,z:22+77.49-meta.origin[0],
     targetX:14.6+meta.origin[1]-2.51,targetZ:17+77.49-meta.origin[0]};
   pose(mode==='lower-path' ? route.lowerPath.start : mode==='lower-extension' ? route.lowerPath.end :
-    mode==='lower' ? lower : mode==='expanded' ? route.expansion.end : mode==='return' ? route.return : route.spawn);
+    mode==='lower' ? lower : mode==='expanded' ? route.expansion.end : mode==='return' ? route.return : mode==='spawn' ? route.spawn : route.start);
   const sky=await createSky(scene,camera,skyData,renderer);
   const preset=query.get('sky');
   if(preset)sky.setPreset(preset);
@@ -130,7 +130,7 @@ try {
     try { await canvas.requestPointerLock(); }
     catch { status.textContent = 'Mouse capture unavailable. Open the demo in a desktop browser.'; }
   };
-  reset.onclick = () => pose(route.spawn);
+  reset.onclick = () => pose(route.start);
   document.addEventListener('pointerlockchange',() => {
     document.body.classList.toggle('locked',lock());
     keys.clear();
@@ -145,7 +145,7 @@ try {
   });
   addEventListener('keydown',event => {
     if (!lock()) return;
-    if (event.code==='KeyR') pose(route.spawn);
+    if (event.code==='KeyR') pose(route.start);
     if (event.code==='KeyF' && !event.repeat){sky.toggleLamp();needsFrame=true;}
     keys.add(event.code);
   });
