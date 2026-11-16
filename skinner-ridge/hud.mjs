@@ -973,6 +973,7 @@ export async function initHud(ctx) {
     }
     if (overlayDirty && state.layer) paintOverlay();
     fadeLines(dt);
+    film?.tick(dt);
     quick += dt; slow += dt; straightTick += dt;
     if (quick>0.15) { telemetry(quick); quick = 0; follow(); }
     if (straightTick>0.5) { straightTick = 0; if (state.show.straight && !state.cleared) { plan('straight'); drawLine('straight', state.routes.straight.dense); } }
@@ -985,8 +986,9 @@ export async function initHud(ctx) {
   replanAll(); setRoxy(true);
   // Promo mode: ?promo or ?promo=<seconds>. The view starts as bare landscape; the display comes online
   // that many seconds after the first click (default 4), or when B is pressed. B again takes it offline for another take.
-  const promoParam = new URLSearchParams(location.search).get('promo');
-  let lineFade = 1, lineTarget = 1;
+  const filmQuery = new URLSearchParams(location.search), filmOn = filmQuery.has('film');
+  const promoParam = filmOn ? '99999' : filmQuery.get('promo');
+  let lineFade = 1, lineTarget = 1, goOnline = null;
   if (promoParam!==null) {
     document.body.classList.add('promo');
     lineFade = lineTarget = 0;
@@ -994,11 +996,104 @@ export async function initHud(ctx) {
       document.body.classList.toggle('online', on);
       lineTarget = on ? 1 : 0;
     };
-    let armed = false;
+    goOnline = online;
+    let armed = filmOn;
     document.addEventListener('pointerlockchange', () => {
       if (isLocked() && !armed) { armed = true; setTimeout(() => { if (!document.body.classList.contains('online')) online(true); }, 1000*(Number(promoParam) || 4)); }
     });
     addEventListener('keydown', event => { if (event.code==='KeyB' && !event.repeat && event.target!==input) { armed = true; online(!document.body.classList.contains('online')); } });
+  }
+
+  // Film mode (?film&team=...&project=...): plays the 30-second pitch hands-free, for screen recording.
+  // Narration, captions, camera and HUD actions are driven line by line, so picture and voice stay in step.
+  let film = null;
+  if (filmOn) {
+    const team = filmQuery.get('team') || 'Team Skinner Ridge', project = filmQuery.get('project') || 'Marswalk HUD';
+    const lines = [
+      {say:"Hi, we're "+team+'.', act:'pan'},
+      {say:'On Mars, one wrong step can end a mission.', act:'pan'},
+      {say:'So we built '+project+': a voice-controlled helmet display that guides astronauts across real terrain,', act:'online'},
+      {say:"measured by NASA's Perseverance rover.", act:'map'},
+      {say:'It finds the safest route, not just the shortest,', act:'walk'},
+      {say:"and warns you when it's time to turn back.", act:'warn'},
+      {say:'Helping the first explorers walk further, and come home.', act:'end'}
+    ];
+    document.head.appendChild(Object.assign(document.createElement('style'), {textContent:`
+      body.film #hud .dock,body.film #hud .note,body.film #hud .ear,body.film #hud .roxy,body.film .sky-controls,body.film #hud .hint{display:none!important}
+      .film-caption{position:fixed;left:50%;bottom:7%;transform:translateX(-50%);z-index:9;max-width:78vw;text-align:center;color:#fff;font:500 clamp(18px,2.3vw,30px)/1.3 "Segoe UI",system-ui,sans-serif;text-shadow:0 2px 6px #000,0 0 2px #000;pointer-events:none}
+      .film-title{position:fixed;inset:0;z-index:8;display:grid;place-content:center;text-align:center;color:#f4efe6;pointer-events:none;opacity:0;transition:opacity .8s;text-shadow:0 2px 14px #000a}
+      .film-title.on{opacity:1}
+      .film-title h2{margin:0;font:700 clamp(40px,7vw,96px)/1 Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+      .film-title p{margin:14px 0 0;font:600 clamp(12px,1.4vw,18px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.3em;text-transform:uppercase}
+      .film-end{background:#120c09e6}
+      .film-end small{display:block;margin-top:26px;font:500 clamp(10px,1.05vw,14px)/1.8 "Segoe UI",sans-serif;letter-spacing:.06em;opacity:.85}
+      .film-start{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9;color:#fff;font:600 16px "Segoe UI",sans-serif;background:#000a;padding:12px 18px;border-radius:6px;text-align:center}`}));
+    document.body.classList.add('film');
+    const el = (cls, htmlText) => { const e = Object.assign(document.createElement('div'), {className:cls, innerHTML:htmlText}); document.body.appendChild(e); return e; };
+    const caption = el('film-caption', '');
+    const title = el('film-title', '<h2>'+project+'</h2><p>A helmet display for the first Marswalk</p>');
+    const endCard = el('film-title film-end', '<h2>'+project+'</h2><p>'+team+' · NASA Space Apps Challenge 2026</p>'+
+      '<small>Challenge: Interplanetary Survival Guide: Martian Map<br>Terrain: NASA/JPL-Caltech, Perseverance rover Navcam stereo products, Jezero crater<br>'+
+      'Voiceover is AI-generated · Code built with AI assistance · Suit telemetry shown is simulated</small>');
+    const start = el('film-start', 'Start your screen recorder, then click anywhere to play<br><small>Loading narration…</small>');
+    state.muted = true;
+    // Fetch every narration line up front so playback is gapless. Falls back to the browser voice if the service is unavailable.
+    const clips = lines.map(line => fetch('/api/tts', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:line.say})})
+      .then(r => r.ok ? r.blob() : null).then(b => b && b.size>500 ? URL.createObjectURL(b) : null).catch(() => null));
+    Promise.all(clips).then(urls => { start.lastChild.textContent = urls.every(Boolean) ? 'Narration ready (studio voice)' : 'Narration ready (browser voice; no voice key found)'; });
+    const home = [camera.position.x, camera.position.z], yaw0 = ctx.getYaw();
+    let index = -1, act = 'idle', actStart = 0, startedAt = 0, along = 0, heading = yaw0, running = false;
+    const sayLine = async i => {
+      const url = await clips[i];
+      return new Promise(resolve => {
+        let finished = false;
+        const done = () => { if (!finished) { finished = true; resolve(); } };
+        // Never stall the film if a voice fails to report that it finished.
+        setTimeout(done, url ? 14000 : 900+lines[i].say.length*80);
+        if (url) { const a = new Audio(url); a.onended = a.onerror = done; a.play().catch(done); }
+        else if ('speechSynthesis' in window) { const u = Object.assign(new SpeechSynthesisUtterance(lines[i].say), {rate:1.08}); u.onend = u.onerror = done; speechSynthesis.speak(u); }
+        else setTimeout(done, 400+lines[i].say.length*62);
+      });
+    };
+    const begin = name => {
+      act = name; actStart = performance.now();
+      if (name==='online') { goOnline?.(true); title.classList.add('on'); setTimeout(() => title.classList.remove('on'), 2600); }
+      if (name==='map') { setLayer('truth', true); enterMap(); }
+      if (name==='walk') { setLayer('truth', false); exitMap(); plan('safe'); refreshLines(); along = 0; }
+      if (name==='warn') { state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
+      if (name==='end') endCard.classList.add('on');
+    };
+    const play = async () => {
+      if (running) return;
+      running = true; start.remove(); setRoxy(false); startedAt = performance.now();
+      // Each line holds for at least its reading time, even if the voice fails or ends early.
+      for (index=0; index<lines.length; index++) {
+        caption.textContent = lines[index].say; begin(lines[index].act);
+        await Promise.all([sayLine(index), new Promise(r => setTimeout(r, 500+lines[index].say.length*50))]);
+      }
+      caption.textContent = '';
+      const seconds = (performance.now()-startedAt)/1000;
+      console.info('[film] narration ran '+seconds.toFixed(1)+' s'+(seconds>29 ? ' — over the 30 s limit once the end card is held; trim or shorten a line' : ''));
+      setTimeout(() => { act = 'done'; }, 1200);
+    };
+    addEventListener('pointerdown', play, {once:true});
+    addEventListener('keydown', event => { if (event.code==='Space' || event.code==='Enter') play(); });
+    film = {tick(dt) {
+      const t = (performance.now()-actStart)/1000;
+      if (act==='pan' || act==='online') {
+        const s = (performance.now()-startedAt)/1000;
+        ctx.setView(home[0], home[1], yaw0+0.22*Math.sin(s*0.38), 0.02);
+      } else if ((act==='walk' || act==='warn' || act==='end') && !flight && !state.mapMode) {
+        const r = state.routes.safe;
+        if (!r) return;
+        along = Math.min(r.distance-0.5, along+dt*config.walkSpeed);
+        let i = 0; while (i<r.cumulative.length-1 && r.cumulative[i]<along) i++;
+        const j = Math.min(r.dense.length-1, i+12), p = r.dense[i], q = r.dense[j];
+        const want = Math.atan2(-(q[0]-p[0]), -(q[2]-p[2]));
+        heading += Math.atan2(Math.sin(want-heading), Math.cos(want-heading))*Math.min(1, dt*2.2);
+        ctx.setView(p[0], p[2], heading, -0.06);
+      }
+    }, play, get elapsed() { return (performance.now()-startedAt)/1000; }, get act() { return act; }};
   }
   const fadeLines = dt => {
     if (lineFade===lineTarget && lineFade===1) return;
@@ -1020,7 +1115,7 @@ export async function initHud(ctx) {
     overlayDirty=true;redraw=true;
     if(state.layer==='traffic' && overlayTarget===1) setLayer('traffic',true);
   }
-  return {setHazardOverlay, update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill, hear, roxy,setWeather,setDockOpen,
+  return {setHazardOverlay, get film() { return film; }, update, command, state, nav, landmarks, enterMap, exitMap, setLayer, camera, refill, hear, roxy,setWeather,setDockOpen,
     get activeLayer(){return overlayTarget===1 ? state.layer : null;},
     get flying() { return !!flight; }};
 }
