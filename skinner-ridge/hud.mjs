@@ -1005,7 +1005,7 @@ export async function initHud(ctx) {
   }
 
   // Film mode (?film&team=...&project=...): plays the 30-second pitch hands-free, for screen recording.
-  // Narration, captions, camera and HUD actions are driven line by line, so picture and voice stay in step.
+  // The picture is silent with no captions; the team records its own narration over it. Each line marks a shot.
   let film = null;
   if (filmOn) {
     const team = filmQuery.get('team') || 'Renispace', project = filmQuery.get('project') || 'Roxy';
@@ -1017,7 +1017,7 @@ export async function initHud(ctx) {
       {at:13.2, say:"It knows the ground, because NASA's Perseverance rover measured it.", act:'data'},
       {at:17.9, say:'It finds the safest way up, not just the shortest,', act:'walk'},
       {at:21.9, say:"and it tells you when it's time to turn back.", act:'warn'},
-      {at:25.6, say:project+'. Walk further. Come home.', act:'end'}
+      {at:25.6, say:project+' is not just a tool; it is safety, reliability and efficiency!', act:'end'}
     ];
     const END = 29.7;
     document.head.appendChild(Object.assign(document.createElement('style'), {textContent:`
@@ -1032,7 +1032,7 @@ export async function initHud(ctx) {
       .film-title.on{opacity:1}
       .film-title h2{margin:0;font:700 clamp(54px,9vw,132px)/1 Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.2em;text-indent:.2em;text-transform:uppercase}
       .film-title h2::after{content:"";display:block;width:74px;height:2px;background:#ffb454;margin:20px auto 0}
-      .film-title p{margin:18px 0 0;font:600 clamp(12px,1.35vw,19px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase}
+      .film-title p{margin:18px 0 0;line-height:1.9;font:600 clamp(12px,1.35vw,19px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase}
       .film-end{background:radial-gradient(ellipse at 50% 40%,#2a1a12f2,#0a0706fa);z-index:10}
       .film-end small{display:block;margin-top:30px;font:500 clamp(10px,1.02vw,14px)/1.9 "Segoe UI",sans-serif;letter-spacing:.05em;opacity:.8}
       .film-black{position:fixed;inset:0;z-index:11;background:#000;opacity:1;transition:opacity 1.6s;pointer-events:none}
@@ -1040,51 +1040,25 @@ export async function initHud(ctx) {
       .film-start{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;color:#fff;font:600 16px/1.6 "Segoe UI",sans-serif;background:#000c;border:1px solid #fff4;padding:14px 22px;border-radius:6px;text-align:center}`}));
     document.body.classList.add('film');
     const el = (cls, htmlText) => { const e = Object.assign(document.createElement('div'), {className:cls, innerHTML:htmlText}); document.body.appendChild(e); return e; };
-    el('film-shade', '');
     const caption = el('film-caption', '');
     const third = el('film-third', 'Real terrain<br>NASA Perseverance rover · Jezero crater');
     const title = el('film-title', '<h2>'+project+'</h2><p>Your guide for the first walk on Mars</p>');
-    const endCard = el('film-title film-end', '<h2>'+project+'</h2><p>Walk further · Come home</p>'+
+    const endCard = el('film-title film-end', '<h2>'+project+'</h2><p>Not just a tool<br>Safety · Reliability · Efficiency</p>'+
       '<small>'+team+' · NASA Space Apps Challenge 2026 · Interplanetary Survival Guide: Martian Map<br>'+
       'Terrain: NASA/JPL-Caltech, Perseverance rover Navcam stereo products, Jezero crater<br>'+
-      'Voiceover is AI-generated · Code built with AI assistance · Suit telemetry shown is simulated</small>');
+      'Code built with AI assistance · Suit telemetry shown is simulated</small>');
     const black = el('film-black', '');
-    const start = el('film-start', 'Start your screen recorder, then click anywhere to play<br><small>Loading narration…</small>');
+    const start = el('film-start', 'Start your screen recorder, then click anywhere to play<br><small>Silent picture, 30 seconds. Record your own narration over it.</small>');
     state.muted = true;
     // Night sky, clock stopped, suit light off until the display comes online.
     ctx.sky?.setPreset('night'); ctx.sky?.setPlaying(false);
     let lampOn = !!ctx.sky?.update(0).lamp;
     const lamp = on => { if (ctx.sky && lampOn!==on) { ctx.sky.toggleLamp(); lampOn = on; redraw = true; } };
     lamp(false);
-    // Fetch every narration line up front so playback is gapless. Falls back to the best browser voice.
-    const clips = lines.map(line => fetch('/api/tts', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:line.say})})
-      .then(r => r.ok ? r.blob() : null).then(blob => blob && blob.size>500 ? URL.createObjectURL(blob) : null).catch(() => null));
-    Promise.all(clips).then(urls => { start.lastChild.textContent = urls.every(Boolean) ? 'Narration ready · studio voice' : 'Narration ready · browser voice (no .env.local voice key found)'; });
-    const browserVoice = () => {
-      const voices = window.speechSynthesis?.getVoices() ?? [];
-      for (const want of [/natural/i, /aria|jenny|sonia|libby/i, /google uk english female/i, /samantha|karen|moira/i, /google us english/i]) {
-        const v = voices.find(v => v.lang.startsWith('en') && want.test(v.name)); if (v) return v;
-      }
-      return voices.find(v => v.lang.startsWith('en')) ?? null;
-    };
-    window.speechSynthesis?.getVoices();
     const home = [camera.position.x, camera.position.z], yaw0 = ctx.getYaw();
     let act = 'idle', startedAt = 0, along = 0, heading = yaw0, running = false, pitch = 0.3;
     const now = () => (performance.now()-startedAt)/1000;
     const wait = seconds => new Promise(r => setTimeout(r, Math.max(0, seconds*1000)));
-    const sayLine = async i => {
-      const url = await clips[i];
-      return new Promise(resolve => {
-        let finished = false;
-        const done = () => { if (!finished) { finished = true; resolve(); } };
-        setTimeout(done, url ? 9000 : 900+lines[i].say.length*85);   // never stall the film
-        if (url) { const a = new Audio(url); a.onended = a.onerror = done; a.play().catch(done); }
-        else if ('speechSynthesis' in window) {
-          const u = Object.assign(new SpeechSynthesisUtterance(lines[i].say), {rate:0.98, pitch:1, voice:browserVoice()});
-          u.onend = u.onerror = done; speechSynthesis.speak(u);
-        }
-      });
-    };
     const begin = name => {
       act = name;
       if (name==='online') { lamp(true); goOnline?.(true); title.classList.add('on'); setTimeout(() => title.classList.remove('on'), 3000); }
@@ -1102,11 +1076,9 @@ export async function initHud(ctx) {
         await wait(Math.max(lines[i].at, free)-now());
         caption.classList.remove('on');
         await wait(0.12);
-        caption.textContent = lines[i].say; caption.classList.add('on');
+        console.info('[film] '+now().toFixed(1)+' s  say: '+lines[i].say);
         begin(lines[i].act);
         const spoken = now();
-        // Hold each caption for at least its reading time, even if the voice ends early or fails.
-        await Promise.all([sayLine(i), wait(0.4+lines[i].say.length*0.045)]);
         free = now()+0.15;
         if (i===lines.length-1) console.info('[film] last line ended at '+now().toFixed(1)+' s (started '+spoken.toFixed(1)+' s)');
       }

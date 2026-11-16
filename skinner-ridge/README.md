@@ -86,9 +86,9 @@ Open `http://127.0.0.1:8080/?sky=day&promo` and start your screen recorder. The 
 
 ### Film mode: the 30-second pitch, hands-free
 
-Open `http://127.0.0.1:8080/?film` (add `&team=Name&project=Name` to change the names; the defaults are Renispace and Roxy, and `%20` stands for a space). Start your screen recorder, then click anywhere. The app plays the whole pitch by itself on a fixed 30-second schedule, at night:
+Open `http://127.0.0.1:8080/?film` (add `&team=Name&project=Name` to change the names; the defaults are Renispace and Roxy). Start your screen recorder, then click anywhere. The app plays the picture by itself on a fixed 30-second schedule, at night. It is silent and has no captions: record your own narration over it, starting each line at the time shown.
 
-| Time | Narration and caption | Picture |
+| Start | Line to say | Picture |
 |---|---|---|
 | 0:01 | "Night on Mars. Your base is out of sight." | Fade in on the stars over the dark ridge |
 | 0:04 | "One bad step… and you don't get home." | Camera settles toward the ground |
@@ -96,9 +96,9 @@ Open `http://127.0.0.1:8080/?film` (add `&team=Name&project=Name` to change the 
 | 0:13 | "It knows the ground, because NASA's Perseverance rover measured it." | Ground-truth highlight, data credit |
 | 0:18 | "It finds the safest way up, not just the shortest," | Walks the safe route |
 | 0:22 | "and it tells you when it's time to turn back." | Return warning |
-| 0:26 | "Roxy. Walk further. Come home." | End card, then cut to black at 0:29.7 |
+| 0:26 | "Roxy is not just a tool; it is safety, reliability and efficiency!" | End card with that line, then cut to black at 0:29.7 |
 
-The narration uses the same voice service as Roxy when `.env.local` holds the key, and the best browser voice otherwise; the start prompt says which. The end card credits the NASA data and states that the voiceover is AI-generated, the code was AI-assisted and the suit telemetry is simulated. Trim the recording where the picture cuts to black.
+The end card credits the NASA data and states that the code was AI-assisted and the suit telemetry is simulated. Trim the recording where the picture cuts to black.
 
 ### How the safe route is chosen
 
