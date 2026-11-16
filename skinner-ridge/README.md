@@ -86,9 +86,19 @@ Open `http://127.0.0.1:8080/?sky=day&promo` and start your screen recorder. The 
 
 ### Film mode: the 30-second pitch, hands-free
 
-Open `http://127.0.0.1:8080/?sky=day&film&team=YOUR%20TEAM&project=YOUR%20PROJECT` (use `%20` for spaces). Start your screen recorder, then click anywhere. The app plays the whole pitch by itself: bare landscape, the display coming online with a title, the planning view with the ground-truth highlight, a walk along the safe route, the return warning, and an end card. Each narration line is spoken, shown as a caption, and triggers its own shot, so picture and voice stay together.
+Open `http://127.0.0.1:8080/?film` (add `&team=Name&project=Name` to change the names; the defaults are Renispace and Roxy, and `%20` stands for a space). Start your screen recorder, then click anywhere. The app plays the whole pitch by itself on a fixed 30-second schedule, at night:
 
-The narration uses the same voice service as Roxy when `.env.local` holds the key, and the browser's built-in voice otherwise; the start prompt says which. The end card credits the NASA data and states that the voiceover is AI-generated, the code was AI-assisted and the suit telemetry is simulated. When it finishes, the browser console prints how long the narration ran; the limit for the submission is 30 seconds.
+| Time | Narration and caption | Picture |
+|---|---|---|
+| 0:01 | "Night on Mars. Your base is out of sight." | Fade in on the stars over the dark ridge |
+| 0:04 | "One bad step… and you don't get home." | Camera settles toward the ground |
+| 0:08 | "We're Renispace. This is Roxy, a helmet display you simply talk to." | Suit light on, display comes online, title |
+| 0:13 | "It knows the ground, because NASA's Perseverance rover measured it." | Ground-truth highlight, data credit |
+| 0:18 | "It finds the safest way up, not just the shortest," | Walks the safe route |
+| 0:22 | "and it tells you when it's time to turn back." | Return warning |
+| 0:26 | "Roxy. Walk further. Come home." | End card, then cut to black at 0:29.7 |
+
+The narration uses the same voice service as Roxy when `.env.local` holds the key, and the best browser voice otherwise; the start prompt says which. The end card credits the NASA data and states that the voiceover is AI-generated, the code was AI-assisted and the suit telemetry is simulated. Trim the recording where the picture cuts to black.
 
 ### How the safe route is chosen
 

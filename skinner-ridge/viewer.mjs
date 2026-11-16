@@ -128,7 +128,7 @@ try {
     terrains:meshes.map(mesh=>mesh.scene), isLocked:lock, enterButton:enter, resetButton:reset, lighting,
     // Lets the film mode steer the camera on the ground.
     setView:(x,z,a,b)=>{const y=ground.foot(x,z);if(!Number.isFinite(y))return;camera.position.set(x,y+eyeHeight,z);yaw=a;pitch=b;camera.rotation.set(pitch,yaw,0);needsFrame=true;},
-    getYaw:()=>yaw
+    getYaw:()=>yaw, sky
   });
   if (query.has('qa')) window.hud = hud;
   const weather=createWeather({scene,camera,lighting,hud});

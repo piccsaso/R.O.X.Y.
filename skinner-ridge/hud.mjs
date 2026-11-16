@@ -1008,81 +1008,124 @@ export async function initHud(ctx) {
   // Narration, captions, camera and HUD actions are driven line by line, so picture and voice stay in step.
   let film = null;
   if (filmOn) {
-    const team = filmQuery.get('team') || 'Team Skinner Ridge', project = filmQuery.get('project') || 'Marswalk HUD';
+    const team = filmQuery.get('team') || 'Renispace', project = filmQuery.get('project') || 'Roxy';
+    // Fixed 30-second schedule. Each line starts at its time (or just after the previous line ends, if a voice runs long).
     const lines = [
-      {say:"Hi, we're "+team+'.', act:'pan'},
-      {say:'On Mars, one wrong step can end a mission.', act:'pan'},
-      {say:'So we built '+project+': a voice-controlled helmet display that guides astronauts across real terrain,', act:'online'},
-      {say:"measured by NASA's Perseverance rover.", act:'map'},
-      {say:'It finds the safest route, not just the shortest,', act:'walk'},
-      {say:"and warns you when it's time to turn back.", act:'warn'},
-      {say:'Helping the first explorers walk further, and come home.', act:'end'}
+      {at:0.8,  say:'Night on Mars. Your base is out of sight.', act:'dark'},
+      {at:4.4,  say:"One bad step… and you don't get home.", act:'dark'},
+      {at:7.8,  say:"We're "+team+'. This is '+project+', a helmet display you simply talk to.', act:'online'},
+      {at:13.2, say:"It knows the ground, because NASA's Perseverance rover measured it.", act:'data'},
+      {at:17.9, say:'It finds the safest way up, not just the shortest,', act:'walk'},
+      {at:21.9, say:"and it tells you when it's time to turn back.", act:'warn'},
+      {at:25.6, say:project+'. Walk further. Come home.', act:'end'}
     ];
+    const END = 29.7;
     document.head.appendChild(Object.assign(document.createElement('style'), {textContent:`
-      body.film #hud .dock,body.film #hud .note,body.film #hud .ear,body.film #hud .roxy,body.film .sky-controls,body.film #hud .hint{display:none!important}
-      .film-caption{position:fixed;left:50%;bottom:7%;transform:translateX(-50%);z-index:9;max-width:78vw;text-align:center;color:#fff;font:500 clamp(18px,2.3vw,30px)/1.3 "Segoe UI",system-ui,sans-serif;text-shadow:0 2px 6px #000,0 0 2px #000;pointer-events:none}
-      .film-title{position:fixed;inset:0;z-index:8;display:grid;place-content:center;text-align:center;color:#f4efe6;pointer-events:none;opacity:0;transition:opacity .8s;text-shadow:0 2px 14px #000a}
+      body.film #hud .dock,body.film #hud .note,body.film #hud .ear,body.film #hud .roxy,body.film .sky-controls,body.film #hud .hint,body.film #hud .weather-alert{display:none!important}
+      body.film{cursor:none}
+      .film-shade{position:fixed;left:0;right:0;bottom:0;height:26vh;z-index:7;background:linear-gradient(transparent,#000b);pointer-events:none}
+      .film-caption{position:fixed;left:50%;bottom:6.5%;transform:translateX(-50%);z-index:9;width:max-content;max-width:60vw;text-align:center;color:#fff;font:500 clamp(18px,2.2vw,32px)/1.3 "Segoe UI",system-ui,sans-serif;letter-spacing:.01em;text-shadow:0 2px 8px #000,0 0 2px #000;pointer-events:none;opacity:0;transition:opacity .35s}
+      .film-caption.on{opacity:1}
+      .film-third{position:fixed;left:5vw;bottom:24vh;z-index:8;color:#f4efe6;font:600 clamp(11px,1.15vw,16px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.28em;text-transform:uppercase;padding-left:14px;border-left:2px solid #ffb454;line-height:1.9;text-shadow:0 1px 6px #000;opacity:0;transform:translateX(-12px);transition:opacity .6s,transform .6s;pointer-events:none}
+      .film-third.on{opacity:1;transform:none}
+      .film-title{position:fixed;inset:0;z-index:8;display:grid;place-content:center;text-align:center;color:#f4efe6;pointer-events:none;opacity:0;transition:opacity .9s;text-shadow:0 2px 18px #000c}
       .film-title.on{opacity:1}
-      .film-title h2{margin:0;font:700 clamp(40px,7vw,96px)/1 Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.14em;text-transform:uppercase}
-      .film-title p{margin:14px 0 0;font:600 clamp(12px,1.4vw,18px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.3em;text-transform:uppercase}
-      .film-end{background:#120c09e6}
-      .film-end small{display:block;margin-top:26px;font:500 clamp(10px,1.05vw,14px)/1.8 "Segoe UI",sans-serif;letter-spacing:.06em;opacity:.85}
-      .film-start{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9;color:#fff;font:600 16px "Segoe UI",sans-serif;background:#000a;padding:12px 18px;border-radius:6px;text-align:center}`}));
+      .film-title h2{margin:0;font:700 clamp(54px,9vw,132px)/1 Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.2em;text-indent:.2em;text-transform:uppercase}
+      .film-title h2::after{content:"";display:block;width:74px;height:2px;background:#ffb454;margin:20px auto 0}
+      .film-title p{margin:18px 0 0;font:600 clamp(12px,1.35vw,19px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase}
+      .film-end{background:radial-gradient(ellipse at 50% 40%,#2a1a12f2,#0a0706fa);z-index:10}
+      .film-end small{display:block;margin-top:30px;font:500 clamp(10px,1.02vw,14px)/1.9 "Segoe UI",sans-serif;letter-spacing:.05em;opacity:.8}
+      .film-black{position:fixed;inset:0;z-index:11;background:#000;opacity:1;transition:opacity 1.6s;pointer-events:none}
+      .film-black.off{opacity:0}
+      .film-start{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;color:#fff;font:600 16px/1.6 "Segoe UI",sans-serif;background:#000c;border:1px solid #fff4;padding:14px 22px;border-radius:6px;text-align:center}`}));
     document.body.classList.add('film');
     const el = (cls, htmlText) => { const e = Object.assign(document.createElement('div'), {className:cls, innerHTML:htmlText}); document.body.appendChild(e); return e; };
+    el('film-shade', '');
     const caption = el('film-caption', '');
-    const title = el('film-title', '<h2>'+project+'</h2><p>A helmet display for the first Marswalk</p>');
-    const endCard = el('film-title film-end', '<h2>'+project+'</h2><p>'+team+' · NASA Space Apps Challenge 2026</p>'+
-      '<small>Challenge: Interplanetary Survival Guide: Martian Map<br>Terrain: NASA/JPL-Caltech, Perseverance rover Navcam stereo products, Jezero crater<br>'+
+    const third = el('film-third', 'Real terrain<br>NASA Perseverance rover · Jezero crater');
+    const title = el('film-title', '<h2>'+project+'</h2><p>Your guide for the first walk on Mars</p>');
+    const endCard = el('film-title film-end', '<h2>'+project+'</h2><p>Walk further · Come home</p>'+
+      '<small>'+team+' · NASA Space Apps Challenge 2026 · Interplanetary Survival Guide: Martian Map<br>'+
+      'Terrain: NASA/JPL-Caltech, Perseverance rover Navcam stereo products, Jezero crater<br>'+
       'Voiceover is AI-generated · Code built with AI assistance · Suit telemetry shown is simulated</small>');
+    const black = el('film-black', '');
     const start = el('film-start', 'Start your screen recorder, then click anywhere to play<br><small>Loading narration…</small>');
     state.muted = true;
-    // Fetch every narration line up front so playback is gapless. Falls back to the browser voice if the service is unavailable.
+    // Night sky, clock stopped, suit light off until the display comes online.
+    ctx.sky?.setPreset('night'); ctx.sky?.setPlaying(false);
+    let lampOn = !!ctx.sky?.update(0).lamp;
+    const lamp = on => { if (ctx.sky && lampOn!==on) { ctx.sky.toggleLamp(); lampOn = on; redraw = true; } };
+    lamp(false);
+    // Fetch every narration line up front so playback is gapless. Falls back to the best browser voice.
     const clips = lines.map(line => fetch('/api/tts', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text:line.say})})
-      .then(r => r.ok ? r.blob() : null).then(b => b && b.size>500 ? URL.createObjectURL(b) : null).catch(() => null));
-    Promise.all(clips).then(urls => { start.lastChild.textContent = urls.every(Boolean) ? 'Narration ready (studio voice)' : 'Narration ready (browser voice; no voice key found)'; });
+      .then(r => r.ok ? r.blob() : null).then(blob => blob && blob.size>500 ? URL.createObjectURL(blob) : null).catch(() => null));
+    Promise.all(clips).then(urls => { start.lastChild.textContent = urls.every(Boolean) ? 'Narration ready · studio voice' : 'Narration ready · browser voice (no .env.local voice key found)'; });
+    const browserVoice = () => {
+      const voices = window.speechSynthesis?.getVoices() ?? [];
+      for (const want of [/natural/i, /aria|jenny|sonia|libby/i, /google uk english female/i, /samantha|karen|moira/i, /google us english/i]) {
+        const v = voices.find(v => v.lang.startsWith('en') && want.test(v.name)); if (v) return v;
+      }
+      return voices.find(v => v.lang.startsWith('en')) ?? null;
+    };
+    window.speechSynthesis?.getVoices();
     const home = [camera.position.x, camera.position.z], yaw0 = ctx.getYaw();
-    let index = -1, act = 'idle', actStart = 0, startedAt = 0, along = 0, heading = yaw0, running = false;
+    let act = 'idle', startedAt = 0, along = 0, heading = yaw0, running = false, pitch = 0.3;
+    const now = () => (performance.now()-startedAt)/1000;
+    const wait = seconds => new Promise(r => setTimeout(r, Math.max(0, seconds*1000)));
     const sayLine = async i => {
       const url = await clips[i];
       return new Promise(resolve => {
         let finished = false;
         const done = () => { if (!finished) { finished = true; resolve(); } };
-        // Never stall the film if a voice fails to report that it finished.
-        setTimeout(done, url ? 14000 : 900+lines[i].say.length*80);
+        setTimeout(done, url ? 9000 : 900+lines[i].say.length*85);   // never stall the film
         if (url) { const a = new Audio(url); a.onended = a.onerror = done; a.play().catch(done); }
-        else if ('speechSynthesis' in window) { const u = Object.assign(new SpeechSynthesisUtterance(lines[i].say), {rate:1.08}); u.onend = u.onerror = done; speechSynthesis.speak(u); }
-        else setTimeout(done, 400+lines[i].say.length*62);
+        else if ('speechSynthesis' in window) {
+          const u = Object.assign(new SpeechSynthesisUtterance(lines[i].say), {rate:0.98, pitch:1, voice:browserVoice()});
+          u.onend = u.onerror = done; speechSynthesis.speak(u);
+        }
       });
     };
     const begin = name => {
-      act = name; actStart = performance.now();
-      if (name==='online') { goOnline?.(true); title.classList.add('on'); setTimeout(() => title.classList.remove('on'), 2600); }
-      if (name==='map') { setLayer('truth', true); enterMap(); }
-      if (name==='walk') { setLayer('truth', false); exitMap(); plan('safe'); refreshLines(); along = 0; }
+      act = name;
+      if (name==='online') { lamp(true); goOnline?.(true); title.classList.add('on'); setTimeout(() => title.classList.remove('on'), 3000); }
+      if (name==='data') { setLayer('truth', true); third.classList.add('on'); }
+      if (name==='walk') { setLayer('truth', false); third.classList.remove('on'); plan('safe'); refreshLines(); along = 0; heading = ctx.getYaw(); }
       if (name==='warn') { state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
-      if (name==='end') endCard.classList.add('on');
+      if (name==='end') { endCard.classList.add('on'); }
     };
     const play = async () => {
       if (running) return;
-      running = true; start.remove(); setRoxy(false); startedAt = performance.now();
-      // Each line holds for at least its reading time, even if the voice fails or ends early.
-      for (index=0; index<lines.length; index++) {
-        caption.textContent = lines[index].say; begin(lines[index].act);
-        await Promise.all([sayLine(index), new Promise(r => setTimeout(r, 500+lines[index].say.length*50))]);
+      running = true; start.remove(); setRoxy(false); startedAt = performance.now(); act = 'dark';
+      black.classList.add('off');
+      let free = 0;
+      for (let i=0; i<lines.length; i++) {
+        await wait(Math.max(lines[i].at, free)-now());
+        caption.classList.remove('on');
+        await wait(0.12);
+        caption.textContent = lines[i].say; caption.classList.add('on');
+        begin(lines[i].act);
+        const spoken = now();
+        // Hold each caption for at least its reading time, even if the voice ends early or fails.
+        await Promise.all([sayLine(i), wait(0.4+lines[i].say.length*0.045)]);
+        free = now()+0.15;
+        if (i===lines.length-1) console.info('[film] last line ended at '+now().toFixed(1)+' s (started '+spoken.toFixed(1)+' s)');
       }
-      caption.textContent = '';
-      const seconds = (performance.now()-startedAt)/1000;
-      console.info('[film] narration ran '+seconds.toFixed(1)+' s'+(seconds>29 ? ' — over the 30 s limit once the end card is held; trim or shorten a line' : ''));
-      setTimeout(() => { act = 'done'; }, 1200);
+      await wait(END-now());
+      caption.classList.remove('on');
+      black.style.transitionDuration = '.3s'; black.classList.remove('off');
+      console.info('[film] picture ends at '+now().toFixed(1)+' s. Trim the recording here; the limit is 30 s.');
+      act = 'done';
     };
     addEventListener('pointerdown', play, {once:true});
     addEventListener('keydown', event => { if (event.code==='Space' || event.code==='Enter') play(); });
     film = {tick(dt) {
-      const t = (performance.now()-actStart)/1000;
-      if (act==='pan' || act==='online') {
-        const s = (performance.now()-startedAt)/1000;
-        ctx.setView(home[0], home[1], yaw0+0.22*Math.sin(s*0.38), 0.02);
+      if (!running) { ctx.setView(home[0], home[1], yaw0, 0.3); return; }
+      const t = now();
+      if (act==='dark' || act==='online' || act==='data') {
+        // Open on the stars, settle onto the ground as the display comes online, then a slow look around.
+        const target = act==='dark' ? 0.3-0.2*Math.min(1, t/7) : -0.02;
+        pitch += (target-pitch)*Math.min(1, dt*1.4);
+        ctx.setView(home[0], home[1], yaw0+0.2*Math.sin(t*0.3), pitch);
       } else if ((act==='walk' || act==='warn' || act==='end') && !flight && !state.mapMode) {
         const r = state.routes.safe;
         if (!r) return;
@@ -1091,9 +1134,10 @@ export async function initHud(ctx) {
         const j = Math.min(r.dense.length-1, i+12), p = r.dense[i], q = r.dense[j];
         const want = Math.atan2(-(q[0]-p[0]), -(q[2]-p[2]));
         heading += Math.atan2(Math.sin(want-heading), Math.cos(want-heading))*Math.min(1, dt*2.2);
-        ctx.setView(p[0], p[2], heading, -0.06);
+        pitch += (-0.07-pitch)*Math.min(1, dt*1.4);
+        ctx.setView(p[0], p[2], heading, pitch);
       }
-    }, play, get elapsed() { return (performance.now()-startedAt)/1000; }, get act() { return act; }};
+    }, play, get elapsed() { return running ? now() : 0; }, get act() { return act; }};
   }
   const fadeLines = dt => {
     if (lineFade===lineTarget && lineFade===1) return;
