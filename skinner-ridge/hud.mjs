@@ -1,4 +1,5 @@
 import {createSpeech} from './speech.mjs';
+import {addHomeBase} from './base.mjs';
 // Helmet HUD for the Skinner Ridge walk: compass, minimap, suit gauge,
 // destination pin, route lines, return warning, planning view, voice.
 import {makeNav, makeLandmarks, parseCommand, matchRoxyWake, selectVoiceTranscript, config, hazards} from './nav.mjs';
@@ -195,6 +196,18 @@ export async function initHud(ctx) {
   const landmarks = makeLandmarks(route);
   const base = landmarks.find(l => l.id==='base'), summit = landmarks.find(l => l.id==='summit');
   const heightAt = (x,z) => ground.sample(x,z)?.height ?? 0;
+  // Home Base concept habitat, 9.5 m behind the start, airlock facing the walk.
+  const homeBase = addHomeBase(scene, ground, [route.start.x, route.start.z-9.5], 0);
+  // At night the planning view would be black, so it gets its own even light, like a map display.
+  let mapLight = 0;
+  if (ctx.sky) {
+    const original = ctx.sky.update.bind(ctx.sky);
+    ctx.sky.update = elapsed => {
+      const result = original(elapsed);
+      if (mapLight>0) { const a = lighting.ambientTint.value, k = 0.62*mapLight; a.setRGB(Math.max(a.r,k), Math.max(a.g,k*0.92), Math.max(a.b,k*0.86)); }
+      return result;
+    };
+  }
 
   // Measured versus inferred support, from the build's coverage map.
   let coverage = null;
@@ -974,6 +987,8 @@ export async function initHud(ctx) {
     if (overlayDirty && state.layer) paintOverlay();
     fadeLines(dt);
     film?.tick(dt);
+    homeBase.update(dt); redraw = true;
+    { const want = state.mapMode && !(flight?.leaving) ? 1 : 0; if (mapLight!==want) mapLight += Math.sign(want-mapLight)*Math.min(Math.abs(want-mapLight), dt/1.1); }
     quick += dt; slow += dt; straightTick += dt;
     if (quick>0.15) { telemetry(quick); quick = 0; follow(); }
     if (straightTick>0.5) { straightTick = 0; if (state.show.straight && !state.cleared) { plan('straight'); drawLine('straight', state.routes.straight.dense); } }
@@ -1008,29 +1023,31 @@ export async function initHud(ctx) {
   // The picture is silent with no captions; the team records its own narration over it. Each line marks a shot.
   let film = null;
   if (filmOn) {
-    const team = filmQuery.get('team') || 'Renispace', project = filmQuery.get('project') || 'Roxy';
-    // Fixed 30-second schedule. Each line starts at its time (or just after the previous line ends, if a voice runs long).
-    const lines = [
-      {at:0.8,  say:'Night on Mars. Your base is out of sight.', act:'dark'},
-      {at:4.4,  say:"One bad step… and you don't get home.", act:'dark'},
-      {at:7.8,  say:"We're "+team+'. This is '+project+', a helmet display you simply talk to.', act:'online'},
-      {at:13.2, say:"It knows the ground, because NASA's Perseverance rover measured it.", act:'data'},
-      {at:17.9, say:'It finds the safest way up, not just the shortest,', act:'walk'},
-      {at:21.9, say:"and it tells you when it's time to turn back.", act:'warn'},
-      {at:25.6, say:project+' is not just a tool; it is safety, reliability and efficiency!', act:'end'}
+    const team = filmQuery.get('team') || 'Renispace', project = filmQuery.get('project') || 'R.O.X.Y';
+    // Fixed 30-second schedule. The picture is silent with no captions; the team records its own narration.
+    // "say" is the suggested line for that moment and is only printed to the console.
+    const beats = [
+      {at:0.0,  act:'base',   say:'Night on Mars. Home Base is your only way back.'},
+      {at:4.4,  act:'turn',   say:"One bad step out here… and you don't get home."},
+      {at:7.8,  act:'online', say:"We're "+team+'. This is '+project+', a helmet display you simply talk to.'},
+      {at:11.4, act:'ask'},
+      {at:12.2, act:'map',    say:"Ask for the map, and it shows real ground, measured by NASA's Perseverance rover."},
+      {at:14.0, act:'truth'},
+      {at:16.3, act:'leave'},
+      {at:17.6, act:'walk',   say:'It guides you up the safest route, not just the shortest,'},
+      {at:20.5, act:'cut',    say:'right to your target,'},
+      {at:23.8, act:'warn',   say:"and it tells you when it's time to turn back."},
+      {at:25.9, act:'end',    say:project+' is not just a tool; it is safety, reliability and efficiency!'}
     ];
     const END = 29.7;
     document.head.appendChild(Object.assign(document.createElement('style'), {textContent:`
-      body.film #hud .dock,body.film #hud .note,body.film #hud .ear,body.film #hud .roxy,body.film .sky-controls,body.film #hud .hint,body.film #hud .weather-alert{display:none!important}
+      body.film #hud .dock,body.film #hud .ear,body.film .sky-controls,body.film #hud .hint,body.film #hud .weather-alert{display:none!important}
       body.film{cursor:none}
-      .film-shade{position:fixed;left:0;right:0;bottom:0;height:26vh;z-index:7;background:linear-gradient(transparent,#000b);pointer-events:none}
-      .film-caption{position:fixed;left:50%;bottom:6.5%;transform:translateX(-50%);z-index:9;width:max-content;max-width:60vw;text-align:center;color:#fff;font:500 clamp(18px,2.2vw,32px)/1.3 "Segoe UI",system-ui,sans-serif;letter-spacing:.01em;text-shadow:0 2px 8px #000,0 0 2px #000;pointer-events:none;opacity:0;transition:opacity .35s}
-      .film-caption.on{opacity:1}
-      .film-third{position:fixed;left:5vw;bottom:24vh;z-index:8;color:#f4efe6;font:600 clamp(11px,1.15vw,16px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.28em;text-transform:uppercase;padding-left:14px;border-left:2px solid #ffb454;line-height:1.9;text-shadow:0 1px 6px #000;opacity:0;transform:translateX(-12px);transition:opacity .6s,transform .6s;pointer-events:none}
+      .film-third{position:fixed;left:5vw;top:20vh;z-index:8;color:#f4efe6;font:600 clamp(11px,1.15vw,16px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.28em;text-transform:uppercase;padding-left:14px;border-left:2px solid #ffb454;line-height:1.9;text-shadow:0 1px 6px #000;opacity:0;transform:translateX(-12px);transition:opacity .6s,transform .6s;pointer-events:none}
       .film-third.on{opacity:1;transform:none}
       .film-title{position:fixed;inset:0;z-index:8;display:grid;place-content:center;text-align:center;color:#f4efe6;pointer-events:none;opacity:0;transition:opacity .9s;text-shadow:0 2px 18px #000c}
       .film-title.on{opacity:1}
-      .film-title h2{margin:0;font:700 clamp(54px,9vw,132px)/1 Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.2em;text-indent:.2em;text-transform:uppercase}
+      .film-title h2{margin:0;font:700 clamp(54px,9vw,132px)/1 Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.12em;text-indent:.12em;text-transform:uppercase}
       .film-title h2::after{content:"";display:block;width:74px;height:2px;background:#ffb454;margin:20px auto 0}
       .film-title p{margin:18px 0 0;line-height:1.9;font:600 clamp(12px,1.35vw,19px) Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.34em;text-indent:.34em;text-transform:uppercase}
       .film-end{background:radial-gradient(ellipse at 50% 40%,#2a1a12f2,#0a0706fa);z-index:10}
@@ -1040,13 +1057,12 @@ export async function initHud(ctx) {
       .film-start{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;color:#fff;font:600 16px/1.6 "Segoe UI",sans-serif;background:#000c;border:1px solid #fff4;padding:14px 22px;border-radius:6px;text-align:center}`}));
     document.body.classList.add('film');
     const el = (cls, htmlText) => { const e = Object.assign(document.createElement('div'), {className:cls, innerHTML:htmlText}); document.body.appendChild(e); return e; };
-    const caption = el('film-caption', '');
     const third = el('film-third', 'Real terrain<br>NASA Perseverance rover · Jezero crater');
     const title = el('film-title', '<h2>'+project+'</h2><p>Your guide for the first walk on Mars</p>');
     const endCard = el('film-title film-end', '<h2>'+project+'</h2><p>Not just a tool<br>Safety · Reliability · Efficiency</p>'+
       '<small>'+team+' · NASA Space Apps Challenge 2026 · Interplanetary Survival Guide: Martian Map<br>'+
       'Terrain: NASA/JPL-Caltech, Perseverance rover Navcam stereo products, Jezero crater<br>'+
-      'Code built with AI assistance · Suit telemetry shown is simulated</small>');
+      'Home Base is a concept model · Suit telemetry shown is simulated · Code built with AI assistance</small>');
     const black = el('film-black', '');
     const start = el('film-start', 'Start your screen recorder, then click anywhere to play<br><small>Silent picture, 30 seconds. Record your own narration over it.</small>');
     state.muted = true;
@@ -1055,35 +1071,33 @@ export async function initHud(ctx) {
     let lampOn = !!ctx.sky?.update(0).lamp;
     const lamp = on => { if (ctx.sky && lampOn!==on) { ctx.sky.toggleLamp(); lampOn = on; redraw = true; } };
     lamp(false);
-    const home = [camera.position.x, camera.position.z], yaw0 = ctx.getYaw();
-    let act = 'idle', startedAt = 0, along = 0, heading = yaw0, running = false, pitch = 0.3;
+    const home = [route.start.x, route.start.z], north = Math.PI, south = 0;
+    let act = 'idle', startedAt = 0, along = 0, heading = south, pitch = 0.14, running = false, walking = false;
     const now = () => (performance.now()-startedAt)/1000;
     const wait = seconds => new Promise(r => setTimeout(r, Math.max(0, seconds*1000)));
+    const turn = (want, rate, dt) => { heading += Math.atan2(Math.sin(want-heading), Math.cos(want-heading))*Math.min(1, dt*rate); };
     const begin = name => {
       act = name;
-      if (name==='online') { lamp(true); goOnline?.(true); title.classList.add('on'); setTimeout(() => title.classList.remove('on'), 3000); }
-      if (name==='data') { setLayer('truth', true); third.classList.add('on'); }
-      if (name==='walk') { setLayer('truth', false); third.classList.remove('on'); plan('safe'); refreshLines(); along = 0; heading = ctx.getYaw(); }
-      if (name==='warn') { state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
-      if (name==='end') { endCard.classList.add('on'); }
+      if (name==='online') { lamp(true); goOnline?.(true); title.classList.add('on'); setTimeout(() => title.classList.remove('on'), 2900); }
+      if (name==='ask') caption('Heard', project+', open the map');
+      if (name==='map') { enterMap(); third.classList.add('on'); }
+      if (name==='truth') setLayer('truth', true);
+      if (name==='leave') { setLayer('truth', false); third.classList.remove('on'); $('hudRoxy').classList.remove('on'); exitMap(); }
+      if (name==='walk') { plan('safe'); refreshLines(); along = 0; walking = true; heading = north; }
+      if (name==='cut') { const r = state.routes.safe; if (r) { along = Math.max(along, r.distance-8.6); const i = Math.max(0, r.dense.length-40), p = r.dense[i], q = r.dense[r.dense.length-1]; heading = Math.atan2(-(q[0]-p[0]), -(q[2]-p[2])); } }
+      if (name==='warn') { $('hudRoxy').classList.remove('on'); state.o2 = Math.min(state.o2, 0.24); checkReturn(); }
+      if (name==='end') endCard.classList.add('on');
     };
     const play = async () => {
       if (running) return;
-      running = true; start.remove(); setRoxy(false); startedAt = performance.now(); act = 'dark';
+      running = true; start.remove(); setRoxy(false); startedAt = performance.now();
       black.classList.add('off');
-      let free = 0;
-      for (let i=0; i<lines.length; i++) {
-        await wait(Math.max(lines[i].at, free)-now());
-        caption.classList.remove('on');
-        await wait(0.12);
-        console.info('[film] '+now().toFixed(1)+' s  say: '+lines[i].say);
-        begin(lines[i].act);
-        const spoken = now();
-        free = now()+0.15;
-        if (i===lines.length-1) console.info('[film] last line ended at '+now().toFixed(1)+' s (started '+spoken.toFixed(1)+' s)');
+      for (const beat of beats) {
+        await wait(beat.at-now());
+        begin(beat.act);
+        if (beat.say) console.info('[film] '+now().toFixed(1)+' s  say: '+beat.say);
       }
       await wait(END-now());
-      caption.classList.remove('on');
       black.style.transitionDuration = '.3s'; black.classList.remove('off');
       console.info('[film] picture ends at '+now().toFixed(1)+' s. Trim the recording here; the limit is 30 s.');
       act = 'done';
@@ -1091,25 +1105,32 @@ export async function initHud(ctx) {
     addEventListener('pointerdown', play, {once:true});
     addEventListener('keydown', event => { if (event.code==='Space' || event.code==='Enter') play(); });
     film = {tick(dt) {
-      if (!running) { ctx.setView(home[0], home[1], yaw0, 0.3); return; }
-      const t = now();
-      if (act==='dark' || act==='online' || act==='data') {
-        // Open on the stars, settle onto the ground as the display comes online, then a slow look around.
-        const target = act==='dark' ? 0.3-0.2*Math.min(1, t/7) : -0.02;
-        pitch += (target-pitch)*Math.min(1, dt*1.4);
-        ctx.setView(home[0], home[1], yaw0+0.2*Math.sin(t*0.3), pitch);
-      } else if ((act==='walk' || act==='warn' || act==='end') && !flight && !state.mapMode) {
+      if (!running || act==='base') {
+        // Open on Home Base under the stars, drifting slowly.
+        ctx.setView(home[0], home[1], south+0.1*Math.sin(running ? now()*0.5 : 0), 0.14);
+      } else if (act==='turn' || act==='online' || act==='ask') {
+        // Turn from the base to the hill, then settle as the display comes online.
+        turn(north+(act==='turn' ? 0 : 0.1*Math.sin(now()*0.5)), 1.5, dt);
+        pitch += ((act==='turn' ? 0.05 : -0.02)-pitch)*Math.min(1, dt*1.4);
+        ctx.setView(home[0], home[1], heading, pitch);
+      } else if ((act==='map' || act==='truth') && !flight) {
+        // Slow orbit over the planning view.
+        orbit.azimuth += dt*0.07;
+        const pose = orbitPose(); camera.position.copy(pose.position); camera.quaternion.copy(pose.quaternion); redraw = true;
+      } else if (walking && !flight && !state.mapMode) {
         const r = state.routes.safe;
         if (!r) return;
         along = Math.min(r.distance-0.5, along+dt*config.walkSpeed);
         let i = 0; while (i<r.cumulative.length-1 && r.cumulative[i]<along) i++;
         const j = Math.min(r.dense.length-1, i+12), p = r.dense[i], q = r.dense[j];
-        const want = Math.atan2(-(q[0]-p[0]), -(q[2]-p[2]));
-        heading += Math.atan2(Math.sin(want-heading), Math.cos(want-heading))*Math.min(1, dt*2.2);
+        if (act==='warn' || act==='end') turn(Math.atan2(-(home[0]-p[0]), -(home[1]-p[2])), 0.9, dt);   // look back toward Home Base
+        else if (j>i) turn(Math.atan2(-(q[0]-p[0]), -(q[2]-p[2])), 2.2, dt);
         pitch += (-0.07-pitch)*Math.min(1, dt*1.4);
         ctx.setView(p[0], p[2], heading, pitch);
       }
-    }, play, get elapsed() { return running ? now() : 0; }, get act() { return act; }};
+    }, play, get elapsed() { return running ? now() : 0; }, get act() { return act; },
+      // Jump straight to one shot, for checking a frame without playing the whole film.
+      preview(name) { if (!running) { running = true; start.remove(); startedAt = performance.now(); black.classList.add('off'); } begin(name); }};
   }
   const fadeLines = dt => {
     if (lineFade===lineTarget && lineFade===1) return;

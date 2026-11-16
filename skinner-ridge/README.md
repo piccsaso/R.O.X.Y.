@@ -86,19 +86,22 @@ Open `http://127.0.0.1:8080/?sky=day&promo` and start your screen recorder. The 
 
 ### Film mode: the 30-second pitch, hands-free
 
-Open `http://127.0.0.1:8080/?film` (add `&team=Name&project=Name` to change the names; the defaults are Renispace and Roxy). Start your screen recorder, then click anywhere. The app plays the picture by itself on a fixed 30-second schedule, at night. It is silent and has no captions: record your own narration over it, starting each line at the time shown.
+Open `http://127.0.0.1:8080/?film` (add `&team=Name&project=Name` to change the names; the defaults are Renispace and R.O.X.Y). Start your screen recorder, then click anywhere. The app plays the picture by itself on a fixed 30-second schedule, at night. It is silent and has no captions: record your own narration over it, starting each line at the time shown.
 
 | Start | Line to say | Picture |
 |---|---|---|
-| 0:01 | "Night on Mars. Your base is out of sight." | Fade in on the stars over the dark ridge |
-| 0:04 | "One bad step… and you don't get home." | Camera settles toward the ground |
-| 0:08 | "We're Renispace. This is Roxy, a helmet display you simply talk to." | Suit light on, display comes online, title |
-| 0:13 | "It knows the ground, because NASA's Perseverance rover measured it." | Ground-truth highlight, data credit |
-| 0:18 | "It finds the safest way up, not just the shortest," | Walks the safe route |
-| 0:22 | "and it tells you when it's time to turn back." | Return warning |
-| 0:26 | "Roxy is not just a tool; it is safety, reliability and efficiency!" | End card with that line, then cut to black at 0:29.7 |
+| 0:00 | "Night on Mars. Home Base is your only way back." | Home Base under the stars, lights blinking |
+| 0:04 | "One bad step out here… and you don't get home." | Camera turns from the base to the dark hill |
+| 0:08 | "We're Renispace. This is R.O.X.Y, a helmet display you simply talk to." | Suit light on, display comes online, title |
+| 0:12 | "Ask for the map, and it shows real ground, measured by NASA's Perseverance rover." | Voice command bubble, then the planning view: routes, Home Base, the destination, and the ground-truth highlight |
+| 0:18 | "It guides you up the safest route, not just the shortest," | Walks the safe route from Home Base |
+| 0:21 | "right to your target," | Cut to the last stretch; arrives at the Ridge summit |
+| 0:24 | "and it tells you when it's time to turn back." | Return warning; the view turns back toward Home Base |
+| 0:26 | "R.O.X.Y is not just a tool; it is safety, reliability and efficiency!" | End card with that line, then cut to black at 0:29.7 |
 
-The end card credits the NASA data and states that the code was AI-assisted and the suit telemetry is simulated. Trim the recording where the picture cuts to black.
+The end card credits the NASA data and states that Home Base is a concept model, the suit telemetry is simulated and the code was AI-assisted. Trim the recording where the picture cuts to black.
+
+**Home Base** (`base.mjs`) is a concept habitat placed 9.5 m behind the start: main module with a dome and lit windows, an airlock, a side module, solar arrays and a communications mast. Its beacon blinks, the window light breathes and green path lights chase toward the trail. It is an illustration, not a NASA design and not part of the measured terrain. In the map view at night the terrain gets an even light so the plan stays readable.
 
 ### How the safe route is chosen
 
