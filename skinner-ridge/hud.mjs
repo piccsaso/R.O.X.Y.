@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import {createSpeech} from './speech.mjs';
 // Helmet HUD for the Skinner Ridge walk: compass, minimap, suit gauge,
 // destination pin, route lines, return warning, planning view, voice.

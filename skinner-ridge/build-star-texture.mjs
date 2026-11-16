@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {EXRLoader} from 'three/addons/loaders/EXRLoader.js';

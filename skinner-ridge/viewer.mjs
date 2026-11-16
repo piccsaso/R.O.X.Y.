@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {makeGround} from './ground.mjs';

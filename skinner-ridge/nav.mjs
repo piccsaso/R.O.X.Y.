@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 // Route planning and command parsing for the Skinner Ridge walk.
 // Pure module: runs in the browser and in Node tests. It reads the same
 // ground the walker stands on.

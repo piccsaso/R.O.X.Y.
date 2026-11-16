@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import {mkdir,readFile,writeFile,rename,stat} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 

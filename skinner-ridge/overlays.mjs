@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 // Local terrain derivatives and native-colour regional NASA Trek observations.
 export const overlayLayers = {
   traffic: {name:'Trafficability & hazards', status:'Terrain-derived · prototype thresholds', colors:[['#45bc78','Lower slope'],['#f1ce52','Caution'],['#ef5555','Steep / uneven'],['#9298a6','Unknown']], note:'Green <15°; yellow 15–25°; red ≥25° or footing step >0.17 m. Gray = unverified support; missing heights are uncoloured. Not an EVA safety assessment.'},

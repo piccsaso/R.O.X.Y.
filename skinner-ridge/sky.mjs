@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import * as THREE from 'three';
 import {lighting} from './lighting.mjs';
 

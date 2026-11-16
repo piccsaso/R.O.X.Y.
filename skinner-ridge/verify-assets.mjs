@@ -1,4 +1,5 @@
-﻿import assert from 'node:assert/strict';
+﻿// This code was generated through the use of SI.
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {makeGround} from './ground.mjs';
 import {buildApron} from './apron.mjs';

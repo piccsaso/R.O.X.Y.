@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import {sampleDistance} from './infill.mjs';
 
 // Deterministic example-based completion. Each donor contains both Navcam

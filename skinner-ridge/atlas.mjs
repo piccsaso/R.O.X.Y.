@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import fs from 'node:fs';
 import {PNG} from 'pngjs';
 import jpeg from 'jpeg-js';

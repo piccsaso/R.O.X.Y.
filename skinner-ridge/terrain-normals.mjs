@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import fs from 'node:fs';
 const meta=JSON.parse(fs.readFileSync('terrain.json'));
 const bytes=Uint8Array.from(fs.readFileSync('ground.bin'));

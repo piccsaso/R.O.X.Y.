@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import * as THREE from 'three';
 export const lighting={sunDirection:{value:new THREE.Vector3()},ambientTint:{value:new THREE.Color()},
  sunTint:{value:new THREE.Color()},lampPosition:{value:new THREE.Vector3()},lampDirection:{value:new THREE.Vector3()},lampPower:{value:0}};

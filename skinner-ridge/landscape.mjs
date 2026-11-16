@@ -1,4 +1,5 @@
-﻿import * as THREE from 'three';
+﻿// This code was generated through the use of SI.
+import * as THREE from 'three';
 import {buildApron} from './apron.mjs';
 import {lighting,lightDeclarations} from './lighting.mjs';
 

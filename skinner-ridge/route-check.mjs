@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 import {readFileSync,writeFileSync} from 'node:fs';
 import {makeGround} from './ground.mjs';
 import {PNG} from 'pngjs';

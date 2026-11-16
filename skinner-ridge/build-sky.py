@@ -1,3 +1,4 @@
+# This code was generated through the use of SI.
 """Bake one observation-anchored sol using NASA/JPL SPICE. pip install spiceypy numpy."""
 from pathlib import Path
 import json, urllib.request, hashlib

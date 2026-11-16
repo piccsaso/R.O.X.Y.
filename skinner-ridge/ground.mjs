@@ -1,3 +1,4 @@
+// This code was generated through the use of SI.
 export function makeGround(meta, data) {
   const {width, depth, step} = meta;
   const heights = new Float32Array(data, 0, width*depth);
