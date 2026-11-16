@@ -1,4 +1,4 @@
-// This code was generated through the use of SI.
+// This code was assisted through the use of SI.
 // Run with: node nav.test.mjs   (uses the real ground.bin and the same context apron as the viewer)
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';

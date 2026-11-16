@@ -1,4 +1,4 @@
-// This code was generated through the use of SI.
+// This code was assisted through the use of SI.
 // The rendered context and its collision use exactly these same triangles.
 export function buildApron(ground,meta) {
  const [width,depth]=meta.boundsMeters,step=meta.step;

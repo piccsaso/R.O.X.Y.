@@ -1,4 +1,4 @@
-// This code was generated through the use of SI.
+// This code was assisted through the use of SI.
 export function createSpeech(onFallback, {timeoutMs=3000}={}) {
   let controller, audio, url, completion, generation = 0;
   function cancel() {

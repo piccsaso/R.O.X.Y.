@@ -1,4 +1,4 @@
-// This code was generated through the use of SI.
+// This code was assisted through the use of SI.
 function interpolate(field, width, depth, x, z) {
   const col = Math.min(width-1, Math.floor(x));
   const row = Math.min(depth-1, Math.floor(z));

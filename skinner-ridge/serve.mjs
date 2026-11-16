@@ -1,4 +1,4 @@
-// This code was generated through the use of SI.
+// This code was assisted through the use of SI.
 import {handleTts} from './tts.mjs';
 import { createServer } from 'node:http';
 import { createReadStream } from 'node:fs';

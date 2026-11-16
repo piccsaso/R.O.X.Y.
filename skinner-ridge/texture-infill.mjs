@@ -1,4 +1,4 @@
-// This code was generated through the use of SI.
+// This code was assisted through the use of SI.
 import {completeField, sampleDistance} from './infill.mjs';
 import {quiltSurface} from './terrain-synthesis.mjs';
 

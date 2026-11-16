@@ -1,4 +1,4 @@
-// This code was generated through the use of SI.
+// This code was assisted through the use of SI.
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { bakeAtlas } from './atlas.mjs';

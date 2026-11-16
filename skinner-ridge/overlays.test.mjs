@@ -1,4 +1,4 @@
-// This code was generated through the use of SI.
+// This code was assisted through the use of SI.
 import assert from 'node:assert/strict';
 import {slopeDegrees,overlayPixel,elevationRange,overlayLayers} from './overlays.mjs';
 import {parseCommand} from './nav.mjs';
