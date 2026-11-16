@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: roxy
+    runtime: node
+    plan: free
+    repo: https://github.com/piccsaso/nasa-hackathon
+    branch: main
+    rootDir: skinner-ridge
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 24.22.1
+      - key: HOST
+        value: 0.0.0.0

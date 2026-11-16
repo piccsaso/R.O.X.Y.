@@ -5,7 +5,8 @@ import { stat } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 
 const directory = process.cwd();
-const port = Number(process.argv[2] || 8080);
+const port = Number(process.env.PORT || process.argv[2] || 8080);
+const host = process.env.HOST || (process.env.RENDER === 'true' ? '0.0.0.0' : '127.0.0.1');
 const appFiles=new Set(['/','/index.html','/viewer.mjs','/ground.mjs','/landscape.mjs','/terrain-0.glb','/terrain-1.glb','/terrain-2.glb','/terrain-3.glb','/sky.mjs','/lighting.mjs','/apron.mjs','/sky-data.json','/stars.png','/ground.bin','/terrain.json','/route.json','/speech.mjs','/hud.mjs','/nav.mjs','/terrain-coverage.png']);
 const mime = {
   '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.mjs':'text/javascript',
@@ -29,4 +30,4 @@ createServer(async (request,response) => {
   } catch {
     response.writeHead(404).end('File not found');
   }
-}).listen(port,'127.0.0.1',() => console.log('http://127.0.0.1:'+port));
+}).listen(port,host,() => console.log(`Server listening on http://${host}:${port}`));

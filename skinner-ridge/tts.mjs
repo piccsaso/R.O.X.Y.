@@ -3,7 +3,8 @@ import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 export async function handleTts(request, response) {
   const fail = (status, message) => response.writeHead(status, {'Content-Type':'text/plain', 'Cache-Control':'no-store'}).end(message);
   if (request.method !== 'POST') return fail(405, 'POST required');
-  if (request.headers.origin && request.headers.origin !== 'http://' + request.headers.host) return fail(403, 'Origin rejected');
+  const origin = process.env.RENDER_EXTERNAL_URL || 'http://' + request.headers.host;
+  if (request.headers.origin && request.headers.origin !== origin) return fail(403, 'Origin rejected');
   if (!request.headers['content-type']?.startsWith('application/json')) return fail(415, 'JSON required');
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) return fail(503, 'ElevenLabs is not configured');
