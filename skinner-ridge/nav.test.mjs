@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {makeGround} from './ground.mjs';
 import {buildApron} from './apron.mjs';
-import {makeNav, makeLandmarks, parseCommand} from './nav.mjs';
+import {makeNav, makeLandmarks, parseCommand, matchRoxyWake, selectVoiceTranscript} from './nav.mjs';
 
 const meta = JSON.parse(readFileSync('terrain.json'));
 const route = JSON.parse(readFileSync('route.json'));
@@ -39,7 +39,17 @@ test('safe route is continuous and stays on ground', () => {
 test('routes exist between all landmarks, both ways', () => {
   for (const a of landmarks) for (const b of landmarks) if (a!==b) assert.ok(nav.safe(a.position, b.position), a.name+' to '+b.name);
 });
+test('voice transcript handling', () => {
+  for(const text of ['Roxy','Hey, Roxy! show minerals','Hey Roxie, show minerals','rock see show traffic ability']) assert.ok(matchRoxyWake(text));
+  assert.equal(matchRoxyWake('the rocks are rocky'),null);
+  assert.equal(selectVoiceTranscript(['boxy show traffic ability','Roxy show traffic ability'],false,landmarks),'Roxy show traffic ability');
+  assert.equal(selectVoiceTranscript(['unrecognized words','open overlays'],true,landmarks),'open overlays');
+  assert.deepEqual(parseCommand('can you please show traffic ability',landmarks),{type:'layer',layer:'traffic',on:true});
+  assert.deepEqual(parseCommand('open over lays',landmarks),{type:'menu',menu:'layers'});
+});
 test('commands', () => {
+  for (const phrase of ['open the overlay tab','show overlays','bring up the overlays panel']) assert.deepEqual(parseCommand(phrase, landmarks), {type:'menu',menu:'layers'});
+  for (const phrase of ['go to trafficability','switch to trafficability','take me to trafficability']) assert.deepEqual(parseCommand(phrase, landmarks), {type:'layer',layer:'traffic',on:true});
   assert.equal(parseCommand('Take me to the summit please', landmarks).landmark.id, 'summit');
   assert.equal(parseCommand('go to the layerd slab', landmarks).landmark.id, 'slab');
   assert.equal(parseCommand('return to base', landmarks).landmark.id, 'base');
